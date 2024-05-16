@@ -1,0 +1,49 @@
+{
+  "name": "@kne/fastify-account",
+  "version": "1.0.0",
+  "description": "fastify的用户管理账号等实现",
+  "main": "index.js",
+  "scripts": {
+    "init": "husky",
+    "dev": "npx fastify-cli start ./index.js",
+    "start": "",
+    "build:md": "npx @kne/md-doc",
+    "start:md": "npx @kne/md-doc --watch",
+    "prettier": "prettier --config .prettierrc --write '{libs/**/*,index}.{js,jsx,ts,tsx,json,css,scss}'",
+    "lint-staged": "npx lint-staged"
+  },
+  "lint-staged": {
+    "{libs/**/*,index}.{js,jsx,ts,tsx,json,css,scss}": [
+      "prettier --config .prettierrc --write",
+      "git add"
+    ]
+  },
+  "files": [
+    "index.js",
+    "libs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kne-union/fastify-account.git"
+  },
+  "keywords": [],
+  "author": "linzp",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kne-union/fastify-account/issues"
+  },
+  "homepage": "https://github.com/kne-union/fastify-account#readme",
+  "devDependencies": {
+    "@kne/fastify-sequelize": "^0.1.0",
+    "fastify": "^4.27.0",
+    "husky": "^9.0.11",
+    "prettier": "^3.2.5",
+    "sqlite3": "^5.1.7"
+  },
+  "dependencies": {
+    "@fastify/jwt": "^8.0.1",
+    "bcryptjs": "^2.4.3",
+    "dayjs": "^1.11.11",
+    "fastify-plugin": "^4.5.1"
+  }
+}
