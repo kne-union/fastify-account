@@ -17,7 +17,7 @@ module.exports = fp(async (fastify, options) => {
         phone: username
       }, {
         status: {
-          [fastify.Sequelize.Op.or]: [0, 1]
+          [fastify.models.Sequelize.Op.or]: [0, 1]
         }
       })
     });
@@ -44,7 +44,6 @@ module.exports = fp(async (fastify, options) => {
                             birthday,
                             description,
                             phone,
-                            phoneCode,
                             email,
                             code,
                             password,
@@ -54,7 +53,7 @@ module.exports = fp(async (fastify, options) => {
     const type = phone ? 0 : 1;
     const verificationCode = await fastify.models.VerificationCode.findOne({
       where: {
-        name: type === 0 ? `${phoneCode} ${phone}` : email, type, code, status: 1
+        name: type === 0 ? `${phone.code} ${phone.value}` : email, type, code, status: 1
       }
     });
     if (!verificationCode) {
@@ -66,7 +65,7 @@ module.exports = fp(async (fastify, options) => {
 
     if (await fastify.models.User.count({
       where: type === 0 ? {
-        phone, phoneCode
+        phone: phone.value, phoneCode: phone.code
       } : {
         email
       }
@@ -81,7 +80,16 @@ module.exports = fp(async (fastify, options) => {
 
     const account = await fastify.models.UserAccount.create({ password: hash, salt });
     const user = await fastify.models.User.create({
-      avatar, nickname, gender, birthday, description, phone, phoneCode, email, status, userAccountId: account.id
+      avatar,
+      nickname,
+      gender,
+      birthday,
+      description,
+      phone: phone?.value,
+      phoneCode: phone?.code,
+      email,
+      status,
+      userAccountId: account.id
     });
 
     return user;
@@ -110,7 +118,9 @@ module.exports = fp(async (fastify, options) => {
   const verificationCodeValidate = async ({ name, type, code }) => {
     const verificationCode = await fastify.models.VerificationCode.findOne({
       where: {
-        name, type, code, status: 0
+        name, type, code, status: {
+          [fastify.models.Sequelize.Op.or]: [0, 1]
+        }
       }
     });
     const isPass = !!(verificationCode && dayjs().isBefore(dayjs(verificationCode.createdAt).add(10, 'minute')));
@@ -123,7 +133,7 @@ module.exports = fp(async (fastify, options) => {
     return isPass;
   };
 
-  const sendSMSCode = async ({ phone, phoneCode }) => {
+  const sendSMSCode = async ({ phone }) => {
     const code = generateRandom6DigitNumber();
 
     // 这里写发送逻辑
@@ -132,12 +142,12 @@ module.exports = fp(async (fastify, options) => {
       status: 2
     }, {
       where: {
-        name: `${phoneCode} ${phone}`, type: 0, status: 0
+        name: `${phone.code} ${phone.value}`, type: 0, status: 0
       }
     });
 
     await fastify.models.VerificationCode.create({
-      name: `${phoneCode} ${phone}`, type: 0, code
+      name: `${phone.code} ${phone.value}`, type: 0, code
     });
 
     return code;

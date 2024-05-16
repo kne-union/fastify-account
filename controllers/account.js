@@ -18,13 +18,17 @@ module.exports = fp(async (fastify, options) => {
     schema: {
       body: {
         type: 'object', required: ['phone'], properties: {
-          phone: { type: 'string' }, phoneCode: { type: 'string' }
+          phone: {
+            type: 'object', required: ['code', 'value'], properties: {
+              code: { type: 'string' }, value: { type: 'string' }
+            }
+          }
         }
       }
     }
   }, async (request) => {
     const { phone, phoneCode } = request.body;
-    const code = await fastify.AccountService.sendEmailCode({ phone, phoneCode });
+    const code = await fastify.AccountService.sendSMSCode({ phone, phoneCode });
     return options.isTest ? { code } : {};
   });
 
@@ -32,14 +36,23 @@ module.exports = fp(async (fastify, options) => {
     schema: {
       body: {
         type: 'object', required: ['name', 'type', 'code'], properties: {
-          name: { type: 'string' }, type: { type: 'number' }, code: { type: 'string' }
+          name: {
+            oneOf: [{ type: 'string' }, {
+              type: 'object', required: ['code', 'value'], properties: {
+                code: { type: 'string' }, value: { type: 'string' }
+              }
+            }]
+          }, type: { type: 'number' }, code: { type: 'string' }
         }
       }
     }
   }, async (request) => {
     const { name, type, code } = request.body;
     const isPass = await fastify.AccountService.verificationCodeValidate({ name, type, code });
-    return { isPass };
+    if (!isPass) {
+      throw new Error('验证码错误');
+    }
+    return {};
   });
 
   fastify.post(`${options.prefix}/register`, {
@@ -48,8 +61,11 @@ module.exports = fp(async (fastify, options) => {
         oneOf: [{
           type: 'object', required: ['phone', 'phoneCode', 'password', 'code'], properties: {
             avatar: { type: 'string' },
-            phone: { type: 'string' },
-            phoneCode: { type: 'string' },
+            phone: {
+              type: 'object', required: ['code', 'value'], properties: {
+                code: { type: 'string' }, value: { type: 'string' }
+              }
+            },
             code: { type: 'string' },
             password: { type: 'string' },
             invitationCode: { type: 'string' },
