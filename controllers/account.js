@@ -77,4 +77,18 @@ module.exports = fp(async (fastify, options) => {
     const account = request.body;
     return await fastify.AccountService.register(account);
   });
+
+  fastify.post(`${options.prefix}/login`, {
+    schema: {
+      body: {
+        type: 'object', required: ['username', 'password'], properties: {
+          username: { type: 'string' }, password: { type: 'string' }
+        }
+      }
+    }
+  }, async (request) => {
+    const { username, password } = request.body;
+    const token = await fastify.AccountService.login({ username, password, ip: request.ip });
+    return { token };
+  });
 });

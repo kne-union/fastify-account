@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
     userAccountId: {
       type: DataTypes.UUID, allowNull: false
     },
+    status: {
+      type: DataTypes.INTEGER, defaultValue: 0//0:正常,1:初始化未激活，需要用户设置密码后使用,11:已禁用,12:已关闭,
+    },
     currentTenantId: {
       type: DataTypes.UUID
     },

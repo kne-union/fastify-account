@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING, allowNull: false
     }, type: {
-      type: DataTypes.INTEGER, allowNull: false //0:手机,1:邮箱
+      type: DataTypes.INTEGER, allowNull: false //0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员
     }, code: {
       type: DataTypes.STRING, allowNull: false
     }, status: {

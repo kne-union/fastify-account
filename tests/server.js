@@ -22,7 +22,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     const responseData = JSON.parse(payload);
     if (responseData.statusCode && (responseData.message || responseData.error)) {
       return JSON.stringify({
-        code: responseData.statusCode, msg: responseData.error || responseData.message
+        code: responseData.statusCode, msg: responseData.message || responseData.error
       });
     }
     return JSON.stringify({

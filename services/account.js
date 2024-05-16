@@ -8,7 +8,34 @@ function generateRandom6DigitNumber() {
 }
 
 module.exports = fp(async (fastify, options) => {
-  const login = () => {
+  const login = async ({ username, password, ip }) => {
+    const isEmail = /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(username);
+    const user = await fastify.models.User.findOne({
+      where: Object.assign({}, isEmail ? {
+        email: username
+      } : {
+        phone: username
+      }, {
+        status: {
+          [fastify.Sequelize.Op.or]: [0, 1]
+        }
+      })
+    });
+
+    if (!user) {
+      throw new Error('用户名或密码错误');
+    }
+    const userAccount = await fastify.models.UserAccount.findByPk(user.userAccountId);
+    const generatedHash = await bcrypt.hash(password + userAccount.salt, userAccount.salt);
+    if (userAccount.password !== generatedHash) {
+      throw new Error('用户名或密码错误');
+    }
+
+    await fastify.models.LoginLog.create({
+      userId: user.id, ip
+    });
+
+    return fastify.jwt.sign({ payload: { id: user.id } });
   };
   const register = async ({
                             avatar,
@@ -21,6 +48,7 @@ module.exports = fp(async (fastify, options) => {
                             email,
                             code,
                             password,
+                            status,
                             invitationCode
                           }) => {
     const type = phone ? 0 : 1;
@@ -53,7 +81,7 @@ module.exports = fp(async (fastify, options) => {
 
     const account = await fastify.models.UserAccount.create({ password: hash, salt });
     const user = await fastify.models.User.create({
-      avatar, nickname, gender, birthday, description, phone, phoneCode, email, userAccountId: account.id
+      avatar, nickname, gender, birthday, description, phone, phoneCode, email, status, userAccountId: account.id
     });
 
     return user;
