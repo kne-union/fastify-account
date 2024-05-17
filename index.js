@@ -27,11 +27,18 @@ module.exports = fp(
       dir: path.resolve(__dirname, './controllers'),
       options
     });
-    fastify.decorate('authenticate', async function (request) {
+    fastify.decorate('authenticate', async request => {
       const info = await request.jwtVerify();
       //这里判断失效时间
       //info.iat
       request.authenticatePayload = info.payload;
+      request.userInfo = await fastify.UserService.getUserInfo(request.authenticatePayload);
+    });
+    fastify.decorate('authenticateTenant', async request => {
+      request.tenantInfo = await fastify.TenantService.tenantUserAuthenticate(request.userInfo);
+    });
+    fastify.decorate('authenticateAdmin', async request => {
+      request.adminInfo = await fastify.AdminService.superAdminAuthenticate(request.userInfo);
     });
   },
   {

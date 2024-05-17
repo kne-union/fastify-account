@@ -18,17 +18,13 @@ module.exports = fp(async (fastify, options) => {
     schema: {
       body: {
         type: 'object', required: ['phone'], properties: {
-          phone: {
-            type: 'object', required: ['code', 'value'], properties: {
-              code: { type: 'string' }, value: { type: 'string' }
-            }
-          }
+          phone: { type: 'string' }
         }
       }
     }
   }, async (request) => {
-    const { phone, phoneCode } = request.body;
-    const code = await fastify.AccountService.sendSMSCode({ phone, phoneCode });
+    const { phone } = request.body;
+    const code = await fastify.AccountService.sendSMSCode({ phone });
     return options.isTest ? { code } : {};
   });
 
@@ -36,36 +32,41 @@ module.exports = fp(async (fastify, options) => {
     schema: {
       body: {
         type: 'object', required: ['name', 'type', 'code'], properties: {
-          name: {
-            oneOf: [{ type: 'string' }, {
-              type: 'object', required: ['code', 'value'], properties: {
-                code: { type: 'string' }, value: { type: 'string' }
-              }
-            }]
-          }, type: { type: 'number' }, code: { type: 'string' }
+          name: { type: 'string' }, type: { type: 'number' }, code: { type: 'string' }
         }
       }
     }
   }, async (request) => {
     const { name, type, code } = request.body;
-    const isPass = await fastify.AccountService.verificationCodeValidate({ name, type, code });
+    const isPass = await fastify.AccountService.verificationCodeValidate({
+      name, type, code
+    });
     if (!isPass) {
       throw new Error('验证码错误');
     }
     return {};
   });
 
+  fastify.post(`${options.prefix}/accountIsExists`, {
+    schema: {
+      body: {
+        type: 'object', required: ['username'], properties: {
+          username: { type: 'string' }
+        }
+      }
+    }
+  }, async (request) => {
+    const { username } = request.body;
+    return { isExists: await fastify.AccountService.accountIsExists({ username }) };
+  });
+
   fastify.post(`${options.prefix}/register`, {
     schema: {
       body: {
         oneOf: [{
-          type: 'object', required: ['phone', 'phoneCode', 'password', 'code'], properties: {
+          type: 'object', required: ['phone', 'password', 'code'], properties: {
             avatar: { type: 'string' },
-            phone: {
-              type: 'object', required: ['code', 'value'], properties: {
-                code: { type: 'string' }, value: { type: 'string' }
-              }
-            },
+            phone: { type: 'string' },
             code: { type: 'string' },
             password: { type: 'string' },
             invitationCode: { type: 'string' },

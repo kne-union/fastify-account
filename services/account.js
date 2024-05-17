@@ -7,9 +7,13 @@ function generateRandom6DigitNumber() {
   return Math.floor(randomNumber).toString().padStart(6, '0');
 }
 
+function userNameIsEmail(username) {
+  return /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(username);
+}
+
 module.exports = fp(async (fastify, options) => {
   const login = async ({ username, password, ip }) => {
-    const isEmail = /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(username);
+    const isEmail = userNameIsEmail(username);
     const user = await fastify.models.User.findOne({
       where: Object.assign({}, isEmail ? {
         email: username
@@ -37,6 +41,7 @@ module.exports = fp(async (fastify, options) => {
 
     return fastify.jwt.sign({ payload: { id: user.id } });
   };
+
   const register = async ({
                             avatar,
                             nickname,
@@ -53,7 +58,7 @@ module.exports = fp(async (fastify, options) => {
     const type = phone ? 0 : 1;
     const verificationCode = await fastify.models.VerificationCode.findOne({
       where: {
-        name: type === 0 ? `${phone.code} ${phone.value}` : email, type, code, status: 1
+        name: type === 0 ? phone : email, type, code, status: 1
       }
     });
     if (!verificationCode) {
@@ -63,13 +68,7 @@ module.exports = fp(async (fastify, options) => {
     verificationCode.status = 2;
     await verificationCode.save();
 
-    if (await fastify.models.User.count({
-      where: type === 0 ? {
-        phone: phone.value, phoneCode: phone.code
-      } : {
-        email
-      }
-    }) > 0) {
+    if (await accountIsExists({ username: type === 0 ? phone : email }) > 0) {
       throw new Error('用户已经存在不能重复注册');
     }
 
@@ -80,19 +79,21 @@ module.exports = fp(async (fastify, options) => {
 
     const account = await fastify.models.UserAccount.create({ password: hash, salt });
     const user = await fastify.models.User.create({
-      avatar,
-      nickname,
-      gender,
-      birthday,
-      description,
-      phone: phone?.value,
-      phoneCode: phone?.code,
-      email,
-      status,
-      userAccountId: account.id
+      avatar, nickname, gender, birthday, description, phone, email, status, userAccountId: account.id
     });
 
     return user;
+  };
+
+  const accountIsExists = async ({ username }) => {
+    const isEmail = userNameIsEmail(username);
+    return await fastify.models.User.count({
+      where: isEmail ? {
+        email: username
+      } : {
+        phone: username
+      }
+    }) > 0;
   };
 
   const sendEmailCode = async ({ email }) => {
@@ -142,12 +143,12 @@ module.exports = fp(async (fastify, options) => {
       status: 2
     }, {
       where: {
-        name: `${phone.code} ${phone.value}`, type: 0, status: 0
+        name: phone, type: 0, status: 0
       }
     });
 
     await fastify.models.VerificationCode.create({
-      name: `${phone.code} ${phone.value}`, type: 0, code
+      name: phone, type: 0, code
     });
 
     return code;
@@ -155,6 +156,6 @@ module.exports = fp(async (fastify, options) => {
 
 
   fastify.decorate('AccountService', {
-    login, register, sendEmailCode, sendSMSCode, verificationCodeValidate
+    login, register, sendEmailCode, sendSMSCode, verificationCodeValidate, accountIsExists
   });
 });

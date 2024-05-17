@@ -10,7 +10,7 @@ module.exports = fp(async (fastify, options) => {
   });
 
   fastify.post(`${options.prefix}/addSuperAdmin`, {
-    onRequest: [fastify.authenticate, fastify.AdminService.superAdminAuthenticate], schema: {
+    onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       body: {}
     }
   }, async (request) => {
@@ -20,7 +20,7 @@ module.exports = fp(async (fastify, options) => {
   });
 
   fastify.post(`${options.prefix}/addTenant`, {
-    onRequest: [fastify.authenticate, fastify.AdminService.superAdminAuthenticate], schema: {
+    onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       body: {}
     }
   }, async () => {

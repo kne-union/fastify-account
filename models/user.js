@@ -5,7 +5,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     nickname: DataTypes.STRING,
     email: DataTypes.STRING,
-    phoneCode: DataTypes.STRING,
     phone: DataTypes.STRING,
     userAccountId: {
       type: DataTypes.UUID, allowNull: false

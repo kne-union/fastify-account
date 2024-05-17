@@ -14,10 +14,7 @@ module.exports = fp(async (fastify, options) => {
     return userInfo;
   };
 
-  const getTenantList = () => {
-  };
-
   fastify.decorate('UserService', {
-    getUserInfo, getTenantList
+    getUserInfo
   });
 });
