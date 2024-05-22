@@ -1,12 +1,13 @@
 const fp = require('fastify-plugin');
+const {UserInfoError} = require('../errors');
 module.exports = fp(async (fastify, options) => {
   const getUserInfo = async (authenticatePayload) => {
     if (!(authenticatePayload && authenticatePayload.id)) {
-      throw new Error('用户不存在或登录失效');
+      throw new UserInfoError();
     }
-    const user = await fastify.models.User.findByPk(authenticatePayload.id);
+    const user = await fastify.models.user.findByPk(authenticatePayload.id);
     if (!user) {
-      throw new Error('用户不存在或登录失效');
+      throw new UserInfoError();
     }
     const userInfo = user.get({ plain: true });
     delete userInfo['userAccountId'];

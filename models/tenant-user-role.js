@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('TenantUserRole', {
+  return sequelize.define('tenantUserRole', {
     tenantId: {
       type: DataTypes.STRING, allowNull: false
     }, tenantUserId: {

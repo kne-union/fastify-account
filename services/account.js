@@ -14,14 +14,14 @@ function userNameIsEmail(username) {
 module.exports = fp(async (fastify, options) => {
   const login = async ({ username, password, ip }) => {
     const isEmail = userNameIsEmail(username);
-    const user = await fastify.models.User.findOne({
+    const user = await fastify.models.user.findOne({
       where: Object.assign({}, isEmail ? {
         email: username
       } : {
         phone: username
       }, {
         status: {
-          [fastify.models.Sequelize.Op.or]: [0, 1]
+          [fastify.Sequelize.Op.or]: [0, 1]
         }
       })
     });
@@ -29,13 +29,13 @@ module.exports = fp(async (fastify, options) => {
     if (!user) {
       throw new Error('用户名或密码错误');
     }
-    const userAccount = await fastify.models.UserAccount.findByPk(user.userAccountId);
+    const userAccount = await fastify.models.userAccount.findByPk(user.userAccountId);
     const generatedHash = await bcrypt.hash(password + userAccount.salt, userAccount.salt);
     if (userAccount.password !== generatedHash) {
       throw new Error('用户名或密码错误');
     }
 
-    await fastify.models.LoginLog.create({
+    await fastify.models.loginLog.create({
       userId: user.id, ip
     });
 
@@ -56,7 +56,7 @@ module.exports = fp(async (fastify, options) => {
                             invitationCode
                           }) => {
     const type = phone ? 0 : 1;
-    const verificationCode = await fastify.models.VerificationCode.findOne({
+    const verificationCode = await fastify.models.verificationCode.findOne({
       where: {
         name: type === 0 ? phone : email, type, code, status: 1
       }
@@ -77,8 +77,8 @@ module.exports = fp(async (fastify, options) => {
     const hash = await bcrypt.hash(combinedString, salt);
 
 
-    const account = await fastify.models.UserAccount.create({ password: hash, salt });
-    const user = await fastify.models.User.create({
+    const account = await fastify.models.userAccount.create({ password: hash, salt });
+    const user = await fastify.models.user.create({
       avatar, nickname, gender, birthday, description, phone, email, status, userAccountId: account.id
     });
 
@@ -87,7 +87,7 @@ module.exports = fp(async (fastify, options) => {
 
   const accountIsExists = async ({ username }) => {
     const isEmail = userNameIsEmail(username);
-    return await fastify.models.User.count({
+    return await fastify.models.user.count({
       where: isEmail ? {
         email: username
       } : {
@@ -101,7 +101,7 @@ module.exports = fp(async (fastify, options) => {
 
     // 这里写发送逻辑
 
-    await fastify.models.VerificationCode.update({
+    await fastify.models.verificationCode.update({
       status: 2
     }, {
       where: {
@@ -109,7 +109,7 @@ module.exports = fp(async (fastify, options) => {
       }
     });
 
-    await fastify.models.VerificationCode.create({
+    await fastify.models.verificationCode.create({
       name: email, type: 1, code
     });
 
@@ -117,10 +117,10 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const verificationCodeValidate = async ({ name, type, code }) => {
-    const verificationCode = await fastify.models.VerificationCode.findOne({
+    const verificationCode = await fastify.models.verificationCode.findOne({
       where: {
         name, type, code, status: {
-          [fastify.models.Sequelize.Op.or]: [0, 1]
+          [fastify.Sequelize.Op.or]: [0, 1]
         }
       }
     });
@@ -139,7 +139,7 @@ module.exports = fp(async (fastify, options) => {
 
     // 这里写发送逻辑
 
-    await fastify.models.VerificationCode.update({
+    await fastify.models.verificationCode.update({
       status: 2
     }, {
       where: {
@@ -147,7 +147,7 @@ module.exports = fp(async (fastify, options) => {
       }
     });
 
-    await fastify.models.VerificationCode.create({
+    await fastify.models.verificationCode.create({
       name: phone, type: 0, code
     });
 

@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('AdminRole', {
+  return sequelize.define('adminRole', {
     userId: {
       type: DataTypes.UUID, allowNull: false
     }, role: {

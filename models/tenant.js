@@ -1,13 +1,15 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('Tenant', {
+  return sequelize.define('tenant', {
     id: {
       type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true
     }, name: {
       type: DataTypes.STRING, allowNull: false
-    }, logo: DataTypes.STRING, status: {
-      type: DataTypes.INTEGER, defaultValue: 0
-    }, deadline: {
-      type: DataTypes.DATE
+    }, accountNumber: {
+      type: DataTypes.INTEGER, defaultValue: 0, allowNull: false
+    }, serviceStartTime: {
+      type: DataTypes.DATE, defaultValue: new Date(), allowNull: false
+    }, serviceEndTime: {
+      type: DataTypes.DATE, allowNull: false
     }
   });
 };

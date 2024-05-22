@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('TenantUserShareGroup', {
+  return sequelize.define('tenantUserShareGroup', {
     tenantId: {
       type: DataTypes.STRING, allowNull: false
     }, tenantUserId: {

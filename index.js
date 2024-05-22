@@ -5,7 +5,7 @@ const autoload = require('@fastify/autoload');
 
 module.exports = fp(
   async function (fastify, options) {
-    await fastify.models.addModels(path.resolve(__dirname, './models'));
+    await fastify.sequelize.addModels(path.resolve(__dirname, './models'));
     options = Object.assign(
       {
         prefix: `/api/v${packageJson.version.split('.')[0]}/account`, //如果为true，发送邮件和短信将不调用，验证码随response返回

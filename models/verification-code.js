@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('VerificationCode', {
+  return sequelize.define('verificationCode', {
     name: {
       type: DataTypes.STRING, allowNull: false
     }, type: {
