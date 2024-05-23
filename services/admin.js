@@ -60,7 +60,39 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getAllTenantList = async ({ filter, perPage, currentPage }) => {
-    const { count, rows } = await fastify.models.tenant.findAndCountAll({});
+    const queryFilter = {};
+    if (filter?.name) {
+      queryFilter.name = {
+        [fastify.Sequelize.Op.like]: `%${filter.name}%`
+      };
+    }
+
+    if (filter?.serviceStartTime) {
+      queryFilter.serviceStartTime = {
+        [fastify.Sequelize.Op.gt]: filter.serviceStartTime
+      };
+    }
+
+    if (filter?.serviceEndTime) {
+      queryFilter.serviceEndTime = {
+        [fastify.Sequelize.Op.lt]: filter.serviceEndTime
+      };
+    }
+
+    const { count, rows } = await fastify.models.tenant.findAndCountAll({
+      where: queryFilter, offset: currentPage * (currentPage - 1), limit: perPage
+    });
+
+    const res = await fastify.models.tenantUser.findAll({
+      attributes: ['tenantId', fastify.sequelize.fn('count', fastify.sequelize.col('tenantId'))], where: {
+        tenantId: {
+          [fastify.Sequelize.Op.in]: rows.map(({ id }) => id)
+        }
+      }, group: 'tenantId'
+    });
+
+    console.log(res);
+
     return {
       pageData: rows, totalCount: count
     };
@@ -89,6 +121,10 @@ module.exports = fp(async (fastify, options) => {
 
   };
 
+  const resetUserPassword = async ({ userId, password }) => {
+    await fastify.AccountService.resetPassword({ userId, password });
+  };
+
   fastify.decorate('AdminService', {
     initSuperAdmin,
     setSuperAdmin,
@@ -99,6 +135,7 @@ module.exports = fp(async (fastify, options) => {
     addSuperAdmin,
     superAdminAuthenticate,
     generateTenantAdminVerifyCode,
-    verifyTenantAdmin
+    verifyTenantAdmin,
+    resetUserPassword
   });
 });

@@ -39,14 +39,28 @@ module.exports = fp(async (fastify, options) => {
 
   fastify.get(`${options.prefix}/getAllTenantList`, {
     onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
-      query: {}
+      query: {
+        type: 'object', properties: {
+          name: {
+            type: 'string'
+          }, serviceStartTime: {
+            type: 'string', format: 'date-time'
+          }, serviceEndTime: {
+            type: 'string', format: 'date-time'
+          }, perPage: {
+            type: 'number'
+          }, currentPage: {
+            type: 'number'
+          }
+        }
+      }
     }
   }, async (request) => {
-    const { filter, perPage, currentPage } = Object.assign({}, request.query, {
+    const { name, perPage, currentPage } = Object.assign({
       perPage: 20, currentPage: 1
-    });
+    }, request.query);
     return await fastify.AdminService.getAllTenantList({
-      filter, perPage, currentPage
+      filter: { name }, perPage, currentPage
     });
   });
 
@@ -81,6 +95,19 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     await fastify.AdminService.saveTenant(request.body);
+    return {};
+  });
+
+  fastify.post(`${options.prefix}/resetUserPassword`, {
+    onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
+      body: {
+        type: 'object', required: ['userId', 'password'], properties: {
+          password: { type: 'string' }, userId: { type: 'string' }
+        }
+      }
+    }
+  }, async (request) => {
+    await fastify.AdminService.resetUserPassword(request.body);
     return {};
   });
 });

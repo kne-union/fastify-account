@@ -29,17 +29,47 @@ module.exports = fp(async (fastify, options) => {
     if (!user) {
       throw new Error('用户名或密码错误');
     }
-    const userAccount = await fastify.models.userAccount.findByPk(user.userAccountId);
-    const generatedHash = await bcrypt.hash(password + userAccount.salt, userAccount.salt);
-    if (userAccount.password !== generatedHash) {
-      throw new Error('用户名或密码错误');
-    }
+
+    await passwordAuthentication({ accountId: user.userAccountId, password });
 
     await fastify.models.loginLog.create({
       userId: user.id, ip
     });
 
     return fastify.jwt.sign({ payload: { id: user.id } });
+  };
+
+  const passwordAuthentication = async ({ accountId, password }) => {
+    const userAccount = await fastify.models.userAccount.findByPk(accountId);
+    if (!userAccount) {
+      throw new Error('账号不存在');
+    }
+    const generatedHash = await bcrypt.hash(password + userAccount.salt, userAccount.salt);
+    if (userAccount.password !== generatedHash) {
+      throw new Error('用户名或密码错误');
+    }
+  };
+
+  const passwordEncryption = async (password) => {
+    const salt = await bcrypt.genSalt(10);
+    const combinedString = password + salt;
+    const hash = await bcrypt.hash(combinedString, salt);
+
+    return {
+      password: hash, salt
+    };
+  };
+
+  const resetPassword = async ({ userId, password }) => {
+    const userInfo = await fastify.models.user.findByPk(userId);
+    if (!userInfo) {
+      throw new Error('用户不存在');
+    }
+    const account = await fastify.models.userAccount.create(Object.assign({}, await passwordEncryption(password), {
+      belongToUserId: userId
+    }));
+
+    await userInfo.update({ userAccountId: account.id });
   };
 
   const register = async ({
@@ -72,16 +102,11 @@ module.exports = fp(async (fastify, options) => {
       throw new Error('用户已经存在不能重复注册');
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const combinedString = password + salt;
-    const hash = await bcrypt.hash(combinedString, salt);
-
-
-    const account = await fastify.models.userAccount.create({ password: hash, salt });
+    const account = await fastify.models.userAccount.create(await passwordEncryption(password));
     const user = await fastify.models.user.create({
       avatar, nickname, gender, birthday, description, phone, email, status, userAccountId: account.id
     });
-
+    await account.update({ belongToUserId: user.id });
     return user;
   };
 
@@ -156,6 +181,14 @@ module.exports = fp(async (fastify, options) => {
 
 
   fastify.decorate('AccountService', {
-    login, register, sendEmailCode, sendSMSCode, verificationCodeValidate, accountIsExists
+    login,
+    register,
+    sendEmailCode,
+    sendSMSCode,
+    verificationCodeValidate,
+    accountIsExists,
+    passwordEncryption,
+    passwordAuthentication,
+    resetPassword
   });
 });
