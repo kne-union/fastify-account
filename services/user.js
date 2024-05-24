@@ -15,7 +15,7 @@ module.exports = fp(async (fastify, options) => {
     return userInfo;
   };
 
-  fastify.decorate('UserService', {
+  fastify.accountServices.user = {
     getUserInfo
-  });
+  };
 });

@@ -3,7 +3,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(`${options.prefix}/getUserTenant`, {
     onRequest: [fastify.authenticate]
   }, async (request) => {
-    return await fastify.TenantService.getUserTenant(request.authenticatePayload);
+    return await fastify.accountServices.tenant.getUserTenant(request.authenticatePayload);
   });
 
   fastify.get(`${options.prefix}/getUserCurrentTenant`, {

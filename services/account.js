@@ -179,8 +179,7 @@ module.exports = fp(async (fastify, options) => {
     return code;
   };
 
-
-  fastify.decorate('AccountService', {
+  fastify.accountServices.account = {
     login,
     register,
     sendEmailCode,
@@ -190,5 +189,5 @@ module.exports = fp(async (fastify, options) => {
     passwordEncryption,
     passwordAuthentication,
     resetPassword
-  });
+  };
 });

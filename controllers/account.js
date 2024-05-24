@@ -10,7 +10,7 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     const { email } = request.body;
-    const code = await fastify.AccountService.sendEmailCode({ email });
+    const code = await fastify.accountServices.account.sendEmailCode({ email });
     return options.isTest ? { code } : {};
   });
 
@@ -24,7 +24,7 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     const { phone } = request.body;
-    const code = await fastify.AccountService.sendSMSCode({ phone });
+    const code = await fastify.accountServices.account.sendSMSCode({ phone });
     return options.isTest ? { code } : {};
   });
 
@@ -38,7 +38,7 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     const { name, type, code } = request.body;
-    const isPass = await fastify.AccountService.verificationCodeValidate({
+    const isPass = await fastify.accountServices.account.verificationCodeValidate({
       name, type, code
     });
     if (!isPass) {
@@ -57,7 +57,7 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     const { username } = request.body;
-    return { isExists: await fastify.AccountService.accountIsExists({ username }) };
+    return { isExists: await fastify.accountServices.account.accountIsExists({ username }) };
   });
 
   fastify.post(`${options.prefix}/register`, {
@@ -92,7 +92,7 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     const account = request.body;
-    return await fastify.AccountService.register(account);
+    return await fastify.accountServices.account.register(account);
   });
 
   fastify.post(`${options.prefix}/login`, {
@@ -105,7 +105,7 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     const { username, password } = request.body;
-    const token = await fastify.AccountService.login({ username, password, ip: request.ip });
+    const token = await fastify.accountServices.account.login({ username, password, ip: request.ip });
     return { token };
   });
 });

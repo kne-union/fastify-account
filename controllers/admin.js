@@ -10,7 +10,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(`${options.prefix}/initSuperAdmin`, {
     onRequest: [fastify.authenticate]
   }, async (request) => {
-    await fastify.AdminService.initSuperAdmin(await fastify.UserService.getUserInfo(request.authenticatePayload));
+    await fastify.accountServices.admin.initSuperAdmin(await fastify.accountServices.user.getUserInfo(request.authenticatePayload));
     return {};
   });
 
@@ -20,7 +20,7 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     const { username, nickname, password } = request.body;
-    await fastify.AdminService.addSuperAdmin({ username, nickname, password: password || options.defaultPassword });
+    await fastify.accountServices.admin.addSuperAdmin({ username, nickname, password: password || options.defaultPassword });
     return {};
   });
 
@@ -32,7 +32,7 @@ module.exports = fp(async (fastify, options) => {
     const { filter, perPage, currentPage } = Object.assign({}, request.query, {
       perPage: 20, currentPage: 1
     });
-    return await fastify.AdminService.getAllUserList({
+    return await fastify.accountServices.admin.getAllUserList({
       filter, perPage, currentPage
     });
   });
@@ -59,7 +59,7 @@ module.exports = fp(async (fastify, options) => {
     const { name, perPage, currentPage } = Object.assign({
       perPage: 20, currentPage: 1
     }, request.query);
-    return await fastify.AdminService.getAllTenantList({
+    return await fastify.accountServices.admin.getAllTenantList({
       filter: { name }, perPage, currentPage
     });
   });
@@ -77,7 +77,7 @@ module.exports = fp(async (fastify, options) => {
       }
     }
   }, async (request) => {
-    await fastify.AdminService.addTenant(request.body);
+    await fastify.accountServices.admin.addTenant(request.body);
     return {};
   });
 
@@ -94,7 +94,7 @@ module.exports = fp(async (fastify, options) => {
       }
     }
   }, async (request) => {
-    await fastify.AdminService.saveTenant(request.body);
+    await fastify.accountServices.admin.saveTenant(request.body);
     return {};
   });
 
@@ -107,7 +107,7 @@ module.exports = fp(async (fastify, options) => {
       }
     }
   }, async (request) => {
-    await fastify.AdminService.resetUserPassword(request.body);
+    await fastify.accountServices.admin.resetUserPassword(request.body);
     return {};
   });
 });

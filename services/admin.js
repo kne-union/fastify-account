@@ -25,14 +25,14 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const addSuperAdmin = async ({ username, nickname, password }) => {
-    const user = await fastify.UserService.register({ username, nickname, password, status: 1 });
+    const user = await fastify.accountServices.account.register({ username, nickname, password, status: 1 });
     await fastify.models.adminRole.create({
       userId: user.id, role: ROLE['SuperAdmin']
     });
   };
 
   const setSuperAdmin = async (targetUser) => {
-    const user = await fastify.UserService.getUserInfo(targetUser);
+    const user = await fastify.accountServices.user.getUserInfo(targetUser);
     if (await fastify.models.adminRole.count({
       where: {
         userId: user.id, role: ROLE['SuperAdmin']
@@ -122,10 +122,10 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const resetUserPassword = async ({ userId, password }) => {
-    await fastify.AccountService.resetPassword({ userId, password });
+    await fastify.accountServices.account.resetPassword({ userId, password });
   };
 
-  fastify.decorate('AdminService', {
+  fastify.accountServices.admin = {
     initSuperAdmin,
     setSuperAdmin,
     getAllUserList,
@@ -137,5 +137,5 @@ module.exports = fp(async (fastify, options) => {
     generateTenantAdminVerifyCode,
     verifyTenantAdmin,
     resetUserPassword
-  });
+  };
 });

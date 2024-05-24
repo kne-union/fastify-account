@@ -1,7 +1,7 @@
 const fp = require('fastify-plugin');
 module.exports = fp(async (fastify, options) => {
   const getUserTenant = async (authenticatePayload) => {
-    const user = await fastify.UserService.getUserInfo(authenticatePayload);
+    const user = await fastify.accountServices.user.getUserInfo(authenticatePayload);
     const tenantUserList = await fastify.models.tenantUser.findAll({
       where: {
         userId: user.id
@@ -52,7 +52,7 @@ module.exports = fp(async (fastify, options) => {
     };
   };
 
-  fastify.decorate('TenantService', {
+  fastify.accountServices.tenant = {
     getUserTenant, tenantUserAuthenticate
-  });
+  };
 });

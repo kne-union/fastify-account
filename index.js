@@ -19,6 +19,7 @@ module.exports = fp(
     );
     fastify.register(require('fastify-ip'));
     fastify.register(require('@fastify/jwt'), options.jwt);
+    fastify.decorate('accountServices', {});
     fastify.register(autoload, {
       dir: path.resolve(__dirname, './services'),
       options
@@ -32,13 +33,13 @@ module.exports = fp(
       //这里判断失效时间
       //info.iat
       request.authenticatePayload = info.payload;
-      request.userInfo = await fastify.UserService.getUserInfo(request.authenticatePayload);
+      request.userInfo = await fastify.accountServices.user.getUserInfo(request.authenticatePayload);
     });
     fastify.decorate('authenticateTenant', async request => {
-      request.tenantInfo = await fastify.TenantService.tenantUserAuthenticate(request.userInfo);
+      request.tenantInfo = await fastify.accountServices.tenant.tenantUserAuthenticate(request.userInfo);
     });
     fastify.decorate('authenticateAdmin', async request => {
-      request.adminInfo = await fastify.AdminService.superAdminAuthenticate(request.userInfo);
+      request.adminInfo = await fastify.accountServices.admin.superAdminAuthenticate(request.userInfo);
     });
   },
   {
