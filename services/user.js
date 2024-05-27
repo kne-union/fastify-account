@@ -38,7 +38,10 @@ module.exports = fp(async (fastify, options) => {
     if (await accountIsExists({ phone, email }) > 0) {
       throw new Error('手机号或者邮箱都不能重复');
     }
-    const account = await fastify.models.userAccount.create(await passwordEncryption(password));
+    if (!password) {
+      throw new Error('密码不能为空');
+    }
+    const account = await fastify.models.userAccount.create(await fastify.accountServices.account.passwordEncryption(password));
     const user = await fastify.models.user.create({
       avatar, nickname, gender, birthday, description, phone, email, status, userAccountId: account.id
     });
