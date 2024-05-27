@@ -98,27 +98,9 @@ module.exports = fp(async (fastify, options) => {
     verificationCode.status = 2;
     await verificationCode.save();
 
-    if (await accountIsExists({ username: type === 0 ? phone : email }) > 0) {
-      throw new Error('用户已经存在不能重复注册');
-    }
-
-    const account = await fastify.models.userAccount.create(await passwordEncryption(password));
-    const user = await fastify.models.user.create({
-      avatar, nickname, gender, birthday, description, phone, email, status, userAccountId: account.id
+    return await fastify.accountServices.user.addUser({
+      avatar, nickname, gender, birthday, description, phone, email, password, status
     });
-    await account.update({ belongToUserId: user.id });
-    return user;
-  };
-
-  const accountIsExists = async ({ username }) => {
-    const isEmail = userNameIsEmail(username);
-    return await fastify.models.user.count({
-      where: isEmail ? {
-        email: username
-      } : {
-        phone: username
-      }
-    }) > 0;
   };
 
   const sendEmailCode = async ({ email }) => {
@@ -185,7 +167,6 @@ module.exports = fp(async (fastify, options) => {
     sendEmailCode,
     sendSMSCode,
     verificationCodeValidate,
-    accountIsExists,
     passwordEncryption,
     passwordAuthentication,
     resetPassword

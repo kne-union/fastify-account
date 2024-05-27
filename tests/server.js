@@ -6,7 +6,6 @@ const path = require('path');
 
 const sqliteStorage = path.resolve('./database.sqlite');
 
-
 fastify.register(require('@kne/fastify-sequelize'), {
   db: {
     storage: sqliteStorage
@@ -14,6 +13,8 @@ fastify.register(require('@kne/fastify-sequelize'), {
     syncOptions: {}
   }
 });
+
+fastify.register(require('@kne/fastify-file-manager'));
 
 fastify.register(require('../index'), { isTest: true });
 

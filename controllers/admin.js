@@ -1,11 +1,6 @@
 const fp = require('fastify-plugin');
 
 module.exports = fp(async (fastify, options) => {
-  fastify.get(`${options.prefix}/getSuperAdminInfo`, {
-    onRequest: [fastify.authenticate, fastify.authenticateAdmin]
-  }, async (request) => {
-    return { userInfo: request.userInfo };
-  });
   // 用于系统初始化时，设置第一个用户，只能使用一次，其他用户由该用户创建
   fastify.post(`${options.prefix}/initSuperAdmin`, {
     onRequest: [fastify.authenticate]
@@ -14,17 +9,23 @@ module.exports = fp(async (fastify, options) => {
     return {};
   });
 
-  fastify.post(`${options.prefix}/addSuperAdmin`, {
+  fastify.get(`${options.prefix}/admin/getSuperAdminInfo`, {
+    onRequest: [fastify.authenticate, fastify.authenticateAdmin]
+  }, async (request) => {
+    return { userInfo: request.userInfo };
+  });
+
+  fastify.post(`${options.prefix}/admin/addUser`, {
     onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       body: {}
     }
   }, async (request) => {
-    const { username, nickname, password } = request.body;
-    await fastify.accountServices.admin.addSuperAdmin({ username, nickname, password: password || options.defaultPassword });
+    const userInfo = request.body;
+    await fastify.accountServices.admin.addUser(Object.assign({}, userInfo, { password: options.defaultPassword }));
     return {};
   });
 
-  fastify.get(`${options.prefix}/getAllUserList`, {
+  fastify.get(`${options.prefix}/admin/getAllUserList`, {
     onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       query: {}
     }
@@ -37,7 +38,7 @@ module.exports = fp(async (fastify, options) => {
     });
   });
 
-  fastify.get(`${options.prefix}/getAllTenantList`, {
+  fastify.get(`${options.prefix}/admin/getAllTenantList`, {
     onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       query: {
         type: 'object', properties: {
@@ -64,7 +65,7 @@ module.exports = fp(async (fastify, options) => {
     });
   });
 
-  fastify.post(`${options.prefix}/addTenant`, {
+  fastify.post(`${options.prefix}/admin/addTenant`, {
     onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       body: {
         type: 'object', required: ['name', 'accountNumber', 'serviceStartTime', 'serviceEndTime'], properties: {
@@ -81,7 +82,7 @@ module.exports = fp(async (fastify, options) => {
     return {};
   });
 
-  fastify.post(`${options.prefix}/saveTenant`, {
+  fastify.post(`${options.prefix}/admin/saveTenant`, {
     onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       body: {
         type: 'object', required: ['id', 'name', 'accountNumber', 'serviceStartTime', 'serviceEndTime'], properties: {
@@ -98,7 +99,7 @@ module.exports = fp(async (fastify, options) => {
     return {};
   });
 
-  fastify.post(`${options.prefix}/resetUserPassword`, {
+  fastify.post(`${options.prefix}/admin/resetUserPassword`, {
     onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       body: {
         type: 'object', required: ['userId', 'password'], properties: {
@@ -108,6 +109,25 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     await fastify.accountServices.admin.resetUserPassword(request.body);
+    return {};
+  });
+
+  fastify.post(`${options.prefix}/admin/saveUser`, {
+    onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
+      body: {
+        type: 'object', required: ['id'], properties: {
+          id: { type: 'string' },
+          avatar: { type: 'string' },
+          nickname: { type: 'string' },
+          phone: { type: 'string' },
+          email: { type: 'string' },
+          description: { type: 'string' }
+        }
+      }
+    }
+  }, async (request) => {
+    const user = request.body;
+    await fastify.accountServices.user.saveUser(user);
     return {};
   });
 });
