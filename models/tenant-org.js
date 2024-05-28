@@ -1,8 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define('tenantOrg', {
-    id: {
-      type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true
-    }, tenantId: {
+    tenantId: {
       type: DataTypes.STRING, allowNull: false
     }, name: {
       type: DataTypes.STRING, allowNull: false
