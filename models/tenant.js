@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE, allowNull: false
     }, status: {
       type: DataTypes.INTEGER, defaultValue: 0// 0:正常,10:过期被关闭,11:已禁用,12:已关闭,
-    }
+    }, description: DataTypes.TEXT
   }, {
     paranoid: true
   });
