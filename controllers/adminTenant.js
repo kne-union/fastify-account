@@ -74,4 +74,27 @@ module.exports = fp(async (fastify, options) => {
     await fastify.accountServices.admin.saveTenant(request.body);
     return {};
   });
+
+  fastify.post(`${options.prefix}/admin/tenant/addOrg`, {
+    onRequest: [fastify.authenticate, fastify.authenticateAdmin], required: ['name', 'tenantId', 'pid'], properties: {
+      name: {type: 'string'},
+      tenantId: {type: 'string'},
+      pid: {type: 'number'},
+    }
+  }, async (request) => {
+    return await fastify.accountServices.tenant.addTenantOrg(request.body);
+  });
+
+  fastify.get(`${options.prefix}/admin/tenant/orgList`, {
+    onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
+      query: {
+        type: 'object', properties: {
+          id: { type: 'string' }
+        }
+      }
+    }
+  }, async (request) => {
+    const { tenantId } = request.query;
+    return await fastify.accountServices.tenant.getTenantOrgList({ tenantId });
+  });
 });

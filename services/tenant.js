@@ -120,7 +120,35 @@ module.exports = fp(async (fastify, options) => {
     };
   };
 
+  const addTenantOrg = async (org) => {
+    if (await fastify.models.tenantOrg.count({ where: { name: org.name } })) {
+      throw new Error('组织名称不能重复');
+    }
+
+    const t = await fastify.sequelize.transaction();
+    try {
+      await fastify.models.tenantOrg.create({
+        name: org.name,
+        enName: org.enName,
+        tenantId: org.tenantId,
+        pid: org.pid
+      });
+      await t.commit();
+    } catch (e) {
+      await t.rollback();
+      throw e;
+    }
+  };
+
+  const getTenantOrgList = async ({ tenantId }) => {
+    const { count, rows } = await fastify.models.tenantOrg.findAndCountAll({
+      where: { tenantId }
+    });
+
+    return { pageData: rows, totalCount: count };
+  };
+
   fastify.accountServices.tenant = {
-    getUserTenant, tenantUserAuthenticate, getTenantInfo, getRoleList, addRole, saveRole, removeRole
+    getUserTenant, tenantUserAuthenticate, getTenantInfo, getRoleList, addRole, saveRole, removeRole, addTenantOrg, getTenantOrgList
   };
 });
