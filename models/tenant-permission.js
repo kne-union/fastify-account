@@ -11,5 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     }, status: {
       type: DataTypes.INTEGER, defaultValue: 0
     }
+  }, {
+    paranoid: true
   });
 };

@@ -10,6 +10,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID
     }, avatar: DataTypes.STRING, gender: DataTypes.STRING,//F:女,M男
     birthday: DataTypes.DATE, description: DataTypes.TEXT
+  }, {
+    paranoid: true
   });
 
   user.associate = ({ adminRole, user, tenant, tenantUser }) => {

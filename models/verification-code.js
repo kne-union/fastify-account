@@ -9,5 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     }, status: {
       type: DataTypes.INTEGER, defaultValue: 0//0:未验证,1:已验证,2:已过期
     }
+  }, {
+    paranoid: true
   });
 };

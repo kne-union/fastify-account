@@ -26,13 +26,7 @@ module.exports = fp(async (fastify, options) => {
 
   const addUser = async ({ avatar, nickname, phone, email, password, description }) => {
     return await fastify.accountServices.user.addUser({
-      avatar,
-      nickname,
-      phone,
-      email,
-      password,
-      description,
-      status: 1
+      avatar, nickname, phone, email, password, description, status: 1
     });
   };
 
@@ -96,8 +90,6 @@ module.exports = fp(async (fastify, options) => {
       }, group: 'tenantId'
     });
 
-    console.log(res);
-
     return {
       pageData: rows, totalCount: count
     };
@@ -107,7 +99,21 @@ module.exports = fp(async (fastify, options) => {
     if (await fastify.models.tenant.count({ where: { name: tenant.name } })) {
       throw new Error('租户名称不能重复');
     }
-    await fastify.models.tenant.create(tenant);
+
+    const t = await fastify.sequelize.transaction();
+    try {
+      const currentTenant = await fastify.models.tenant.create(tenant);
+      await fastify.models.tenantRole.create({
+        name: '系统默认角色',
+        tenantId: currentTenant.id,
+        description: '创建租户时自动生成，可以设置权限，不可更改删除，所有租户用户默认拥有该角色',
+        type: 1
+      });
+      await t.commit();
+    } catch (e) {
+      await t.rollback();
+      throw e;
+    }
   };
 
   const saveTenant = async (tenant) => {

@@ -7,5 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     }, tenantShareGroupId: {
       type: DataTypes.INTEGER, allowNull: false
     }
+  }, {
+    paranoid: true
   });
 };

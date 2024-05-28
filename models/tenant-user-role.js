@@ -7,5 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     }, tenantRoleId: {
       type: DataTypes.INTEGER, allowNull: false
     }
+  }, {
+    paranoid: true
   });
 };

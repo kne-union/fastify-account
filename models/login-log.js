@@ -3,5 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: {
       type: DataTypes.UUID, allowNull: false
     }, ip: DataTypes.STRING
+  }, {
+    paranoid: true
   });
 };

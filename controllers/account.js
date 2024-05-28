@@ -50,14 +50,21 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(`${options.prefix}/accountIsExists`, {
     schema: {
       body: {
-        type: 'object', required: ['username'], properties: {
-          username: { type: 'string' }
-        }
+        oneOf: [{
+          type: 'object', required: ['phone'], properties: {
+            phone: { type: 'string' }
+          }
+        }, {
+          type: 'object', required: ['email'], properties: {
+            email: { type: 'string' }
+          }
+        }]
+
       }
     }
   }, async (request) => {
-    const { username } = request.body;
-    return { isExists: await fastify.accountServices.account.accountIsExists({ username }) };
+    const { phone, email } = request.body;
+    return { isExists: await fastify.accountServices.user.accountIsExists({ phone, email }) };
   });
 
   fastify.post(`${options.prefix}/register`, {
