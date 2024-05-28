@@ -4,6 +4,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING, allowNull: false
     }, permissionId: {
       type: DataTypes.INTEGER, allowNull: false
+    }, roleId: {
+      type: DataTypes.INTEGER, allowNull: false
     }, status: {
       type: DataTypes.INTEGER, defaultValue: 0//0:开启  11:关闭
     }

@@ -1,11 +1,13 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('tenantOrg', {
-    tenantId: {
+  return sequelize.define('permission', {
+    applicationId: {
+      type: DataTypes.STRING, allowNull: false
+    }, code: {
       type: DataTypes.STRING, allowNull: false
     }, name: {
       type: DataTypes.STRING, allowNull: false
-    }, pid: {
-      type: DataTypes.INTEGER, allowNull: false //0:为根节点
+    }, type: {
+      type: DataTypes.INTEGER, defaultValue: 0//0:基础模块,1:扩展模块
     }, status: {
       type: DataTypes.INTEGER, defaultValue: 0
     }

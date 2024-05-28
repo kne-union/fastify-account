@@ -4,7 +4,7 @@ const fastify = require('fastify')({
 
 const path = require('path');
 
-const sqliteStorage = path.resolve('./database.sqlite');
+const sqliteStorage = path.resolve('./tests/database.sqlite');
 
 fastify.register(require('@kne/fastify-sequelize'), {
   db: {
@@ -14,7 +14,9 @@ fastify.register(require('@kne/fastify-sequelize'), {
   }
 });
 
-fastify.register(require('@kne/fastify-file-manager'));
+fastify.register(require('@kne/fastify-file-manager'), {
+  root: path.resolve('./tests/static')
+});
 
 fastify.register(require('../index'), { isTest: true });
 
