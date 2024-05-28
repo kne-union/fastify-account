@@ -57,7 +57,7 @@ module.exports = fp(async (fastify, options) => {
     }
   }, async (request) => {
     const { username } = request.body;
-    return { isExists: await fastify.accountServices.account.accountIsExists({ username }) };
+    return { isExists: await fastify.accountServices.user.accountIsExists({ username }) };
   });
 
   fastify.post(`${options.prefix}/register`, {
