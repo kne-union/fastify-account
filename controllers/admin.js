@@ -144,6 +144,20 @@ module.exports = fp(async (fastify, options) => {
     return {};
   });
 
+  fastify.post(`${options.prefix}/admin/closeUser`, {
+    onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
+      body: {
+        type: 'object', required: ['userId'], properties: {
+          status: { type: 'number' },
+        }
+      }
+    }
+  }, async (request) => {
+    const {userId} = request.body;
+    await fastify.accountServices.user.updateUser({userId, status: 12});
+    return {};
+  });
+
   fastify.get(`${options.prefix}/admin/getRoleList`, {
     onRequest: [fastify.authenticate, fastify.authenticateAdmin], schema: {
       query: {
