@@ -137,6 +137,14 @@ module.exports = fp(async (fastify, options) => {
     };
   };
 
+  const getTenantOrgList = async ({ tenantId }) => {
+    const { count, rows } = await fastify.account.models.tenantOrg.findAndCountAll({
+      where: { tenantId }
+    });
+
+    return { pageData: rows, totalCount: count };
+  };
+
   fastify.account.services.tenant = {
     getUserTenant,
     tenantUserAuthenticate,
@@ -144,6 +152,7 @@ module.exports = fp(async (fastify, options) => {
     getRoleList,
     addRole,
     saveRole,
-    removeRole
+    removeRole,
+    getTenantOrgList
   };
 });

@@ -123,4 +123,23 @@ module.exports = fp(async (fastify, options) => {
       return {};
     }
   );
+
+  fastify.get(
+    `${options.prefix}/admin/tenant/orgList`,
+    {
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      schema: {
+        query: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { tenantId } = request.query;
+      return await fastify.account.services.tenant.getTenantOrgList({ tenantId });
+    }
+  );
 });
