@@ -34,8 +34,8 @@
   },
   "homepage": "https://github.com/kne-union/fastify-account#readme",
   "devDependencies": {
-    "@kne/fastify-file-manager": "^0.1.1-alpha.1",
-    "@kne/fastify-sequelize": "^0.1.3",
+    "@kne/fastify-file-manager": "^1.0.0",
+    "@kne/fastify-sequelize": "^1.0.0",
     "fastify": "^4.27.0",
     "husky": "^9.0.11",
     "nodemon": "^3.1.1",
@@ -43,11 +43,12 @@
     "sqlite3": "^5.1.7"
   },
   "dependencies": {
-    "@fastify/autoload": "^5.8.2",
     "@fastify/jwt": "^8.0.1",
+    "@kne/fastify-namespace": "^0.1.0",
     "bcryptjs": "^2.4.3",
     "dayjs": "^1.11.11",
     "fastify-ip": "^1.0.0",
-    "fastify-plugin": "^4.5.1"
+    "fastify-plugin": "^4.5.1",
+    "http-errors": "^2.0.0"
   }
 }
