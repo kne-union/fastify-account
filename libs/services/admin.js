@@ -134,6 +134,10 @@ module.exports = fp(async (fastify, options) => {
         description: '创建租户时自动生成，可以设置权限，不可更改删除，所有租户用户默认拥有该角色',
         type: 1
       });
+      await fastify.account.models.tenantOrg.create({
+        name: tenant.name,
+        tenantId: currentTenant.id
+      });
       await t.commit();
     } catch (e) {
       await t.rollback();
