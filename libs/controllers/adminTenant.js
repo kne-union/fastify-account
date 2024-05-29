@@ -124,6 +124,22 @@ module.exports = fp(async (fastify, options) => {
     }
   );
 
+  fastify.post(
+    `${options.prefix}/admin/tenant/addOrg`,
+    {
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      required: ['name', 'tenantId', 'pid'],
+      properties: {
+        name: { type: 'string' },
+        tenantId: { type: 'string' },
+        pid: { type: 'number' }
+      }
+    },
+    async request => {
+      return await fastify.account.services.tenant.addTenantOrg(request.body);
+    }
+  );
+
   fastify.get(
     `${options.prefix}/admin/tenant/orgList`,
     {
