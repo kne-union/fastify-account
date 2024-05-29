@@ -140,6 +140,22 @@ module.exports = fp(async (fastify, options) => {
     }
   );
 
+  fastify.post(
+    `${options.prefix}/admin/tenant/removeOrg`,
+    {
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      required: ['tenantId', 'id'],
+      properties: {
+        tenantId: { type: 'string' },
+        id: { type: 'number' }
+      }
+    },
+    async request => {
+      await fastify.account.services.tenant.removeTenantOrg(request.body);
+      return {};
+    }
+  );
+
   fastify.get(
     `${options.prefix}/admin/tenant/orgList`,
     {

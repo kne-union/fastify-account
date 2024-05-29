@@ -150,6 +150,28 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
+  const removeTenantOrg = async ({ id, tenantId }) => {
+    const tenantOrg = await fastify.account.models.tenantOrg.findByPk(id, {
+      where: {
+        type: 0
+      }
+    });
+
+    if (!tenantOrg) {
+      throw new Error('该组织不存在');
+    }
+
+    const { rows } = await fastify.account.models.tenantOrg.findAndCountAll({
+      where: { tenantId, pid: id }
+    });
+
+    if (rows?.length) {
+      throw new Error('组织下有用户或子组织无法删除');
+    }
+
+    await tenantOrg.destroy();
+  };
+
   const getTenantOrgList = async ({ tenantId }) => {
     const { count, rows } = await fastify.account.models.tenantOrg.findAndCountAll({
       where: { tenantId }
@@ -167,6 +189,7 @@ module.exports = fp(async (fastify, options) => {
     saveRole,
     removeRole,
     addTenantOrg,
-    getTenantOrgList
+    getTenantOrgList,
+    removeTenantOrg
   };
 });
