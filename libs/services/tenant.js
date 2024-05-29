@@ -138,7 +138,7 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const addTenantOrg = async org => {
-    if (await fastify.account.models.tenantOrg.count({ where: { name: org.name } })) {
+    if (await fastify.account.models.tenantOrg.count({ where: { name: org.name, tenantId: org.tenantId, pid: org.pid } })) {
       throw new Error('组织名称不能重复');
     }
 
@@ -148,6 +148,29 @@ module.exports = fp(async (fastify, options) => {
       tenantId: org.tenantId,
       pid: org.pid
     });
+  };
+
+  const editTenantOrg = async ({ id, ...otherInfo }) => {
+    const tenantOrg = await fastify.account.models.tenantOrg.findByPk(id, {
+      where: {
+        type: 0
+      }
+    });
+
+    if (!tenantOrg) {
+      throw new Error('该组织不存在');
+    }
+    if (await fastify.account.models.tenantOrg.count({ where: { name: otherInfo.name, pid: otherInfo.pid, tenantId: otherInfo.tenantId } })) {
+      throw new Error('组织名称在同一父组织下有重复');
+    }
+
+    ['name', 'enName', 'tenantId', 'pid'].forEach(name => {
+      if (otherInfo[name]) {
+        tenantOrg[name] = otherInfo[name];
+      }
+    });
+
+    await tenantOrg.save();
   };
 
   const removeTenantOrg = async ({ id, tenantId }) => {
@@ -189,6 +212,7 @@ module.exports = fp(async (fastify, options) => {
     saveRole,
     removeRole,
     addTenantOrg,
+    editTenantOrg,
     getTenantOrgList,
     removeTenantOrg
   };
