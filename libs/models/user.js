@@ -27,7 +27,17 @@ module.exports = (sequelize, DataTypes) => {
       description: DataTypes.TEXT
     },
     {
-      paranoid: true
+      paranoid: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['email', 'deletedAt']
+        },
+        {
+          unique: true,
+          fields: ['phone', 'deletedAt']
+        }
+      ]
     }
   );
 
