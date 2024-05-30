@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       },
+      url: DataTypes.STRING,
       code: {
         type: DataTypes.STRING,
         allowNull: false
@@ -23,7 +24,13 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     {
-      paranoid: true
+      paranoid: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['code', 'deletedAt']
+        }
+      ]
     }
   );
 };

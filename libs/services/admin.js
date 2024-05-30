@@ -128,16 +128,22 @@ module.exports = fp(async (fastify, options) => {
     const t = await fastify.sequelize.instance.transaction();
     try {
       const currentTenant = await fastify.account.models.tenant.create(tenant);
-      await fastify.account.models.tenantRole.create({
-        name: '系统默认角色',
-        tenantId: currentTenant.id,
-        description: '创建租户时自动生成，可以设置权限，不可更改删除，所有租户用户默认拥有该角色',
-        type: 1
-      });
-      await fastify.account.models.tenantOrg.create({
-        name: tenant.name,
-        tenantId: currentTenant.id
-      });
+      await fastify.account.models.tenantRole.create(
+        {
+          name: '系统默认角色',
+          tenantId: currentTenant.id,
+          description: '创建租户时自动生成，可以设置权限，不可更改删除，所有租户用户默认拥有该角色',
+          type: 1
+        },
+        { transaction: t }
+      );
+      await fastify.account.models.tenantOrg.create(
+        {
+          name: tenant.name,
+          tenantId: currentTenant.id
+        },
+        { transaction: t }
+      );
       await t.commit();
     } catch (e) {
       await t.rollback();
