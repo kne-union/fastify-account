@@ -18,13 +18,28 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         defaultValue: 0 //0:基础模块,1:扩展模块
       },
+      pid: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+      },
+      paths: {
+        type: DataTypes.JSON,
+        defaultValue: []
+      },
+      description: DataTypes.TEXT,
       status: {
         type: DataTypes.INTEGER,
         defaultValue: 0
       }
     },
     {
-      paranoid: true
+      paranoid: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['code', 'pid', 'deletedAt']
+        }
+      ]
     }
   );
 };
