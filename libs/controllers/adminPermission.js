@@ -92,7 +92,12 @@ module.exports = fp(async (fastify, options) => {
           properties: {
             applicationId: { type: 'string' },
             name: { type: 'string' },
-            code: { type: 'string' }
+            code: { type: 'string' },
+            type: { type: 'number' },
+            isModule: { type: 'number' },
+            isMust: { type: 'number' },
+            pid: { type: 'number' },
+            description: { type: 'string' }
           }
         }
       }
@@ -127,8 +132,89 @@ module.exports = fp(async (fastify, options) => {
     `${options.prefix}/admin/deletePermission`,
     {
       onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
-      schema: {}
+      schema: {
+        body: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'string' }
+          }
+        }
+      }
     },
-    async () => {}
+    async request => {
+      const { id } = request.body;
+
+      await fastify.account.services.permission.deletePermission({ id });
+
+      return {};
+    }
+  );
+
+  fastify.post(
+    `${options.prefix}/admin/savePermission`,
+    {
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      schema: {
+        body: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'string' },
+            name: { type: 'string' },
+            type: { type: 'number' },
+            isMust: { type: 'number' },
+            description: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      await fastify.account.services.permission.savePermission(request.body);
+      return {};
+    }
+  );
+
+  fastify.post(
+    `${options.prefix}/admin/saveTenantPermissionList`,
+    {
+      body: {
+        type: 'object',
+        required: ['tenantId', 'applications', 'permissions'],
+        properties: {
+          tenantId: { type: 'string' },
+          applications: {
+            type: 'array',
+            items: { type: 'string' }
+          },
+          permissions: {
+            type: 'array',
+            items: { type: 'number' }
+          }
+        }
+      }
+    },
+    async request => {
+      await fastify.account.services.permission.saveTenantPermissionList(request.body);
+
+      return {};
+    }
+  );
+
+  fastify.get(
+    `${options.prefix}/admin/getTenantPermissionList`,
+    {
+      query: {
+        type: 'object',
+        required: ['tenantId'],
+        properties: {
+          tenantId: { type: 'string' }
+        }
+      }
+    },
+    async request => {
+      const { tenantId } = request.query;
+      return await fastify.account.services.permission.getTenantPermissionList({ tenantId });
+    }
   );
 });

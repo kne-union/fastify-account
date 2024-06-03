@@ -20,12 +20,13 @@ fastify.register(require('@kne/fastify-file-manager'), {
 
 fastify.register(require('../index'), { isTest: true });
 
-fastify.register(require('fastify-plugin')(async (fastify)=>{
+fastify.register(require('fastify-plugin')(async (fastify) => {
   await fastify.sequelize.sync();
 }));
 
 fastify.addHook('onSend', async (request, reply, payload) => {
-  if (reply.getHeader('content-type').indexOf('application/json') > -1) {
+  const contentType = reply.getHeader('content-type');
+  if (contentType && contentType.indexOf('application/json') > -1) {
     const responseData = JSON.parse(payload);
     if (responseData.statusCode && (responseData.message || responseData.error)) {
       return JSON.stringify({
