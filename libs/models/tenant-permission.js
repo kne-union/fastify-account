@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define(
-    'tenantRolePermission',
+    'tenantPermission',
     {
       tenantId: {
         type: DataTypes.STRING,

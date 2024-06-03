@@ -14,6 +14,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       },
+      isModule: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0 //0:操作项，1:模块
+      },
+      isMust: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0 //0:非必须，1:必须
+      },
       type: {
         type: DataTypes.INTEGER,
         defaultValue: 0 //0:基础模块,1:扩展模块
@@ -37,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       indexes: [
         {
           unique: true,
-          fields: ['code', 'pid', 'deletedAt']
+          fields: ['code', 'applicationId', 'pid', 'deletedAt']
         }
       ]
     }
