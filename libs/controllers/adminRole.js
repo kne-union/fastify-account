@@ -93,4 +93,46 @@ module.exports = fp(async (fastify, options) => {
       return {};
     }
   );
+
+  fastify.get(
+    `${options.prefix}/admin/getRolePermissionList`,
+    {
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      schema: {
+        query: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'number' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { id } = request.query;
+      return await fastify.account.services.permission.getRolePermissionList({ roleId: id });
+    }
+  );
+
+  fastify.post(
+    `${options.prefix}/admin/saveRolePermissionList`,
+    {
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      schema: {
+        roleId: { type: 'string' },
+        applications: {
+          type: 'array',
+          items: { type: 'string' }
+        },
+        permissions: {
+          type: 'array',
+          items: { type: 'number' }
+        }
+      }
+    },
+    async request => {
+      await fastify.account.services.permission.saveRolePermissionList(request.body);
+      return {};
+    }
+  );
 });

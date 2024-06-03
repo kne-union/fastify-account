@@ -103,6 +103,10 @@ module.exports = fp(async (fastify, options) => {
       throw new Error('该角色已经被使用，请在租户用户种处理掉所有使用该角色的租户用户后重试');
     }
 
+    if (tenantRole.type === 1) {
+      throw new Error('该角色为系统默认角色，不能删除');
+    }
+
     await tenantRole.destroy();
   };
 

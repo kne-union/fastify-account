@@ -46,7 +46,7 @@ module.exports = fp(async (fastify, options) => {
         {
           where: {
             permissionId: {
-              [fastify.sequence.Sequelize.Op.in]: permissionIdList
+              [fastify.sequelize.Sequelize.Op.in]: permissionIdList
             }
           }
         },
@@ -57,7 +57,7 @@ module.exports = fp(async (fastify, options) => {
         {
           where: {
             permissionId: {
-              [fastify.sequence.Sequelize.Op.in]: permissionIdList
+              [fastify.sequelize.Sequelize.Op.in]: permissionIdList
             }
           }
         },
@@ -80,8 +80,23 @@ module.exports = fp(async (fastify, options) => {
     }
   };
 
-  const getApplicationList = async () => {
-    return await fastify.account.models.application.findAll();
+  const getApplicationList = async ({ tenantId }) => {
+    const query = {};
+    if (tenantId) {
+      const tenant = await fastify.account.models.tenant.findByPk(tenantId);
+      if (!tenant) {
+        throw new Error('租户不存在');
+      }
+      const tenantApplications = await fastify.account.models.tenantApplication.findAll({
+        where: { tenantId }
+      });
+      query.id = {
+        [fastify.sequelize.Sequelize.Op.in]: tenantApplications.map(({ applicationId }) => applicationId)
+      };
+    }
+    return await fastify.account.models.application.findAll({
+      where: query
+    });
   };
 
   const addPermission = async ({ applicationId, pid, code, name, type, isModule, isMust, description }) => {
@@ -120,9 +135,27 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
-  const getPermissionList = async ({ applicationId }) => {
+  const getPermissionList = async ({ applicationId, tenantId }) => {
+    const query = {};
+    if (tenantId) {
+      const tenant = await fastify.account.models.tenant.findByPk(tenantId);
+      if (!tenant) {
+        throw new Error('租户不存在');
+      }
+      const tenantPermissions = await fastify.account.models.tenantPermission.findAll({
+        where: { tenantId }
+      });
+      query[fastify.sequelize.Sequelize.Op.or] = [
+        {
+          id: {
+            [fastify.sequelize.Sequelize.Op.in]: tenantPermissions.map(({ permissionId }) => permissionId)
+          }
+        },
+        { isMust: 1 }
+      ];
+    }
     return await fastify.account.models.permission.findAll({
-      where: { applicationId }
+      where: Object.assign({}, { applicationId }, query)
     });
   };
 
@@ -259,6 +292,92 @@ module.exports = fp(async (fastify, options) => {
     }
   };
 
+  const saveRolePermissionList = async ({ roleId, applications, permissions }) => {
+    const role = await fastify.account.models.tenantRole.findByPk(roleId);
+    if (!role) {
+      throw new Error('角色不存在');
+    }
+    if (!(await fastify.account.models.tenant.findByPk(role.tenantId))) {
+      throw new Error('租户不存在');
+    }
+
+    const tenantId = role.tenantId;
+
+    const tenantApplications = await fastify.account.models.tenantApplication.findAll({
+      attributes: ['applicationId'],
+      where: { tenantId }
+    });
+
+    const tenantPermissions = await fastify.account.models.tenantPermission.findAll({
+      where: { tenantId }
+    });
+
+    const currentApplications = await fastify.account.models.tenantRoleApplication.findAll({
+      where: {
+        roleId: role.id,
+        tenantId,
+        id: {
+          [fastify.sequelize.Sequelize.Op.in]: tenantApplications.map(({ applicationId }) => applicationId)
+        }
+      }
+    });
+
+    const currentPermissions = await fastify.account.models.tenantRolePermission.findAll({
+      where: {
+        roleId: role.id,
+        tenantId,
+        id: { [fastify.sequelize.Sequelize.Op.in]: tenantPermissions.map(({ permissionId }) => permissionId) }
+      }
+    });
+
+    const currentApplicationIds = currentApplications.map(({ applicationId }) => applicationId);
+    const currentPermissionIds = currentPermissions.map(({ permissionId }) => permissionId);
+
+    const t = await fastify.sequelize.instance.transaction();
+    try {
+      //先删除，后添加
+      for (let item of currentApplications) {
+        if (applications.indexOf(item.applicationId) === -1) {
+          await item.destroy({ transaction: t });
+        }
+      }
+      for (let applicationId of applications) {
+        if (currentApplicationIds.indexOf(applicationId) === -1) {
+          await fastify.account.models.tenantRoleApplication.create(
+            {
+              tenantId,
+              roleId,
+              applicationId
+            },
+            { transaction: t }
+          );
+        }
+      }
+
+      for (let item of currentPermissions) {
+        if (permissions.indexOf(item.permissionId) === -1) {
+          await item.destroy({ transaction: t });
+        }
+      }
+      for (let permissionId of permissions) {
+        if (currentPermissionIds.indexOf(permissionId) === -1) {
+          await fastify.account.models.tenantRolePermission.create(
+            {
+              tenantId,
+              roleId,
+              permissionId
+            },
+            { transaction: t }
+          );
+        }
+      }
+      await t.commit();
+    } catch (e) {
+      await t.rollback();
+      throw e;
+    }
+  };
+
   const getTenantPermissionList = async ({ tenantId }) => {
     if (!(await fastify.account.models.tenant.findByPk(tenantId))) {
       throw new Error('租户不存在');
@@ -275,6 +394,21 @@ module.exports = fp(async (fastify, options) => {
     return { applications, permissions };
   };
 
+  const getRolePermissionList = async ({ roleId }) => {
+    const role = await fastify.account.models.tenantRole.findByPk(roleId);
+    if (!role) {
+      throw new Error('角色不存在');
+    }
+    const applications = await fastify.account.models.tenantRoleApplication.findAll({
+      where: { roleId: role.id, tenantId: role.tenantId }
+    });
+    const permissions = await fastify.account.models.tenantRolePermission.findAll({
+      where: { roleId: role.id, tenantId: role.tenantId }
+    });
+
+    return { applications, permissions };
+  };
+
   fastify.account.services.permission = {
     addApplication,
     saveApplication,
@@ -285,6 +419,8 @@ module.exports = fp(async (fastify, options) => {
     deletePermission,
     savePermission,
     saveTenantPermissionList,
-    getTenantPermissionList
+    saveRolePermissionList,
+    getTenantPermissionList,
+    getRolePermissionList
   };
 });
