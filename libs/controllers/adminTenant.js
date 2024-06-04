@@ -158,4 +158,23 @@ module.exports = fp(async (fastify, options) => {
       return await fastify.account.services.tenant.getTenantOrgList({ tenantId });
     }
   );
+
+  fastify.get(
+    `${options.prefix}/admin/getTenantUserList`,
+    {
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      schema: {
+        query: {
+          type: 'object',
+          properties: {
+            tenantId: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { tenantId } = request.query;
+      return await fastify.account.services.tenant.getTenantUserList({ tenantId });
+    }
+  );
 });
