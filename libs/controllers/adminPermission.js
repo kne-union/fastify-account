@@ -74,10 +74,19 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getApplicationList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin]
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      schema: {
+        query: {
+          type: 'object',
+          properties: {
+            tenantId: { type: 'string' }
+          }
+        }
+      }
     },
-    async () => {
-      return await fastify.account.services.permission.getApplicationList();
+    async request => {
+      const { tenantId } = request.query;
+      return await fastify.account.services.permission.getApplicationList({ tenantId });
     }
   );
 
@@ -117,14 +126,15 @@ module.exports = fp(async (fastify, options) => {
           type: 'object',
           required: ['applicationId'],
           properties: {
-            applicationId: { type: 'string' }
+            applicationId: { type: 'string' },
+            tenantId: { type: 'string' }
           }
         }
       }
     },
     async request => {
-      const { applicationId } = request.query;
-      return await fastify.account.services.permission.getPermissionList({ applicationId });
+      const { applicationId, tenantId } = request.query;
+      return await fastify.account.services.permission.getPermissionList({ applicationId, tenantId });
     }
   );
 
