@@ -41,7 +41,8 @@ fastify的用户管理账号等实现
   ],
   "properties": {
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "邮箱"
     }
   }
 }
@@ -52,13 +53,51 @@ fastify的用户管理账号等实现
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |body|body|object|true|none|
-|» email|body|string|true|none|
+|» email|body|string|true|邮箱|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "number"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "验证码"
+        }
+      }
+    },
+    "msg": {
+      "type": "string"
+    }
+  }
+}
+```
 
 <h3 id="post__api_v1_account_sendemailcode-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_sendemailcode-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» code|number|false|none|none|
+|» data|object|false|none|none|
+|»» code|string|false|none|验证码|
+|» msg|string|false|none|none|
 
 <aside class="success">
 This operation does not require authentication
@@ -78,7 +117,8 @@ This operation does not require authentication
   ],
   "properties": {
     "phone": {
-      "type": "string"
+      "type": "string",
+      "description": "电话"
     }
   }
 }
@@ -89,7 +129,7 @@ This operation does not require authentication
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |body|body|object|true|none|
-|» phone|body|string|true|none|
+|» phone|body|string|true|电话|
 
 <h3 id="post__api_v1_account_sendsmscode-responses">Responses</h3>
 
@@ -117,13 +157,16 @@ This operation does not require authentication
   ],
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "被验证的账号，手机或邮箱"
     },
     "type": {
-      "type": "number"
+      "type": "number",
+      "description": "0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员"
     },
     "code": {
-      "type": "string"
+      "type": "string",
+      "description": "接受到的验证码"
     }
   }
 }
@@ -134,9 +177,9 @@ This operation does not require authentication
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |body|body|object|true|none|
-|» name|body|string|true|none|
-|» type|body|number|true|none|
-|» code|body|string|true|none|
+|» name|body|string|true|被验证的账号，手机或邮箱|
+|» type|body|number|true|0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员|
+|» code|body|string|true|接受到的验证码|
 
 <h3 id="post__api_v1_account_validatecode-responses">Responses</h3>
 

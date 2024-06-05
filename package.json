@@ -16,6 +16,9 @@
     "{libs/**/*,index}.{js,jsx,ts,tsx,json,css,scss}": [
       "prettier --config .prettierrc --write",
       "git add"
+    ],
+    "README.md": [
+      "git add"
     ]
   },
   "files": [
