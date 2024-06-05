@@ -2,7 +2,9 @@ const fastify = require('fastify')({
   logger: true
 });
 
+
 const path = require('path');
+const packageJson = require('../package.json');
 
 const sqliteStorage = path.resolve('./tests/database.sqlite');
 
@@ -16,6 +18,14 @@ fastify.register(require('@kne/fastify-sequelize'), {
 
 fastify.register(require('@kne/fastify-file-manager'), {
   root: path.resolve('./tests/static')
+});
+
+fastify.register(require('@fastify/swagger'), {
+  routePrefix: `/api/v${packageJson.version.split('.')[0]}/account`, openapi: {
+    info: {
+      title: packageJson.name, description: packageJson.description, version: packageJson.version
+    }, components: {}
+  }
 });
 
 fastify.register(require('../index'), { isTest: true });
@@ -43,4 +53,12 @@ fastify.addHook('onSend', async (request, reply, payload) => {
 fastify.listen({ port: 3000 }, (err, address) => {
   if (err) throw err;
   // Server is now listening on ${address}
+});
+
+fastify.ready().then(async () => {
+  const api = fastify.swagger();
+  const converter = require('widdershins');
+  const fs = require('fs').promises;
+  const md = await converter.convert(api, {});
+  fs.writeFile(path.resolve(__dirname, '../doc/api.md'), md);
 });
