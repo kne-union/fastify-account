@@ -34,13 +34,15 @@
   },
   "homepage": "https://github.com/kne-union/fastify-account#readme",
   "devDependencies": {
+    "@fastify/swagger": "^8.14.0",
     "@kne/fastify-file-manager": "^1.0.0",
     "@kne/fastify-sequelize": "^1.0.0",
     "fastify": "^4.27.0",
     "husky": "^9.0.11",
     "nodemon": "^3.1.1",
     "prettier": "^3.2.5",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "widdershins": "^4.0.1"
   },
   "dependencies": {
     "@fastify/jwt": "^8.0.1",

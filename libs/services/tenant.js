@@ -1,4 +1,5 @@
 const fp = require('fastify-plugin');
+const isNil = require('lodash/isNil');
 module.exports = fp(async (fastify, options) => {
   const getUserTenant = async authenticatePayload => {
     const user = await fastify.account.services.user.getUserInfo(authenticatePayload);
@@ -162,6 +163,150 @@ module.exports = fp(async (fastify, options) => {
     return { pageData: rows, totalCount: count };
   };
 
+  const getTenantUserList = async ({ tenantId }) => {
+    if (!(await fastify.account.models.tenant.findByPk(tenantId))) {
+      throw new Error('租户不存在');
+    }
+    const { count, rows } = await fastify.account.models.tenantUser.findAndCountAll({
+      where: { tenantId }
+    });
+
+    return { pageData: rows, totalCount: count };
+  };
+
+  const saveTenantUserInfoValidate = async ({ tenantId, roleIds, orgIds, userId }) => {
+    if (!(await fastify.account.models.tenant.findByPk(tenantId))) {
+      throw new Error('租户不存在');
+    }
+    if (
+      roleIds.length > 0 &&
+      (await fastify.account.models.tenantRole.count({
+        where: {
+          id: {
+            [fastify.sequelize.Sequelize.Op.in]: roleIds
+          }
+        }
+      })) < roleIds.length
+    ) {
+      throw new Error('包含租户不存在的角色');
+    }
+    if (orgIds.length === 0) {
+      throw new Error('租户用户所属组织不能为空');
+    }
+    if (
+      !(await fastify.account.models.tenantOrg.count({
+        where: {
+          id: {
+            [fastify.sequelize.Sequelize.Op.in]: orgIds
+          }
+        }
+      })) < orgIds.length
+    ) {
+      throw new Error('包含租户不存在组织');
+    }
+
+    if (!(await fastify.account.models.user.findByPk(userId))) {
+      throw new Error('用户不存在，应该先创建用户再创建租户用户');
+    }
+  };
+
+  const addTenantUser = async ({ tenantId, roleIds, orgIds, userId, ...tenantUser }) => {
+    await saveTenantUserInfoValidate({ tenantId, roleIds, orgIds, userId });
+
+    const t = await fastify.sequelize.instance.transaction();
+
+    try {
+      const currentTenantUser = await fastify.account.models.tenantUser.create(
+        {
+          name: tenantUser.name,
+          avatar: tenantUser.avatar,
+          phone: tenantUser.phone,
+          email: tenantUser.email,
+          description: tenantUser.description
+        },
+        { transaction: t }
+      );
+      roleIds.length > 0 &&
+        (await fastify.account.models.tenantUserRole.bulkCreate(
+          roleIds.map(
+            roleId => {
+              return {
+                tenantRoleId: roleId,
+                tenantId,
+                tenantUserId: currentTenantUser.id
+              };
+            },
+            { transaction: t }
+          )
+        ));
+
+      await fastify.account.models.tenantUserOrg.bulkCreate(
+        orgIds.map(orgId => {
+          return {
+            tenantOrgId: orgId,
+            tenantId,
+            tenantUserId: currentTenantUser.id
+          };
+        }),
+        { transaction: t }
+      );
+
+      await t.commit();
+    } catch (e) {
+      await t.rollback();
+      throw e;
+    }
+  };
+
+  const saveTenantUser = async ({ id, tenantId, roleIds, orgIds, userId, ...tenantUser }) => {
+    await saveTenantUserInfoValidate({ tenantId, roleIds, orgIds, userId });
+
+    const currentTenantUser = await fastify.account.models.tenantUser.findByPk(id);
+    if (!currentTenantUser) {
+      throw new Error('租户用户不存在');
+    }
+
+    const tenantRoleIds = (
+      await fastify.account.models.tenantUserRole.findAll({
+        attributes: ['tenantRoleId'],
+        where: {
+          tenantId,
+          tenantUserId: currentTenantUser.id
+        }
+      })
+    ).map(({ tenantRoleId }) => tenantRoleId);
+
+    const tenantOrgIds = (
+      await fastify.account.models.tenantUserOrg.findAll({
+        attributes: ['tenantOrgId'],
+        where: {
+          tenantId,
+          tenantUserId: currentTenantUser.id
+        }
+      })
+    ).map(({ tenantOrgId }) => tenantOrgId);
+
+    const t = await fastify.sequelize.instance.transaction();
+
+    try {
+      ['name', 'avatar', 'phone', 'email', 'description'].forEach(name => {
+        if (!isNil(tenantUser[name])) {
+          currentTenantUser[name] = tenantUser[name];
+        }
+      });
+      await currentTenantUser.save({ transaction: t });
+
+      // 修改角色
+
+      //修改组织
+
+      await t.commit();
+    } catch (e) {
+      await t.rollback();
+      throw e;
+    }
+  };
+
   fastify.account.services.tenant = {
     getUserTenant,
     tenantUserAuthenticate,
@@ -171,6 +316,8 @@ module.exports = fp(async (fastify, options) => {
     saveRole,
     removeRole,
     addTenantOrg,
-    getTenantOrgList
+    getTenantOrgList,
+    getTenantUserList,
+    addTenantUser
   };
 });
