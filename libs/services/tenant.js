@@ -41,9 +41,13 @@ module.exports = fp(async (fastify, options) => {
     return tenant;
   };
 
-  const getRoleList = async ({ tenantId, currentPage, perPage }) => {
+  const getRoleList = async ({ tenantId, currentPage, perPage, filter }) => {
+    const queryFilter = {};
+    if (!isNil(filter?.type)) {
+      queryFilter.type = filter.type;
+    }
     const { count, rows } = await fastify.account.models.tenantRole.findAndCountAll({
-      where: { tenantId },
+      where: Object.assign({}, queryFilter, { tenantId }),
       offset: currentPage * (currentPage - 1),
       limit: perPage
     });
@@ -142,6 +146,18 @@ module.exports = fp(async (fastify, options) => {
     };
   };
 
+  const closeTenant = async ({ tenantId }) => {
+    const tenant = await getTenantInfo({ id: tenantId });
+    tenant.status = 12;
+    await tenant.save();
+  };
+
+  const openTenant = async ({ tenantId }) => {
+    const tenant = await getTenantInfo({ id: tenantId });
+    tenant.status = 0;
+    await tenant.save();
+  };
+
   const addTenantOrg = async org => {
     if (await fastify.account.models.tenantOrg.count({ where: { name: org.name } })) {
       throw new Error('组织名称不能重复');
@@ -153,6 +169,59 @@ module.exports = fp(async (fastify, options) => {
       tenantId: org.tenantId,
       pid: org.pid
     });
+  };
+
+  const saveTenantOrg = async ({ id, ...otherInfo }) => {
+    const tenantOrg = await fastify.account.models.tenantOrg.findByPk(id, {
+      where: {
+        type: 0
+      }
+    });
+
+    if (!tenantOrg) {
+      throw new Error('该组织不存在');
+    }
+    if (
+      await fastify.account.models.tenantOrg.count({
+        where: {
+          name: otherInfo.name,
+          pid: otherInfo.pid,
+          tenantId: otherInfo.tenantId
+        }
+      })
+    ) {
+      throw new Error('组织名称在同一父组织下有重复');
+    }
+
+    ['name', 'enName', 'tenantId', 'pid'].forEach(name => {
+      if (otherInfo[name]) {
+        tenantOrg[name] = otherInfo[name];
+      }
+    });
+
+    await tenantOrg.save();
+  };
+
+  const deleteTenantOrg = async ({ id, tenantId }) => {
+    const tenantOrg = await fastify.account.models.tenantOrg.findByPk(id, {
+      where: {
+        type: 0
+      }
+    });
+
+    if (!tenantOrg) {
+      throw new Error('该组织不存在');
+    }
+
+    const { rows } = await fastify.account.models.tenantOrg.findAndCountAll({
+      where: { tenantId, pid: id }
+    });
+
+    if (rows?.length) {
+      throw new Error('组织下有用户或子组织无法删除');
+    }
+
+    await tenantOrg.destroy();
   };
 
   const getTenantOrgList = async ({ tenantId }) => {
@@ -168,6 +237,7 @@ module.exports = fp(async (fastify, options) => {
       throw new Error('租户不存在');
     }
     const { count, rows } = await fastify.account.models.tenantUser.findAndCountAll({
+      include: [fastify.account.models.tenantRole, fastify.account.models.tenantOrg, fastify.account.models.user],
       where: { tenantId }
     });
 
@@ -175,9 +245,7 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const saveTenantUserInfoValidate = async ({ tenantId, roleIds, orgIds, userId }) => {
-    if (!(await fastify.account.models.tenant.findByPk(tenantId))) {
-      throw new Error('租户不存在');
-    }
+    await getTenantInfo({ id: tenantId });
     if (
       roleIds.length > 0 &&
       (await fastify.account.models.tenantRole.count({
@@ -191,11 +259,22 @@ module.exports = fp(async (fastify, options) => {
       throw new Error('包含租户不存在的角色');
     }
     if (orgIds.length === 0) {
-      throw new Error('租户用户所属组织不能为空');
-    }
-    if (
-      !(await fastify.account.models.tenantOrg.count({
+      const tenantOrg = await fastify.account.models.tenantOrg.findOne({
         where: {
+          pid: 0,
+          tenantId
+        }
+      });
+      if (!tenantOrg) {
+        throw new Error('租户根节点不存在');
+      }
+      orgIds = [tenantOrg.id];
+    }
+
+    if (
+      (await fastify.account.models.tenantOrg.count({
+        where: {
+          tenantId,
           id: {
             [fastify.sequelize.Sequelize.Op.in]: orgIds
           }
@@ -211,9 +290,30 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const addTenantUser = async ({ tenantId, roleIds, orgIds, userId, ...tenantUser }) => {
+    const tenant = await getTenantInfo({ id: tenantId });
+
+    const currentAccountNumber = await fastify.account.models.tenantUser.count({
+      where: { tenantId }
+    });
+
+    if (currentAccountNumber >= tenant.accountNumber) {
+      throw new Error('租户用户数量已达上限');
+    }
+
     await saveTenantUserInfoValidate({ tenantId, roleIds, orgIds, userId });
 
     const t = await fastify.sequelize.instance.transaction();
+
+    if (
+      (await fastify.account.models.tenantUser.count({
+        where: {
+          userId,
+          tenantId
+        }
+      })) > 0
+    ) {
+      throw new Error('该用户已经属于该租户，不能重复添加');
+    }
 
     try {
       const currentTenantUser = await fastify.account.models.tenantUser.create(
@@ -222,22 +322,22 @@ module.exports = fp(async (fastify, options) => {
           avatar: tenantUser.avatar,
           phone: tenantUser.phone,
           email: tenantUser.email,
-          description: tenantUser.description
+          description: tenantUser.description,
+          tenantId,
+          userId
         },
         { transaction: t }
       );
       roleIds.length > 0 &&
         (await fastify.account.models.tenantUserRole.bulkCreate(
-          roleIds.map(
-            roleId => {
-              return {
-                tenantRoleId: roleId,
-                tenantId,
-                tenantUserId: currentTenantUser.id
-              };
-            },
-            { transaction: t }
-          )
+          roleIds.map(roleId => {
+            return {
+              tenantRoleId: roleId,
+              tenantId,
+              tenantUserId: currentTenantUser.id
+            };
+          }),
+          { transaction: t }
         ));
 
       await fastify.account.models.tenantUserOrg.bulkCreate(
@@ -259,12 +359,14 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const saveTenantUser = async ({ id, tenantId, roleIds, orgIds, userId, ...tenantUser }) => {
-    await saveTenantUserInfoValidate({ tenantId, roleIds, orgIds, userId });
-
     const currentTenantUser = await fastify.account.models.tenantUser.findByPk(id);
     if (!currentTenantUser) {
       throw new Error('租户用户不存在');
     }
+    if (tenantId !== currentTenantUser.tenantId) {
+      throw new Error('租户Id和当前租户用户的租户Id不一致');
+    }
+    await saveTenantUserInfoValidate({ tenantId, roleIds, orgIds, userId: currentTenantUser.userId });
 
     const tenantRoleIds = (
       await fastify.account.models.tenantUserRole.findAll({
@@ -295,11 +397,44 @@ module.exports = fp(async (fastify, options) => {
         }
       });
       await currentTenantUser.save({ transaction: t });
-
       // 修改角色
-
+      const needDeleteTenantRole = tenantRoleIds.filter(targetId => roleIds.indexOf(targetId) === -1);
+      const needAddTenantRole = roleIds.filter(targetId => tenantRoleIds.indexOf(targetId) === -1);
+      await fastify.account.models.tenantUserRole.destroy({
+        where: {
+          tenantId,
+          tenantUserId: currentTenantUser.id,
+          tenantRoleId: {
+            [fastify.sequelize.Sequelize.Op.in]: needDeleteTenantRole
+          }
+        },
+        transaction: t
+      });
+      await fastify.account.models.tenantUserRole.bulkCreate(
+        needAddTenantRole.map(tenantRoleId => {
+          return { tenantId, tenantUserId: currentTenantUser.id, tenantRoleId };
+        }),
+        { transaction: t }
+      );
       //修改组织
-
+      const needDeleteTenantOrg = tenantOrgIds.filter(targetId => orgIds.indexOf(targetId) === -1);
+      const needAddTenantOrg = orgIds.filter(targetId => tenantOrgIds.indexOf(targetId) === -1);
+      await fastify.account.models.tenantUserOrg.destroy({
+        where: {
+          tenantId,
+          tenantUserId: currentTenantUser.id,
+          tenantOrgId: {
+            [fastify.sequelize.Sequelize.Op.in]: needDeleteTenantOrg
+          }
+        },
+        transaction: t
+      });
+      await fastify.account.models.tenantUserOrg.bulkCreate(
+        needAddTenantOrg.map(tenantOrgId => {
+          return { tenantId, tenantUserId: currentTenantUser.id, tenantOrgId };
+        }),
+        { transaction: t }
+      );
       await t.commit();
     } catch (e) {
       await t.rollback();
@@ -307,8 +442,115 @@ module.exports = fp(async (fastify, options) => {
     }
   };
 
+  const deleteTenantUser = async ({ tenantId, tenantUserId }) => {
+    await getTenantInfo({ id: tenantId });
+    const tenantUser = await fastify.account.models.tenantUser.findByPk(tenantUserId);
+    if (!tenantUser) {
+      throw new Error('租户用户不存在');
+    }
+
+    const t = await fastify.sequelize.instance.transaction();
+
+    try {
+      await fastify.account.models.tenantUserOrg.destroy({
+        where: {
+          tenantId,
+          tenantUserId: tenantUser.id
+        },
+        transaction: t
+      });
+      await fastify.account.models.tenantUserRole.destroy({
+        where: {
+          tenantId,
+          tenantUserId: tenantUser.id
+        },
+        transaction: t
+      });
+      await tenantUser.destroy({ transaction: t });
+      await t.commit();
+    } catch (e) {
+      await t.rollback();
+      throw e;
+    }
+  };
+
+  const closeTenantUser = async ({ tenantId, tenantUserId }) => {
+    await getTenantInfo({ id: tenantId });
+    const tenantUser = await fastify.account.models.tenantUser.findByPk(tenantUserId);
+    if (!tenantUser) {
+      throw new Error('租户用户不存在');
+    }
+    tenantUser.status = 12;
+
+    await tenantUser.save();
+  };
+
+  const openTenantUser = async ({ tenantId, tenantUserId }) => {
+    await getTenantInfo({ id: tenantId });
+    const tenantUser = await fastify.account.models.tenantUser.findByPk(tenantUserId);
+    if (!tenantUser) {
+      throw new Error('租户用户不存在');
+    }
+    tenantUser.status = 0;
+
+    await tenantUser.save();
+  };
+
+  const getInviteList = async ({ tenantId, filter, currentPage, perPage }) => {
+    const queryFilter = {};
+    const { count, rows } = await fastify.account.models.tenantToken.findAndCountAll({
+      where: Object.assign({}, queryFilter, { tenantId, type: 10 }),
+      offset: currentPage * (currentPage - 1),
+      limit: perPage
+    });
+    return { pageData: rows, totalCount: count };
+  };
+
+  const generateTenantToken = async ({ type, tenantId, info, tenantUserId }) => {
+    await getTenantInfo({ id: tenantId });
+    const token = fastify.jwt.sign({ tenantId });
+    return await fastify.account.models.tenantToken.create({
+      token,
+      tenantId,
+      info,
+      tenantUserId,
+      type
+    });
+  };
+
+  const decodeTenantToken = async ({ type, tenantId, token }) => {
+    if (
+      (await fastify.account.models.tenantToken.count({
+        where: {
+          type,
+          tenantId,
+          token
+        }
+      })) === 0
+    ) {
+      throw new Error('token已过期');
+    }
+
+    return fastify.jwt.decode(token);
+  };
+
+  const addInviteToken = async ({ info, tenantId, tenantUserId }) => {
+    return await generateTenantToken({ info, tenantId, tenantUserId, type: 10 });
+  };
+
+  const deleteInviteToken = async ({ id }) => {
+    const token = await fastify.account.models.tenantToken.findByPk(id);
+    if (!token) {
+      throw new Error('数据不存在');
+    }
+
+    await token.destroy();
+  };
+
   fastify.account.services.tenant = {
     getUserTenant,
+    closeTenant,
+    openTenant,
     tenantUserAuthenticate,
     getTenantInfo,
     getRoleList,
@@ -316,8 +558,19 @@ module.exports = fp(async (fastify, options) => {
     saveRole,
     removeRole,
     addTenantOrg,
+    deleteTenantOrg,
+    saveTenantOrg,
     getTenantOrgList,
     getTenantUserList,
-    addTenantUser
+    addTenantUser,
+    saveTenantUser,
+    deleteTenantUser,
+    closeTenantUser,
+    openTenantUser,
+    getInviteList,
+    generateTenantToken,
+    decodeTenantToken,
+    addInviteToken,
+    deleteInviteToken
   };
 });

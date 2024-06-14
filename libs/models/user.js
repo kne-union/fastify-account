@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
 
   user.associate = ({ adminRole, user, tenant, tenantUser }) => {
     user.hasOne(adminRole, { foreignKey: 'userId' });
-    user.belongsToMany(tenant, { through: tenantUser, foreignKey: 'userId', otherKey: 'tenantId' });
+    user.belongsToMany(tenant, { through: { model: tenantUser, unique: false } });
   };
 
   return user;

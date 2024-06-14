@@ -1,5 +1,6 @@
 const fastify = require('fastify')({
-  logger: true
+  logger: true,
+  querystringParser: str => require('qs').parse(str)
 });
 
 

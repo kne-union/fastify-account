@@ -139,7 +139,7 @@ module.exports = fp(async (fastify, options) => {
       );
       await fastify.account.models.tenantOrg.create(
         {
-          name: tenant.name,
+          name: '根组织',
           tenantId: currentTenant.id
         },
         { transaction: t }

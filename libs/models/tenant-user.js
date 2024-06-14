@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
+  const tenantUser = sequelize.define(
     'tenantUser',
     {
       id: {
@@ -33,11 +33,24 @@ module.exports = (sequelize, DataTypes) => {
       },
       status: {
         type: DataTypes.INTEGER,
-        defaultValue: 0
+        defaultValue: 0 //0:正常,11:已禁用,12:已关闭,
       }
     },
     {
-      paranoid: true
+      paranoid: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['tenantId', 'userId', 'deletedAt']
+        }
+      ]
     }
   );
+
+  tenantUser.associate = ({ user, tenantRole, tenantUser, tenantUserRole, tenantOrg, tenantUserOrg }) => {
+    tenantUser.belongsToMany(tenantRole, { through: tenantUserRole });
+    tenantUser.belongsToMany(tenantOrg, { through: tenantUserOrg });
+    tenantUser.belongsTo(user);
+  };
+  return tenantUser;
 };
