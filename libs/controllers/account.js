@@ -8,7 +8,28 @@ module.exports = fp(async (fastify, options) => {
           type: 'object',
           required: ['email'],
           properties: {
-            email: { type: 'string' }
+            email: { type: 'string', description: '邮箱' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    code: { type: 'number' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        code: { type: 'string', description: '验证码' }
+                      }
+                    },
+                    msg: { type: 'string' }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -28,7 +49,7 @@ module.exports = fp(async (fastify, options) => {
           type: 'object',
           required: ['phone'],
           properties: {
-            phone: { type: 'string' }
+            phone: { type: 'string', description: '电话' }
           }
         }
       }
@@ -48,9 +69,9 @@ module.exports = fp(async (fastify, options) => {
           type: 'object',
           required: ['name', 'type', 'code'],
           properties: {
-            name: { type: 'string' },
-            type: { type: 'number' },
-            code: { type: 'string' }
+            name: { type: 'string', description: '被验证的账号，手机或邮箱' },
+            type: { type: 'number', description: '0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员' },
+            code: { type: 'string', description: '接受到的验证码' }
           }
         }
       }

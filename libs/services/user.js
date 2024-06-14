@@ -87,11 +87,22 @@ module.exports = fp(async (fastify, options) => {
     await user.save();
   };
 
+  const openUser = async ({ id }) => {
+    const user = await fastify.account.models.user.findByPk(id);
+
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    user.status = 0;
+    await user.save();
+  };
+
   fastify.account.services.user = {
     getUserInfo,
     saveUser,
     accountIsExists,
     addUser,
-    closeUser
+    closeUser,
+    openUser
   };
 });

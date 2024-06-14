@@ -1,10 +1,12 @@
 const fastify = require('fastify')({
-  logger: true
+  logger: true,
+  querystringParser: str => require('qs').parse(str)
 });
 
 
 const path = require('path');
 const packageJson = require('../package.json');
+const { promises: fs } = require('fs');
 
 const sqliteStorage = path.resolve('./tests/database.sqlite');
 
@@ -60,5 +62,5 @@ fastify.ready().then(async () => {
   const converter = require('widdershins');
   const fs = require('fs').promises;
   const md = await converter.convert(api, {});
-  fs.writeFile(path.resolve(__dirname, '../doc/api.md'), md);
+  await fs.writeFile(path.resolve(__dirname, '../doc/api.md'), md);
 });

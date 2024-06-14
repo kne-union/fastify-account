@@ -10,20 +10,27 @@ module.exports = fp(async (fastify, options) => {
           type: 'object',
           required: ['tenantId'],
           properties: {
-            tenantId: { type: 'string' }
+            tenantId: { type: 'string' },
+            filter: {
+              type: 'object',
+              properties: {
+                type: { type: 'number' }
+              }
+            }
           }
         }
       }
     },
     async request => {
-      const { tenantId, perPage, currentPage } = Object.assign(
+      const { filter, tenantId, perPage, currentPage } = Object.assign(
         {
           perPage: 20,
-          currentPage: 1
+          currentPage: 1,
+          filter: {}
         },
         request.query
       );
-      return await fastify.account.services.tenant.getRoleList({ tenantId, perPage, currentPage });
+      return await fastify.account.services.tenant.getRoleList({ tenantId, perPage, currentPage, filter });
     }
   );
 

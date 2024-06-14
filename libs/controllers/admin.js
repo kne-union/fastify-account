@@ -129,4 +129,25 @@ module.exports = fp(async (fastify, options) => {
       return {};
     }
   );
+
+  fastify.post(
+    `${options.prefix}/admin/openUser`,
+    {
+      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      schema: {
+        body: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { id } = request.body;
+      await fastify.account.services.user.openUser({ id });
+      return {};
+    }
+  );
 });
