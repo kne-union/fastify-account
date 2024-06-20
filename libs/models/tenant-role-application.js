@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       paranoid: true,
       indexes: [
         {
+          name: 'application_key',
           unique: true,
           fields: ['tenantId', 'applicationId', 'roleId', 'deletedAt']
         }
