@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       paranoid: true,
       indexes: [
         {
+          name: 'permission_key',
           unique: true,
           fields: ['tenantId', 'permissionId', 'roleId', 'deletedAt']
         }
