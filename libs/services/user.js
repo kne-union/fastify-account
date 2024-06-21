@@ -97,12 +97,23 @@ module.exports = fp(async (fastify, options) => {
     await user.save();
   };
 
+  const setCurrentTenantId = async ({ id, tenantId }) => {
+    await fastify.account.services.tenant.getTenantInfo({ id: tenantId });
+    const user = await fastify.account.models.user.findByPk(id);
+
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    user.currentTenantId = tenantId;
+    await user.save();
+  };
   fastify.account.services.user = {
     getUserInfo,
     saveUser,
     accountIsExists,
     addUser,
     closeUser,
-    openUser
+    openUser,
+    setCurrentTenantId
   };
 });

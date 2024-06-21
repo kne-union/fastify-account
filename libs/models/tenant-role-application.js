@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
+  const tenantRoleApplication = sequelize.define(
     'tenantRoleApplication',
     {
       tenantId: {
@@ -30,4 +30,8 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   );
+  tenantRoleApplication.associate = ({ tenantRoleApplication, application }) => {
+    tenantRoleApplication.belongsTo(application);
+  };
+  return tenantRoleApplication;
 };

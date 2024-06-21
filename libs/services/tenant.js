@@ -1,5 +1,7 @@
 const fp = require('fastify-plugin');
 const isNil = require('lodash/isNil');
+const { Unauthorized } = require('http-errors');
+const transform = require('lodash/transform');
 module.exports = fp(async (fastify, options) => {
   const getUserTenant = async authenticatePayload => {
     const user = await fastify.account.services.user.getUserInfo(authenticatePayload);
@@ -115,9 +117,87 @@ module.exports = fp(async (fastify, options) => {
     await tenantRole.destroy();
   };
 
+  const getTenantUserPermissionList = async ({ tenantRoleIds }) => {
+    const tenantRoleApplication = await fastify.account.models.tenantRoleApplication.findAll({
+      attributes: ['applicationId'],
+      where: {
+        roleId: {
+          [fastify.sequelize.Sequelize.Op.in]: tenantRoleIds
+        }
+      }
+    });
+
+    const applications = await fastify.account.models.application.findAll({
+      attributes: ['code', 'name'],
+      where: {
+        id: {
+          [fastify.sequelize.Sequelize.Op.in]: tenantRoleApplication.map(({ applicationId }) => applicationId)
+        }
+      }
+    });
+
+    const tenantRolePermission = await fastify.account.models.tenantRolePermission.findAll({
+      attributes: ['permissionId'],
+      include: {
+        attributes: ['code', 'name', 'isModule', 'paths'],
+        model: fastify.account.models.permission
+      },
+      where: {
+        roleId: {
+          [fastify.sequelize.Sequelize.Op.in]: tenantRoleIds
+        }
+      }
+    });
+
+    const permissions = await fastify.account.models.permission.findAll({
+      attributes: ['id', 'code', 'name', 'isModule', 'paths'],
+      where: {
+        [fastify.sequelize.Sequelize.Op.or]: [
+          {
+            id: {
+              [fastify.sequelize.Sequelize.Op.in]: tenantRolePermission.map(({ permissionId }) => permissionId)
+            }
+          },
+          {
+            isMust: true
+          }
+        ]
+      }
+    });
+
+    const permissionMapping = transform(
+      await fastify.account.models.permission.findAll({
+        where: {
+          id: {
+            [fastify.sequelize.Sequelize.Op.in]: permissions.map(({ paths }) => paths).reduce((list, item) => [...list, ...(item || [])], [])
+          }
+        }
+      }),
+      (result, value) => {
+        result[value.id] = { code: value.code, name: value.name };
+      },
+      {}
+    );
+
+    return {
+      applications: applications,
+      permissions: permissions.map(item =>
+        Object.assign(
+          {},
+          {
+            code: item.code,
+            name: item.name,
+            isModule: item.isModule,
+            paths: (item.paths || []).map(id => permissionMapping[id])
+          }
+        )
+      )
+    };
+  };
+
   const tenantUserAuthenticate = async user => {
     if (!user.currentTenantId) {
-      throw new Error('没有找到当前绑定租户');
+      throw new Unauthorized('没有找到当前绑定租户');
     }
     const tenant = await fastify.account.models.tenant.findByPk(user.currentTenantId, {
       where: {
@@ -129,6 +209,14 @@ module.exports = fp(async (fastify, options) => {
     }
 
     const tenantUser = await fastify.account.models.tenantUser.findOne({
+      include: [
+        {
+          model: fastify.account.models.tenantOrg
+        },
+        {
+          model: fastify.account.models.tenantRole
+        }
+      ],
       where: {
         tenantId: tenant.id,
         userId: user.id,
@@ -136,13 +224,33 @@ module.exports = fp(async (fastify, options) => {
       }
     });
 
+    // 获取当前租户默认角色
+    const defaultTenant = await fastify.account.models.tenantRole.findOne({
+      where: {
+        type: 1,
+        tenantId: tenant.id
+      }
+    });
+
+    if (!defaultTenant) {
+      throw new Error('租户默认角色未设置，请联系管理员');
+    }
+
+    const tenantRoleIds = tenantUser.tenantRoles.map(({ id }) => id);
+    tenantRoleIds.push(defaultTenant.id);
+
+    const { applications, permissions } = await getTenantUserPermissionList({ tenantRoleIds });
     if (!tenantUser) {
       throw new Error('当前租户用户不存在或者已经被关闭');
     }
 
     return {
       tenant,
-      tenantUser
+      tenantUser: Object.assign({}, tenantUser.get({ plain: true }), {
+        applications: applications,
+        permissions: permissions
+      }),
+      user
     };
   };
 

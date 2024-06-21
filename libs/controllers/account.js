@@ -182,8 +182,8 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { username, password } = request.body;
-      const token = await fastify.account.services.account.login({ username, password, ip: request.ip });
-      return { token };
+      const { token, user } = await fastify.account.services.account.login({ username, password, ip: request.ip });
+      return { token, currentTenantId: user.currentTenantId };
     }
   );
 });

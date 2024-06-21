@@ -43,7 +43,7 @@ module.exports = fp(async (fastify, options) => {
       ip
     });
 
-    return fastify.jwt.sign({ payload: { id: user.id } });
+    return { token: fastify.jwt.sign({ payload: { id: user.id } }), user };
   };
 
   const passwordAuthentication = async ({ accountId, password }) => {
