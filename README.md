@@ -22,7 +22,7 @@ npm i --save @kne/fastify-account
 ### API
 
 ---
-title: "@kne/fastify-account v1.0.0-alpha.0"
+title: "@kne/fastify-account v1.0.0-alpha.1"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -42,7 +42,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.0</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.1</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -1938,11 +1938,25 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
-## get__api_v1_account_tenant_getUserCurrentTenant
+## get__api_v1_account_tenant_getTenantUserInfo
 
-`GET /api/v1/account/tenant/getUserCurrentTenant`
+`GET /api/v1/account/tenant/getTenantUserInfo`
 
-<h3 id="get__api_v1_account_tenant_getusercurrenttenant-responses">Responses</h3>
+<h3 id="get__api_v1_account_tenant_gettenantuserinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_tenant_orgList
+
+`GET /api/v1/account/tenant/orgList`
+
+<h3 id="get__api_v1_account_tenant_orglist-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1957,6 +1971,43 @@ This operation does not require authentication
 `GET /api/v1/account/getUserInfo`
 
 <h3 id="get__api_v1_account_getuserinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_setCurrentTenantId
+
+`POST /api/v1/account/setCurrentTenantId`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_setcurrenttenantid-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+
+<h3 id="post__api_v1_account_setcurrenttenantid-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|

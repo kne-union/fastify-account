@@ -1,6 +1,7 @@
 const fp = require('fastify-plugin');
 const { Unauthorized } = require('http-errors');
 const get = require('lodash/get');
+const pick = require('lodash/pick');
 module.exports = fp(async (fastify, options) => {
   const getUserInfo = async authenticatePayload => {
     if (!(authenticatePayload && authenticatePayload.id)) {
@@ -10,10 +11,7 @@ module.exports = fp(async (fastify, options) => {
     if (!user) {
       throw new Unauthorized();
     }
-    const userInfo = user.get({ plain: true });
-    delete userInfo['userAccountId'];
-
-    return userInfo;
+    return pick(user, ['id', 'avatar', 'nickname', 'phone', 'email', 'gender', 'status', 'birthday', 'description', 'currentTenantId']);
   };
 
   const accountIsExists = async ({ email, phone }, currentUser) => {

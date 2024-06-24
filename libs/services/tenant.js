@@ -2,6 +2,8 @@ const fp = require('fastify-plugin');
 const isNil = require('lodash/isNil');
 const { Unauthorized } = require('http-errors');
 const transform = require('lodash/transform');
+const groupBy = require('lodash/groupBy');
+const pick = require('lodash/pick');
 module.exports = fp(async (fastify, options) => {
   const getUserTenant = async authenticatePayload => {
     const user = await fastify.account.services.user.getUserInfo(authenticatePayload);
@@ -128,7 +130,7 @@ module.exports = fp(async (fastify, options) => {
     });
 
     const applications = await fastify.account.models.application.findAll({
-      attributes: ['code', 'name'],
+      attributes: ['id', 'code', 'name'],
       where: {
         id: {
           [fastify.sequelize.Sequelize.Op.in]: tenantRoleApplication.map(({ applicationId }) => applicationId)
@@ -150,7 +152,7 @@ module.exports = fp(async (fastify, options) => {
     });
 
     const permissions = await fastify.account.models.permission.findAll({
-      attributes: ['id', 'code', 'name', 'isModule', 'paths'],
+      attributes: ['id', 'code', 'name', 'isModule', 'pid', 'applicationId', 'paths'],
       where: {
         [fastify.sequelize.Sequelize.Op.or]: [
           {
@@ -179,6 +181,47 @@ module.exports = fp(async (fastify, options) => {
       {}
     );
 
+    const applicationsMapping = transform(
+      applications,
+      (result, value) => {
+        result[value.id] = value;
+      },
+      {}
+    );
+
+    const findEndChildren = permissions => {
+      const output = [];
+      const core = (list, node) => {
+        const { children, other } = groupBy(list, item => (item.pid === node.id ? 'children' : 'other'));
+        if (!(other && other.length > 0)) {
+          return;
+        }
+        if (!(children && children.length > 0)) {
+          node.id !== 0 && output.push(node);
+          return;
+        }
+
+        children.forEach(node => {
+          core(other, node);
+        });
+        return output;
+      };
+      core(permissions, { id: 0 });
+      return output;
+    };
+
+    const userPermissionList = findEndChildren(permissions).map(({ code, applicationId, paths }) => {
+      return `${applicationsMapping[applicationId].code}${
+        paths && paths.length > 0
+          ? `:${paths
+              .map(id => {
+                return permissionMapping[id].code;
+              })
+              .join(':')}`
+          : ''
+      }:${code}`;
+    });
+
     return {
       applications: applications,
       permissions: permissions.map(item =>
@@ -191,7 +234,8 @@ module.exports = fp(async (fastify, options) => {
             paths: (item.paths || []).map(id => permissionMapping[id])
           }
         )
-      )
+      ),
+      userPermissionList
     };
   };
 
@@ -209,11 +253,14 @@ module.exports = fp(async (fastify, options) => {
     }
 
     const tenantUser = await fastify.account.models.tenantUser.findOne({
+      attributes: ['id', 'avatar', 'description', 'phone', 'email'],
       include: [
         {
+          attributes: ['id', 'name'],
           model: fastify.account.models.tenantOrg
         },
         {
+          attributes: ['id', 'name'],
           model: fastify.account.models.tenantRole
         }
       ],
@@ -239,16 +286,18 @@ module.exports = fp(async (fastify, options) => {
     const tenantRoleIds = tenantUser.tenantRoles.map(({ id }) => id);
     tenantRoleIds.push(defaultTenant.id);
 
-    const { applications, permissions } = await getTenantUserPermissionList({ tenantRoleIds });
+    const { userPermissionList } = await getTenantUserPermissionList({ tenantRoleIds });
     if (!tenantUser) {
       throw new Error('当前租户用户不存在或者已经被关闭');
     }
 
+    const outputTenantUser = Object.assign({}, tenantUser.get({ plain: true }));
+    outputTenantUser.tenantOrgs = outputTenantUser?.tenantOrgs.map(({ id, name }) => ({ id, name }));
+    outputTenantUser.tenantRoles = outputTenantUser?.tenantRoles.map(({ id, name }) => ({ id, name }));
     return {
-      tenant,
-      tenantUser: Object.assign({}, tenantUser.get({ plain: true }), {
-        applications: applications,
-        permissions: permissions
+      tenant: pick(tenant, ['id', 'name', 'description']),
+      tenantUser: Object.assign({}, outputTenantUser, {
+        permissions: userPermissionList
       }),
       user
     };
