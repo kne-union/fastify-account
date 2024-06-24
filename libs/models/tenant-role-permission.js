@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
+  const tenantRolePermission = sequelize.define(
     'tenantRolePermission',
     {
       tenantId: {
@@ -30,4 +30,10 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   );
+
+  tenantRolePermission.associate = ({ tenantRolePermission, permission }) => {
+    tenantRolePermission.belongsTo(permission);
+  };
+
+  return tenantRolePermission;
 };

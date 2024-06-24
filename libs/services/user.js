@@ -1,6 +1,7 @@
 const fp = require('fastify-plugin');
 const { Unauthorized } = require('http-errors');
 const get = require('lodash/get');
+const pick = require('lodash/pick');
 module.exports = fp(async (fastify, options) => {
   const getUserInfo = async authenticatePayload => {
     if (!(authenticatePayload && authenticatePayload.id)) {
@@ -10,10 +11,7 @@ module.exports = fp(async (fastify, options) => {
     if (!user) {
       throw new Unauthorized();
     }
-    const userInfo = user.get({ plain: true });
-    delete userInfo['userAccountId'];
-
-    return userInfo;
+    return pick(user, ['id', 'avatar', 'nickname', 'phone', 'email', 'gender', 'status', 'birthday', 'description', 'currentTenantId']);
   };
 
   const accountIsExists = async ({ email, phone }, currentUser) => {
@@ -97,12 +95,23 @@ module.exports = fp(async (fastify, options) => {
     await user.save();
   };
 
+  const setCurrentTenantId = async ({ id, tenantId }) => {
+    await fastify.account.services.tenant.getTenantInfo({ id: tenantId });
+    const user = await fastify.account.models.user.findByPk(id);
+
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    user.currentTenantId = tenantId;
+    await user.save();
+  };
   fastify.account.services.user = {
     getUserInfo,
     saveUser,
     accountIsExists,
     addUser,
     closeUser,
-    openUser
+    openUser,
+    setCurrentTenantId
   };
 });
