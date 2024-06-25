@@ -1,9 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'tenantRole',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       tenantId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false
       },
       name: {
@@ -19,9 +18,6 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0 //0:用户自定义,1:系统默认
       },
       description: DataTypes.TEXT
-    },
-    {
-      paranoid: true
     }
-  );
+  };
 };

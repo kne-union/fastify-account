@@ -1,10 +1,11 @@
 const fp = require('fastify-plugin');
 
 module.exports = fp(async (fastify, options) => {
+  const { authenticate, services } = fastify.account;
   fastify.get(
     `${options.prefix}/admin/getAllTenantList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -38,7 +39,7 @@ module.exports = fp(async (fastify, options) => {
         },
         request.query
       );
-      return await fastify.account.services.admin.getAllTenantList({
+      return await services.tenant.getAllTenantList({
         filter: { name },
         perPage,
         currentPage
@@ -49,7 +50,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getTenantInfo`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -61,14 +62,14 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { id } = request.query;
-      return await fastify.account.services.tenant.getTenantInfo({ id });
+      return await services.tenant.getTenant({ id });
     }
   );
 
   fastify.post(
     `${options.prefix}/admin/addTenant`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -89,7 +90,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.admin.addTenant(request.body);
+      await services.tenant.addTenant(request.body);
       return {};
     }
   );
@@ -97,7 +98,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/saveTenant`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -119,7 +120,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.admin.saveTenant(request.body);
+      await services.tenant.saveTenant(request.body);
       return {};
     }
   );
@@ -127,7 +128,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/tenant/addOrg`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       required: ['name', 'tenantId', 'pid'],
       properties: {
         name: { type: 'string' },
@@ -136,14 +137,14 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      return await fastify.account.services.tenant.addTenantOrg(request.body);
+      return await services.tenantOrg.addTenantOrg(request.body);
     }
   );
 
   fastify.get(
     `${options.prefix}/admin/tenant/orgList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -155,14 +156,14 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId } = request.query;
-      return await fastify.account.services.tenant.getTenantOrgList({ tenantId });
+      return await services.tenantOrg.getTenantOrgList({ tenantId });
     }
   );
 
   fastify.post(
     `${options.prefix}/admin/tenant/editOrg`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       required: ['name', 'tenantId', 'pid'],
       properties: {
         name: { type: 'string' },
@@ -171,7 +172,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.tenant.saveTenantOrg(request.body);
+      await services.tenantOrg.saveTenantOrg(request.body);
       return {};
     }
   );
@@ -179,7 +180,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/tenant/removeOrg`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       required: ['tenantId', 'id'],
       properties: {
         tenantId: { type: 'string' },
@@ -187,7 +188,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.tenant.deleteTenantOrg(request.body);
+      await services.tenantOrg.deleteTenantOrg(request.body);
       return {};
     }
   );
@@ -195,7 +196,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getTenantUserList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -207,13 +208,14 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId } = request.query;
-      return await fastify.account.services.tenant.getTenantUserList({ tenantId });
+      return await services.tenantUser.getTenantUserList({ tenantId });
     }
   );
 
   fastify.post(
     `${options.prefix}/admin/addTenantUser`,
     {
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -237,7 +239,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.tenant.addTenantUser(request.body);
+      await services.tenantUser.addTenantUser(request.body);
       return {};
     }
   );
@@ -245,6 +247,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/saveTenantUser`,
     {
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -267,7 +270,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.tenant.saveTenantUser(request.body);
+      await services.tenantUser.saveTenantUser(request.body);
       return {};
     }
   );
@@ -275,7 +278,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/deleteTenantUser`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -289,7 +292,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId, tenantUserId } = request.body;
-      await fastify.account.services.tenant.deleteTenantUser({ tenantId, tenantUserId });
+      await services.tenantUser.deleteTenantUser({ tenantId, tenantUserId });
       return {};
     }
   );
@@ -297,7 +300,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/closeTenant`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -310,7 +313,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId } = request.body;
-      await fastify.account.services.tenant.closeTenant({ tenantId });
+      await services.tenant.closeTenant({ tenantId });
       return {};
     }
   );
@@ -318,7 +321,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/openTenant`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -331,7 +334,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId } = request.body;
-      await fastify.account.services.tenant.openTenant({ tenantId });
+      await services.tenant.openTenant({ tenantId });
       return {};
     }
   );
@@ -339,7 +342,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/closeTenantUser`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -353,7 +356,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId, tenantUserId } = request.body;
-      await fastify.account.services.tenant.closeTenantUser({ tenantId, tenantUserId });
+      await services.tenantUser.closeTenantUser({ tenantId, tenantUserId });
       return {};
     }
   );
@@ -361,7 +364,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/openTenantUser`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -375,7 +378,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId, tenantUserId } = request.body;
-      await fastify.account.services.tenant.openTenantUser({ tenantId, tenantUserId });
+      await services.tenantUser.openTenantUser({ tenantId, tenantUserId });
       return {};
     }
   );
@@ -383,7 +386,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getInviteList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -403,14 +406,14 @@ module.exports = fp(async (fastify, options) => {
         request.query
       );
 
-      return await fastify.account.services.tenant.getInviteList({ filter, perPage, currentPage, tenantId });
+      return await services.tenantInvite.getInviteList({ filter, perPage, currentPage, tenantId });
     }
   );
 
   fastify.post(
     `${options.prefix}/admin/addInviteToken`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -434,7 +437,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId, info } = request.body;
-      await fastify.account.services.tenant.addInviteToken({ tenantId, info });
+      await services.tenantInvite.addInviteToken({ tenantId, info });
       return {};
     }
   );
@@ -442,7 +445,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/deleteInviteToken`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -454,7 +457,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.tenant.deleteInviteToken({ id: request.body.id });
+      await services.tenantInvite.deleteInviteToken({ id: request.body.id });
       return {};
     }
   );

@@ -1,9 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'tenantShareGroup',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       tenantId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false
       },
       tenantShareGroupId: {
@@ -14,9 +13,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false
       }
-    },
-    {
-      paranoid: true
     }
-  );
+  };
 };

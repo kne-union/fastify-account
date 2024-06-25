@@ -1,15 +1,11 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'loginLog',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       userId: {
         type: DataTypes.UUID,
         allowNull: false
       },
       ip: DataTypes.STRING
-    },
-    {
-      paranoid: true
     }
-  );
+  };
 };

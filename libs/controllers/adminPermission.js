@@ -1,10 +1,11 @@
 const fp = require('fastify-plugin');
 
 module.exports = fp(async (fastify, options) => {
+  const { authenticate, services } = fastify.account;
   fastify.post(
     `${options.prefix}/admin/addApplication`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -20,7 +21,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.permission.addApplication(request.body);
+      await services.application.addApplication(request.body);
       return {};
     }
   );
@@ -28,7 +29,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/saveApplication`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -45,7 +46,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.permission.saveApplication(request.body);
+      await services.application.saveApplication(request.body);
       return {};
     }
   );
@@ -53,7 +54,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/deleteApplication`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -66,7 +67,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { id } = request.body;
-      await fastify.account.services.permission.deleteApplication({ id });
+      await services.application.deleteApplication({ id });
       return {};
     }
   );
@@ -74,7 +75,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getApplicationList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -86,14 +87,14 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId } = request.query;
-      return await fastify.account.services.permission.getApplicationList({ tenantId });
+      return await services.application.getApplicationList({ tenantId });
     }
   );
 
   fastify.post(
     `${options.prefix}/admin/addPermission`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -112,7 +113,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.permission.addPermission(request.body);
+      await services.permission.addPermission(request.body);
       return {};
     }
   );
@@ -120,7 +121,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getPermissionList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -134,14 +135,14 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { applicationId, tenantId } = request.query;
-      return await fastify.account.services.permission.getPermissionList({ applicationId, tenantId });
+      return await services.permission.getPermissionList({ applicationId, tenantId });
     }
   );
 
   fastify.post(
     `${options.prefix}/admin/deletePermission`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -155,7 +156,7 @@ module.exports = fp(async (fastify, options) => {
     async request => {
       const { id } = request.body;
 
-      await fastify.account.services.permission.deletePermission({ id });
+      await services.permission.deletePermission({ id });
 
       return {};
     }
@@ -164,7 +165,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/savePermission`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -180,7 +181,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.permission.savePermission(request.body);
+      await services.permission.savePermission(request.body);
       return {};
     }
   );
@@ -188,24 +189,27 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/saveTenantPermissionList`,
     {
-      body: {
-        type: 'object',
-        required: ['tenantId', 'applications', 'permissions'],
-        properties: {
-          tenantId: { type: 'string' },
-          applications: {
-            type: 'array',
-            items: { type: 'string' }
-          },
-          permissions: {
-            type: 'array',
-            items: { type: 'number' }
+      onRequest: [authenticate.user, authenticate.admin],
+      schema: {
+        body: {
+          type: 'object',
+          required: ['tenantId', 'applications', 'permissions'],
+          properties: {
+            tenantId: { type: 'string' },
+            applications: {
+              type: 'array',
+              items: { type: 'string' }
+            },
+            permissions: {
+              type: 'array',
+              items: { type: 'number' }
+            }
           }
         }
       }
     },
     async request => {
-      await fastify.account.services.permission.saveTenantPermissionList(request.body);
+      await services.permission.saveTenantPermissionList(request.body);
 
       return {};
     }
@@ -214,17 +218,20 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getTenantPermissionList`,
     {
-      query: {
-        type: 'object',
-        required: ['tenantId'],
-        properties: {
-          tenantId: { type: 'string' }
+      onRequest: [authenticate.user, authenticate.admin],
+      schema: {
+        query: {
+          type: 'object',
+          required: ['tenantId'],
+          properties: {
+            tenantId: { type: 'string' }
+          }
         }
       }
     },
     async request => {
       const { tenantId } = request.query;
-      return await fastify.account.services.permission.getTenantPermissionList({ tenantId });
+      return await services.permission.getTenantPermissionList({ tenantId });
     }
   );
 });

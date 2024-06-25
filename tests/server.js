@@ -1,6 +1,5 @@
 const fastify = require('fastify')({
-  logger: true,
-  querystringParser: str => require('qs').parse(str)
+  logger: true, querystringParser: str => require('qs').parse(str)
 });
 
 
@@ -15,7 +14,7 @@ fastify.register(require('@kne/fastify-sequelize'), {
     storage: sqliteStorage
   }, modelsGlobOptions: {
     syncOptions: {}
-  }
+  }, prefix: 't_account_'
 });
 
 fastify.register(require('@kne/fastify-file-manager'), {
