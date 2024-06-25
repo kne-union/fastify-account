@@ -22,7 +22,7 @@ npm i --save @kne/fastify-account
 ### API
 
 ---
-title: "@kne/fastify-account v1.0.0-alpha.1"
+title: "@kne/fastify-account v1.0.0-alpha.3"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -42,7 +42,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.1</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.3</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -1008,6 +1008,45 @@ This operation does not require authentication
 
 `POST /api/v1/account/admin/saveTenantPermissionList`
 
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId",
+    "applications",
+    "permissions"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    },
+    "applications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_savetenantpermissionlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+|» applications|body|[string]|true|none|
+|» permissions|body|[number]|true|none|
+
 <h3 id="post__api_v1_account_admin_savetenantpermissionlist-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
@@ -1021,6 +1060,12 @@ This operation does not require authentication
 ## get__api_v1_account_admin_getTenantPermissionList
 
 `GET /api/v1/account/admin/getTenantPermissionList`
+
+<h3 id="get__api_v1_account_admin_gettenantpermissionlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|tenantId|query|string|true|none|
 
 <h3 id="get__api_v1_account_admin_gettenantpermissionlist-responses">Responses</h3>
 
