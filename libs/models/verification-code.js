@@ -1,7 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'verificationCode',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       name: {
         type: DataTypes.STRING,
         allowNull: false
@@ -18,9 +17,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         defaultValue: 0 //0:未验证,1:已验证,2:已过期
       }
-    },
-    {
-      paranoid: true
     }
-  );
+  };
 };

@@ -3,15 +3,37 @@ const { Unauthorized } = require('http-errors');
 const get = require('lodash/get');
 const pick = require('lodash/pick');
 module.exports = fp(async (fastify, options) => {
-  const getUserInfo = async authenticatePayload => {
+  const { models, services } = fastify.account;
+
+  const getUserInstance = async ({ id }) => {
+    const user = await models.user.findOne({
+      where: {
+        uuid: id
+      }
+    });
+
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+
+    return user;
+  };
+
+  const getUser = async authenticatePayload => {
     if (!(authenticatePayload && authenticatePayload.id)) {
       throw new Unauthorized();
     }
-    const user = await fastify.account.models.user.findByPk(authenticatePayload.id);
+    const user = await models.user.findOne({
+      where: {
+        uuid: authenticatePayload.id
+      }
+    });
     if (!user) {
       throw new Unauthorized();
     }
-    return pick(user, ['id', 'avatar', 'nickname', 'phone', 'email', 'gender', 'status', 'birthday', 'description', 'currentTenantId']);
+    return Object.assign({}, pick(user, ['avatar', 'nickname', 'phone', 'email', 'gender', 'status', 'birthday', 'description', 'currentTenantId']), {
+      id: user.uuid
+    });
   };
 
   const accountIsExists = async ({ email, phone }, currentUser) => {
@@ -24,7 +46,7 @@ module.exports = fp(async (fastify, options) => {
     }
 
     return (
-      (await fastify.account.models.user.count({
+      (await models.user.count({
         where: {
           [fastify.sequelize.Sequelize.Op.or]: query
         }
@@ -39,8 +61,8 @@ module.exports = fp(async (fastify, options) => {
     if (!password) {
       throw new Error('密码不能为空');
     }
-    const account = await fastify.account.models.userAccount.create(await fastify.account.services.account.passwordEncryption(password));
-    const user = await fastify.account.models.user.create({
+    const account = await models.userAccount.create(await services.account.passwordEncryption(password));
+    const user = await models.user.create({
       avatar,
       nickname,
       gender,
@@ -49,18 +71,15 @@ module.exports = fp(async (fastify, options) => {
       phone,
       email,
       status,
-      userAccountId: account.id
+      userAccountId: account.uuid
     });
-    await account.update({ belongToUserId: user.id });
-    return user;
+    await account.update({ belongToUserId: user.uuid });
+
+    return Object.assign({}, user.get({ pain: true }), { id: user.uuid });
   };
 
   const saveUser = async ({ id, ...otherInfo }) => {
-    const user = await fastify.account.models.user.findByPk(id);
-
-    if (!user) {
-      throw new Error('用户不存在');
-    }
+    const user = await getUserInstance({ id });
 
     if ((await accountIsExists({ phone: otherInfo.phone, email: otherInfo.email }, user)) > 0) {
       throw new Error('手机号或者邮箱都不能重复');
@@ -76,42 +95,53 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const closeUser = async ({ id }) => {
-    const user = await fastify.account.models.user.findByPk(id);
-
-    if (!user) {
-      throw new Error('用户不存在');
-    }
+    const user = await getUserInstance({ id });
     user.status = 12;
     await user.save();
   };
 
   const openUser = async ({ id }) => {
-    const user = await fastify.account.models.user.findByPk(id);
-
-    if (!user) {
-      throw new Error('用户不存在');
-    }
+    const user = await getUserInstance({ id });
     user.status = 0;
     await user.save();
   };
 
   const setCurrentTenantId = async ({ id, tenantId }) => {
-    await fastify.account.services.tenant.getTenantInfo({ id: tenantId });
-    const user = await fastify.account.models.user.findByPk(id);
-
-    if (!user) {
-      throw new Error('用户不存在');
-    }
+    await services.tenant.getTenant({ id: tenantId });
+    const user = await getUserInstance({ id });
     user.currentTenantId = tenantId;
     await user.save();
   };
-  fastify.account.services.user = {
-    getUserInfo,
+
+  const getAllUserList = async ({ filter, perPage, currentPage }) => {
+    const { count, rows } = await models.user.findAndCountAll({
+      include: [
+        {
+          attributes: ['role'],
+          model: models.adminRole
+        },
+        {
+          model: models.tenant
+        }
+      ]
+    });
+    return {
+      pageData: rows.map(item => {
+        return Object.assign({}, item.get({ pain: true }), { id: item.uuid });
+      }),
+      totalCount: count
+    };
+  };
+
+  services.user = {
+    getUser,
+    getUserInstance,
     saveUser,
     accountIsExists,
     addUser,
     closeUser,
     openUser,
-    setCurrentTenantId
+    setCurrentTenantId,
+    getAllUserList
   };
 });

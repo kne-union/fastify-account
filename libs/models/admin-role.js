@@ -1,7 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'adminRole',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       userId: {
         type: DataTypes.UUID,
         allowNull: false
@@ -11,9 +10,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       target: DataTypes.STRING
-    },
-    {
-      paranoid: true
     }
-  );
+  };
 };

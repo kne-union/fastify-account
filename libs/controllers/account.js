@@ -1,5 +1,6 @@
 const fp = require('fastify-plugin');
 module.exports = fp(async (fastify, options) => {
+  const { services } = fastify.account;
   fastify.post(
     `${options.prefix}/sendEmailCode`,
     {
@@ -36,7 +37,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { email } = request.body;
-      const code = await fastify.account.services.account.sendEmailCode({ email });
+      const code = await services.account.sendEmailCode({ email });
       return options.isTest ? { code } : {};
     }
   );
@@ -56,7 +57,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { phone } = request.body;
-      const code = await fastify.account.services.account.sendSMSCode({ phone });
+      const code = await services.account.sendSMSCode({ phone });
       return options.isTest ? { code } : {};
     }
   );
@@ -78,7 +79,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { name, type, code } = request.body;
-      const isPass = await fastify.account.services.account.verificationCodeValidate({
+      const isPass = await services.account.verificationCodeValidate({
         name,
         type,
         code
@@ -116,7 +117,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { phone, email } = request.body;
-      return { isExists: await fastify.account.services.user.accountIsExists({ phone, email }) };
+      return { isExists: await services.user.accountIsExists({ phone, email }) };
     }
   );
 
@@ -162,7 +163,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const account = request.body;
-      return await fastify.account.services.account.register(account);
+      return await services.account.register(account);
     }
   );
 
@@ -182,7 +183,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { username, password } = request.body;
-      const { token, user } = await fastify.account.services.account.login({ username, password, ip: request.ip });
+      const { token, user } = await services.account.login({ username, password, ip: request.ip });
       return { token, currentTenantId: user.currentTenantId };
     }
   );

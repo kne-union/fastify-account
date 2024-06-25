@@ -1,9 +1,10 @@
 const fp = require('fastify-plugin');
 module.exports = fp(async (fastify, options) => {
+  const { authenticate, services } = fastify.account;
   fastify.get(
     `${options.prefix}/getUserInfo`,
     {
-      onRequest: [fastify.account.authenticate.user]
+      onRequest: [authenticate.user]
     },
     async request => {
       return { userInfo: request.userInfo };
@@ -13,7 +14,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/setCurrentTenantId`,
     {
-      onRequest: [fastify.account.authenticate.user],
+      onRequest: [authenticate.user],
       schema: {
         body: {
           type: 'object',
@@ -26,7 +27,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId } = request.body;
-      await fastify.account.services.user.setCurrentTenantId({ id: request.userInfo.id, tenantId });
+      await services.user.setCurrentTenantId({ id: request.userInfo.id, tenantId });
       return {};
     }
   );

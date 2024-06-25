@@ -1,13 +1,12 @@
-module.exports = (sequelize, DataTypes) => {
-  const tenantRoleApplication = sequelize.define(
-    'tenantRoleApplication',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       tenantId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false
       },
       applicationId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false
       },
       roleId: {
@@ -19,19 +18,20 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0 //0:开启  11:关闭
       }
     },
-    {
-      paranoid: true,
+    options: {
       indexes: [
         {
           name: 'application_key',
           unique: true,
-          fields: ['tenantId', 'applicationId', 'roleId', 'deletedAt']
+          fields: ['tenant_id', 'application_id', 'role_id', 'deleted_at']
         }
       ]
+    },
+    associate: ({ tenantRoleApplication, application }) => {
+      tenantRoleApplication.belongsTo(application, {
+        targetKey: 'uuid',
+        constraints: false
+      });
     }
-  );
-  tenantRoleApplication.associate = ({ tenantRoleApplication, application }) => {
-    tenantRoleApplication.belongsTo(application);
   };
-  return tenantRoleApplication;
 };

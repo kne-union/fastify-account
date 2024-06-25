@@ -1,19 +1,20 @@
 const fp = require('fastify-plugin');
 module.exports = fp(async (fastify, options) => {
+  const { authenticate, services } = fastify.account;
   fastify.get(
     `${options.prefix}/tenant/getUserTenant`,
     {
-      onRequest: [fastify.account.authenticate.user]
+      onRequest: [authenticate.user]
     },
     async request => {
-      return await fastify.account.services.tenant.getUserTenant(request.authenticatePayload);
+      return await services.tenantUser.getUserTenant(request.authenticatePayload);
     }
   );
 
   fastify.get(
     `${options.prefix}/tenant/getTenantUserInfo`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.tenant]
+      onRequest: [authenticate.user, authenticate.tenant]
     },
     async request => {
       return request.tenantInfo;
@@ -23,11 +24,11 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/tenant/orgList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.tenant]
+      onRequest: [authenticate.user, authenticate.tenant]
     },
     async request => {
       const { tenantId } = request.tenantInfo;
-      return await fastify.account.services.tenant.getTenantOrgList({ tenantId });
+      return await services.tenantOrg.getTenantOrgList({ tenantId });
     }
   );
 });

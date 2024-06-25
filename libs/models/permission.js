@@ -1,9 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'permission',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       applicationId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false
       },
       code: {
@@ -40,14 +39,13 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0
       }
     },
-    {
-      paranoid: true,
+    options: {
       indexes: [
         {
           unique: true,
-          fields: ['code', 'applicationId', 'pid', 'deletedAt']
+          fields: ['code', 'application_id', 'pid', 'deleted_at']
         }
       ]
     }
-  );
+  };
 };

@@ -1,116 +1,22 @@
 const fp = require('fastify-plugin');
 const isNil = require('lodash/isNil');
 module.exports = fp(async (fastify, options) => {
-  const addApplication = async application => {
-    return fastify.account.models.application.create(application);
-  };
-  const saveApplication = async ({ id, ...others }) => {
-    const application = await fastify.account.models.application.findByPk(id);
-    if (!application) {
-      throw new Error('应用不存在');
-    }
-    ['name', 'code', 'avatar', 'url', 'description'].forEach(name => {
-      if (!isNil(others[name])) {
-        application[name] = others[name];
-      }
-    });
-
-    await application.save();
-  };
-
-  const deleteApplication = async ({ id }) => {
-    const application = await fastify.account.models.application.findByPk(id);
-    if (!application) {
-      throw new Error('应用不存在');
-    }
-    if (
-      (await fastify.account.models.tenantApplication.count({
-        where: {
-          applicationId: application.id
-        }
-      })) > 0
-    ) {
-      throw new Error('应用已经开放给其他租户使用，不能删除');
-    }
-
-    const permissionIdList = (
-      await fastify.account.models.permission.findAll({
-        where: { applicationId: application.id }
-      })
-    ).map(({ id }) => id);
-
-    const t = await fastify.sequelize.instance.transaction();
-
-    try {
-      await fastify.account.models.tenantPermission.destroy(
-        {
-          where: {
-            permissionId: {
-              [fastify.sequelize.Sequelize.Op.in]: permissionIdList
-            }
-          }
-        },
-        { transaction: t }
-      );
-
-      await fastify.account.models.tenantRolePermission.destroy(
-        {
-          where: {
-            permissionId: {
-              [fastify.sequelize.Sequelize.Op.in]: permissionIdList
-            }
-          }
-        },
-        { transaction: t }
-      );
-
-      await fastify.account.models.permission.destroy({
-        where: {
-          applicationId: application.id
-        },
-        transaction: t
-      });
-      await application.destroy({ transaction: t });
-      await t.commit();
-    } catch (e) {
-      await t.rollback();
-      throw e;
-    }
-  };
-
-  const getApplicationList = async ({ tenantId }) => {
-    const query = {};
-    if (tenantId) {
-      const tenant = await fastify.account.models.tenant.findByPk(tenantId);
-      if (!tenant) {
-        throw new Error('租户不存在');
-      }
-      const tenantApplications = await fastify.account.models.tenantApplication.findAll({
-        where: { tenantId }
-      });
-      query.id = {
-        [fastify.sequelize.Sequelize.Op.in]: tenantApplications.map(({ applicationId }) => applicationId)
-      };
-    }
-    return await fastify.account.models.application.findAll({
-      where: query
-    });
-  };
+  const { models, services } = fastify.account;
 
   const addPermission = async ({ applicationId, pid, code, name, type, isModule, isMust, description }) => {
-    if (!(await fastify.account.models.application.findByPk(applicationId))) {
+    if (!(await services.application.getApplication({ id: applicationId }))) {
       throw new Error('应用不存在');
     }
     const paths = [];
     if (pid > 0) {
-      const parentNode = await fastify.account.models.permission.findByPk(pid);
+      const parentNode = await models.permission.findByPk(pid);
       if (!parentNode) {
         throw new Error('未找到父级');
       }
       paths.push(...parentNode.paths, parentNode.id);
     }
     if (
-      (await fastify.account.models.permission.count({
+      (await models.permission.count({
         where: {
           pid,
           code,
@@ -120,7 +26,7 @@ module.exports = fp(async (fastify, options) => {
     ) {
       throw new Error('同一级权限code不能重复');
     }
-    return await fastify.account.models.permission.create({
+    return await models.permission.create({
       applicationId,
       code,
       description,
@@ -135,12 +41,10 @@ module.exports = fp(async (fastify, options) => {
 
   const getPermissionList = async ({ applicationId, tenantId }) => {
     const query = {};
+
     if (tenantId) {
-      const tenant = await fastify.account.models.tenant.findByPk(tenantId);
-      if (!tenant) {
-        throw new Error('租户不存在');
-      }
-      const tenantPermissions = await fastify.account.models.tenantPermission.findAll({
+      await services.tenant.getTenant({ id: tenantId });
+      const tenantPermissions = await models.tenantPermission.findAll({
         where: { tenantId }
       });
       query[fastify.sequelize.Sequelize.Op.or] = [
@@ -152,19 +56,24 @@ module.exports = fp(async (fastify, options) => {
         { isMust: 1 }
       ];
     }
-    return await fastify.account.models.permission.findAll({
+
+    await services.application.getApplication({ id: applicationId });
+
+    return await models.permission.findAll({
       where: Object.assign({}, { applicationId }, query)
     });
   };
 
   const deletePermission = async ({ id }) => {
-    const currentPermission = await fastify.account.models.permission.findByPk(id);
+    const currentPermission = await models.permission.findByPk(id);
 
     if (!currentPermission) {
       throw new Error('权限不存在');
     }
 
-    const permissionList = await fastify.account.models.permission.findAll({
+    await services.application.getApplication({ id: currentPermission.applicationId });
+
+    const permissionList = await models.permission.findAll({
       where: {
         applicationId: currentPermission.applicationId
       }
@@ -178,7 +87,7 @@ module.exports = fp(async (fastify, options) => {
 
     const t = await fastify.sequelize.instance.transaction();
     try {
-      await fastify.account.models.tenantPermission.destroy({
+      await models.tenantPermission.destroy({
         where: {
           permissionId: {
             [fastify.sequelize.Sequelize.Op.in]: permissionIdList
@@ -186,7 +95,7 @@ module.exports = fp(async (fastify, options) => {
         },
         transaction: t
       });
-      await fastify.account.models.tenantRolePermission.destroy({
+      await models.tenantRolePermission.destroy({
         where: {
           permissionId: {
             [fastify.sequelize.Sequelize.Op.in]: permissionIdList
@@ -194,7 +103,7 @@ module.exports = fp(async (fastify, options) => {
         },
         transaction: t
       });
-      await fastify.account.models.permission.destroy({
+      await models.permission.destroy({
         where: {
           id: {
             [fastify.sequelize.Sequelize.Op.in]: permissionIdList
@@ -210,7 +119,7 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const savePermission = async permission => {
-    const currentPermission = await fastify.account.models.permission.findByPk(permission.id);
+    const currentPermission = await models.permission.findByPk(permission.id);
 
     if (!permission) {
       throw new Error('权限不存在');
@@ -226,16 +135,14 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const saveTenantPermissionList = async ({ tenantId, applications, permissions }) => {
-    if (!(await fastify.account.models.tenant.findByPk(tenantId))) {
-      throw new Error('租户不存在');
-    }
-    const currentApplications = await fastify.account.models.tenantApplication.findAll({
+    await services.tenant.getTenant({ id: tenantId });
+    const currentApplications = await models.tenantApplication.findAll({
       where: { tenantId }
     });
 
     const currentApplicationIds = currentApplications.map(({ applicationId }) => applicationId);
 
-    const currentPermissions = await fastify.account.models.tenantPermission.findAll({
+    const currentPermissions = await models.tenantPermission.findAll({
       where: { tenantId }
     });
 
@@ -249,7 +156,7 @@ module.exports = fp(async (fastify, options) => {
       const needDeletePermissions = currentPermissions.filter(item => permissions.indexOf(item.permissionId) === -1).map(({ permissionId }) => permissionId);
       const needAddPermissions = permissions.filter(permissionId => currentPermissionIds.indexOf(permissionId) === -1);
 
-      await fastify.account.models.tenantRoleApplication.destroy({
+      await models.tenantRoleApplication.destroy({
         where: {
           applicationId: {
             [fastify.sequelize.Sequelize.Op.in]: needDeleteApplications
@@ -259,7 +166,7 @@ module.exports = fp(async (fastify, options) => {
         transaction: t
       });
 
-      await fastify.account.models.tenantRolePermission.destroy({
+      await models.tenantRolePermission.destroy({
         where: {
           permissionId: {
             [fastify.sequelize.Sequelize.Op.in]: needDeletePermissions
@@ -269,7 +176,7 @@ module.exports = fp(async (fastify, options) => {
         transaction: t
       });
 
-      await fastify.account.models.tenantApplication.destroy({
+      await models.tenantApplication.destroy({
         where: {
           applicationId: {
             [fastify.sequelize.Sequelize.Op.in]: needDeleteApplications
@@ -279,7 +186,7 @@ module.exports = fp(async (fastify, options) => {
         transaction: t
       });
 
-      await fastify.account.models.tenantPermission.destroy({
+      await models.tenantPermission.destroy({
         where: {
           permissionId: {
             [fastify.sequelize.Sequelize.Op.in]: needDeletePermissions
@@ -290,7 +197,7 @@ module.exports = fp(async (fastify, options) => {
       });
 
       needAddApplications.length > 0 &&
-        (await fastify.account.models.tenantApplication.bulkCreate(
+        (await models.tenantApplication.bulkCreate(
           needAddApplications.map(applicationId => {
             return { tenantId, applicationId };
           }),
@@ -298,7 +205,7 @@ module.exports = fp(async (fastify, options) => {
         ));
 
       needAddPermissions.length > 0 &&
-        (await fastify.account.models.tenantPermission.bulkCreate(
+        (await models.tenantPermission.bulkCreate(
           needAddPermissions.map(permissionId => {
             return { tenantId, permissionId };
           }),
@@ -313,22 +220,21 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const saveRolePermissionList = async ({ roleId, applications, permissions }) => {
-    const role = await fastify.account.models.tenantRole.findByPk(roleId);
+    const role = await models.tenantRole.findByPk(roleId);
     if (!role) {
       throw new Error('角色不存在');
-    }
-    if (!(await fastify.account.models.tenant.findByPk(role.tenantId))) {
-      throw new Error('租户不存在');
     }
 
     const tenantId = role.tenantId;
 
-    const tenantApplications = await fastify.account.models.tenantApplication.findAll({
+    await services.tenant.getTenant({ id: tenantId });
+
+    const tenantApplications = await models.tenantApplication.findAll({
       attributes: ['applicationId'],
       where: { tenantId }
     });
 
-    const tenantPermissions = await fastify.account.models.tenantPermission.findAll({
+    const tenantPermissions = await models.tenantPermission.findAll({
       attributes: ['permissionId'],
       where: { tenantId }
     });
@@ -336,7 +242,7 @@ module.exports = fp(async (fastify, options) => {
     const tenantApplicationIds = tenantApplications.map(({ applicationId }) => applicationId);
     const tenantPermissionIds = tenantPermissions.map(({ permissionId }) => permissionId);
 
-    const currentApplications = await fastify.account.models.tenantRoleApplication.findAll({
+    const currentApplications = await models.tenantRoleApplication.findAll({
       where: {
         roleId: role.id,
         tenantId,
@@ -346,7 +252,7 @@ module.exports = fp(async (fastify, options) => {
       }
     });
 
-    const currentPermissions = await fastify.account.models.tenantRolePermission.findAll({
+    const currentPermissions = await models.tenantRolePermission.findAll({
       where: {
         roleId: role.id,
         tenantId,
@@ -367,7 +273,7 @@ module.exports = fp(async (fastify, options) => {
       const needAddPermissions = permissions.filter(permissionId => currentPermissionIds.indexOf(permissionId) === -1 && tenantPermissionIds.indexOf(permissionId) > -1);
 
       needDeleteApplications.length > 0 &&
-        (await fastify.account.models.tenantRoleApplication.destroy({
+        (await models.tenantRoleApplication.destroy({
           where: {
             applicationId: {
               [fastify.sequelize.Sequelize.Op.in]: needDeleteApplications
@@ -378,7 +284,7 @@ module.exports = fp(async (fastify, options) => {
         }));
 
       needDeletePermissions.length > 0 &&
-        (await fastify.account.models.tenantRolePermission.destroy({
+        (await models.tenantRolePermission.destroy({
           where: {
             permissionId: {
               [fastify.sequelize.Sequelize.Op.in]: needDeletePermissions
@@ -389,7 +295,7 @@ module.exports = fp(async (fastify, options) => {
         }));
 
       needAddApplications.length > 0 &&
-        (await fastify.account.models.tenantRoleApplication.bulkCreate(
+        (await models.tenantRoleApplication.bulkCreate(
           needAddApplications.map(applicationId => {
             return {
               tenantId,
@@ -401,7 +307,7 @@ module.exports = fp(async (fastify, options) => {
         ));
 
       needAddPermissions.length > 0 &&
-        (await fastify.account.models.tenantRolePermission.bulkCreate(
+        (await models.tenantRolePermission.bulkCreate(
           needAddPermissions.map(permissionId => {
             return {
               tenantId,
@@ -420,13 +326,13 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getTenantPermissionList = async ({ tenantId }) => {
-    await fastify.account.services.tenant.getTenantInfo({ id: tenantId });
+    await services.tenant.getTenant({ id: tenantId });
 
-    const applications = await fastify.account.models.tenantApplication.findAll({
+    const applications = await models.tenantApplication.findAll({
       where: { tenantId, status: 0 }
     });
 
-    const permissions = await fastify.account.models.tenantPermission.findAll({
+    const permissions = await models.tenantPermission.findAll({
       where: { tenantId, status: 0 }
     });
 
@@ -434,25 +340,21 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getRolePermissionList = async ({ roleId }) => {
-    const role = await fastify.account.models.tenantRole.findByPk(roleId);
+    const role = await models.tenantRole.findByPk(roleId);
     if (!role) {
       throw new Error('角色不存在');
     }
-    const applications = await fastify.account.models.tenantRoleApplication.findAll({
+    const applications = await models.tenantRoleApplication.findAll({
       where: { roleId: role.id, tenantId: role.tenantId }
     });
-    const permissions = await fastify.account.models.tenantRolePermission.findAll({
+    const permissions = await models.tenantRolePermission.findAll({
       where: { roleId: role.id, tenantId: role.tenantId }
     });
 
     return { applications, permissions };
   };
 
-  fastify.account.services.permission = {
-    addApplication,
-    saveApplication,
-    deleteApplication,
-    getApplicationList,
+  services.permission = {
     addPermission,
     getPermissionList,
     deletePermission,
