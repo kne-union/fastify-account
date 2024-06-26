@@ -27,7 +27,7 @@ module.exports = fp(async (fastify, options) => {
       onRequest: [authenticate.user, authenticate.tenant]
     },
     async request => {
-      const { tenantId } = request.tenantInfo;
+      const { id: tenantId } = request.tenantInfo.tenant;
       return await services.tenantOrg.getTenantOrgList({ tenantId });
     }
   );

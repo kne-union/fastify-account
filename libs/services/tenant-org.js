@@ -67,11 +67,11 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getTenantOrgList = async ({ tenantId }) => {
-    const { count, rows } = await models.tenantOrg.findAndCountAll({
+    const data = await models.tenantOrg.findAll({
       where: { tenantId }
     });
 
-    return { pageData: rows, totalCount: count };
+    return data.map(item => item.get({ plain: true }));
   };
 
   services.tenantOrg = {
