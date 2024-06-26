@@ -1,13 +1,12 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'tenantApplication',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       tenantId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false
       },
       applicationId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false
       },
       status: {
@@ -15,14 +14,13 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0 //0:开启  11:关闭
       }
     },
-    {
-      paranoid: true,
+    options: {
       indexes: [
         {
           unique: true,
-          fields: ['tenantId', 'applicationId', 'deletedAt']
+          fields: ['tenant_id', 'application_id', 'deleted_at']
         }
       ]
     }
-  );
+  };
 };

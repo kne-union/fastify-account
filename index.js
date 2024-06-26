@@ -9,6 +9,7 @@ module.exports = fp(
     options = merge(
       {
         prefix: `/api/v${packageJson.version.split('.')[0]}/account`, //如果为true，发送邮件和短信将不调用，验证码随response返回
+        dbTableNamePrefix: 't_account_',
         isTest: false,
         jwt: {
           secret: 'super-secret'
@@ -23,7 +24,12 @@ module.exports = fp(
       options,
       name: 'account',
       modules: [
-        ['models', await fastify.sequelize.addModels(path.resolve(__dirname, './libs/models'))],
+        [
+          'models',
+          await fastify.sequelize.addModels(path.resolve(__dirname, './libs/models'), {
+            prefix: options.dbTableNamePrefix
+          })
+        ],
         ['services', path.resolve(__dirname, './libs/services')],
         ['controllers', path.resolve(__dirname, './libs/controllers')],
         [
@@ -34,13 +40,13 @@ module.exports = fp(
               //这里判断失效时间
               //info.iat
               request.authenticatePayload = info.payload;
-              request.userInfo = await fastify.account.services.user.getUserInfo(request.authenticatePayload);
+              request.userInfo = await fastify.account.services.user.getUser(request.authenticatePayload);
             },
             tenant: async request => {
-              request.tenantInfo = await fastify.account.services.tenant.tenantUserAuthenticate(request.userInfo);
+              request.tenantInfo = await fastify.account.services.tenantUser.getTenantUserByUserId(request.userInfo);
             },
             admin: async request => {
-              request.adminInfo = await fastify.account.services.admin.superAdminAuthenticate(request.userInfo);
+              request.adminInfo = await fastify.account.services.admin.checkSuperAdmin(request.userInfo);
             }
           }
         ]

@@ -1,9 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'tenantRolePermission',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       tenantId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false
       },
       permissionId: {
@@ -19,14 +18,17 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0 //0:开启  11:关闭
       }
     },
-    {
-      paranoid: true,
+    options: {
       indexes: [
         {
+          name: 'permission_key',
           unique: true,
-          fields: ['tenantId', 'permissionId', 'roleId', 'deletedAt']
+          fields: ['tenant_id', 'permission_id', 'role_id', 'deleted_at']
         }
       ]
+    },
+    associate: ({ tenantRolePermission, permission }) => {
+      tenantRolePermission.belongsTo(permission, { constraints: false });
     }
-  );
+  };
 };

@@ -1,6 +1,6 @@
 {
   "name": "@kne/fastify-account",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.4",
   "description": "fastify的用户管理账号等实现",
   "main": "index.js",
   "scripts": {
@@ -38,8 +38,9 @@
   "homepage": "https://github.com/kne-union/fastify-account#readme",
   "devDependencies": {
     "@fastify/swagger": "^8.14.0",
-    "@kne/fastify-file-manager": "^1.0.0",
-    "@kne/fastify-sequelize": "^1.0.0",
+    "@kne/fastify-file-manager": "^1.1.2",
+    "@kne/fastify-response-data-format": "^0.1.0",
+    "@kne/fastify-sequelize": "^2.0.2",
     "fastify": "^4.27.0",
     "husky": "^9.0.11",
     "nodemon": "^3.1.1",

@@ -1,14 +1,15 @@
 const fp = require('fastify-plugin');
 
 module.exports = fp(async (fastify, options) => {
+  const { authenticate, services } = fastify.account;
   // 用于系统初始化时，设置第一个用户，只能使用一次，其他用户由该用户创建
   fastify.post(
     `${options.prefix}/initSuperAdmin`,
     {
-      onRequest: [fastify.account.authenticate.user]
+      onRequest: [authenticate.user]
     },
     async request => {
-      await fastify.account.services.admin.initSuperAdmin(await fastify.account.services.user.getUserInfo(request.authenticatePayload));
+      await services.admin.initSuperAdmin(await services.user.getUser(request.authenticatePayload));
       return {};
     }
   );
@@ -16,7 +17,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getSuperAdminInfo`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin]
+      onRequest: [authenticate.user, authenticate.admin]
     },
     async request => {
       return { userInfo: request.userInfo };
@@ -26,14 +27,14 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/addUser`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {}
       }
     },
     async request => {
       const userInfo = request.body;
-      await fastify.account.services.admin.addUser(Object.assign({}, userInfo, { password: options.defaultPassword }));
+      await services.admin.addUser(Object.assign({}, userInfo, { password: options.defaultPassword }));
       return {};
     }
   );
@@ -41,7 +42,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getAllUserList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {}
       }
@@ -54,7 +55,7 @@ module.exports = fp(async (fastify, options) => {
         },
         request.query
       );
-      return await fastify.account.services.admin.getAllUserList({
+      return await services.user.getAllUserList({
         filter,
         perPage,
         currentPage
@@ -65,7 +66,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/resetUserPassword`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -78,7 +79,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.admin.resetUserPassword(request.body);
+      await services.admin.resetUserPassword(request.body);
       return {};
     }
   );
@@ -86,7 +87,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/saveUser`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -104,7 +105,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const user = request.body;
-      await fastify.account.services.user.saveUser(user);
+      await services.user.saveUser(user);
       return {};
     }
   );
@@ -112,7 +113,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/closeUser`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -125,7 +126,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { id } = request.body;
-      await fastify.account.services.user.closeUser({ id });
+      await services.user.closeUser({ id });
       return {};
     }
   );
@@ -133,7 +134,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/openUser`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -146,7 +147,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { id } = request.body;
-      await fastify.account.services.user.openUser({ id });
+      await services.user.openUser({ id });
       return {};
     }
   );

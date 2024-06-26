@@ -1,9 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'tenantPermission',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       tenantId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false
       },
       permissionId: {
@@ -15,14 +14,13 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0 //0:开启  11:关闭
       }
     },
-    {
-      paranoid: true,
+    options: {
       indexes: [
         {
           unique: true,
-          fields: ['tenantId', 'permissionId', 'deletedAt']
+          fields: ['tenant_id', 'permission_id', 'deleted_at']
         }
       ]
     }
-  );
+  };
 };

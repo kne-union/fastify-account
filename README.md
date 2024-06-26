@@ -22,7 +22,7 @@ npm i --save @kne/fastify-account
 ### API
 
 ---
-title: "@kne/fastify-account v1.0.0"
+title: "@kne/fastify-account v1.0.0-alpha.3"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -42,7 +42,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.3</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -619,6 +619,43 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+## post__api_v1_account_admin_openUser
+
+`POST /api/v1/account/admin/openUser`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_openuser-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» id|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_openuser-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 ## post__api_v1_account_admin_addApplication
 
 `POST /api/v1/account/admin/addApplication`
@@ -971,6 +1008,45 @@ This operation does not require authentication
 
 `POST /api/v1/account/admin/saveTenantPermissionList`
 
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId",
+    "applications",
+    "permissions"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    },
+    "applications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_savetenantpermissionlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+|» applications|body|[string]|true|none|
+|» permissions|body|[number]|true|none|
+
 <h3 id="post__api_v1_account_admin_savetenantpermissionlist-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
@@ -984,6 +1060,12 @@ This operation does not require authentication
 ## get__api_v1_account_admin_getTenantPermissionList
 
 `GET /api/v1/account/admin/getTenantPermissionList`
+
+<h3 id="get__api_v1_account_admin_gettenantpermissionlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|tenantId|query|string|true|none|
 
 <h3 id="get__api_v1_account_admin_gettenantpermissionlist-responses">Responses</h3>
 
@@ -1004,6 +1086,7 @@ This operation does not require authentication
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |tenantId|query|string|true|none|
+|filter|query|object|false|none|
 
 <h3 id="get__api_v1_account_admin_getrolelist-responses">Responses</h3>
 
@@ -1369,6 +1452,34 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+## post__api_v1_account_admin_tenant_editOrg
+
+`POST /api/v1/account/admin/tenant/editOrg`
+
+<h3 id="post__api_v1_account_admin_tenant_editorg-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_tenant_removeOrg
+
+`POST /api/v1/account/admin/tenant/removeOrg`
+
+<h3 id="post__api_v1_account_admin_tenant_removeorg-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 ## get__api_v1_account_admin_getTenantUserList
 
 `GET /api/v1/account/admin/getTenantUserList`
@@ -1380,6 +1491,475 @@ This operation does not require authentication
 |tenantId|query|string|false|none|
 
 <h3 id="get__api_v1_account_admin_gettenantuserlist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_addTenantUser
+
+`POST /api/v1/account/admin/addTenantUser`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId",
+    "userId",
+    "name"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    },
+    "roleIds": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "orgIds": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "userId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "avatar": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_addtenantuser-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+|» roleIds|body|[number]|false|none|
+|» orgIds|body|[number]|false|none|
+|» userId|body|string|true|none|
+|» name|body|string|true|none|
+|» avatar|body|string|false|none|
+|» phone|body|string|false|none|
+|» email|body|string|false|none|
+|» description|body|string|false|none|
+
+<h3 id="post__api_v1_account_admin_addtenantuser-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_saveTenantUser
+
+`POST /api/v1/account/admin/saveTenantUser`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId",
+    "name"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    },
+    "roleIds": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "orgIds": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "name": {
+      "type": "string"
+    },
+    "avatar": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_savetenantuser-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+|» roleIds|body|[number]|false|none|
+|» orgIds|body|[number]|false|none|
+|» name|body|string|true|none|
+|» avatar|body|string|false|none|
+|» phone|body|string|false|none|
+|» email|body|string|false|none|
+|» description|body|string|false|none|
+
+<h3 id="post__api_v1_account_admin_savetenantuser-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_deleteTenantUser
+
+`POST /api/v1/account/admin/deleteTenantUser`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId",
+    "tenantUserId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    },
+    "tenantUserId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_deletetenantuser-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+|» tenantUserId|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_deletetenantuser-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_closeTenant
+
+`POST /api/v1/account/admin/closeTenant`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_closetenant-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_closetenant-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_openTenant
+
+`POST /api/v1/account/admin/openTenant`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_opentenant-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_opentenant-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_closeTenantUser
+
+`POST /api/v1/account/admin/closeTenantUser`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId",
+    "tenantUserId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    },
+    "tenantUserId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_closetenantuser-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+|» tenantUserId|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_closetenantuser-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_openTenantUser
+
+`POST /api/v1/account/admin/openTenantUser`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId",
+    "tenantUserId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    },
+    "tenantUserId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_opentenantuser-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+|» tenantUserId|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_opentenantuser-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_admin_getInviteList
+
+`GET /api/v1/account/admin/getInviteList`
+
+<h3 id="get__api_v1_account_admin_getinvitelist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|tenantId|query|string|true|none|
+
+<h3 id="get__api_v1_account_admin_getinvitelist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_addInviteToken
+
+`POST /api/v1/account/admin/addInviteToken`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    },
+    "info": {
+      "type": "object",
+      "properties": {
+        "roleIds": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": []
+        },
+        "orgIds": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": []
+        }
+      }
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_addinvitetoken-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+|» info|body|object|false|none|
+|»» roleIds|body|[number]|false|none|
+|»» orgIds|body|[number]|false|none|
+
+<h3 id="post__api_v1_account_admin_addinvitetoken-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_deleteInviteToken
+
+`POST /api/v1/account/admin/deleteInviteToken`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "number"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_deleteinvitetoken-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» id|body|number|true|none|
+
+<h3 id="post__api_v1_account_admin_deleteinvitetoken-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1403,11 +1983,25 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
-## get__api_v1_account_tenant_getUserCurrentTenant
+## get__api_v1_account_tenant_getTenantUserInfo
 
-`GET /api/v1/account/tenant/getUserCurrentTenant`
+`GET /api/v1/account/tenant/getTenantUserInfo`
 
-<h3 id="get__api_v1_account_tenant_getusercurrenttenant-responses">Responses</h3>
+<h3 id="get__api_v1_account_tenant_gettenantuserinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_tenant_orgList
+
+`GET /api/v1/account/tenant/orgList`
+
+<h3 id="get__api_v1_account_tenant_orglist-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1422,6 +2016,43 @@ This operation does not require authentication
 `GET /api/v1/account/getUserInfo`
 
 <h3 id="get__api_v1_account_getuserinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_setCurrentTenantId
+
+`POST /api/v1/account/setCurrentTenantId`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_setcurrenttenantid-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|none|
+
+<h3 id="post__api_v1_account_setcurrenttenantid-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|

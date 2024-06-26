@@ -1,11 +1,14 @@
-module.exports = (sequelize, DataTypes) => {
-  const user = sequelize.define(
-    'user',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true
+      },
+      uuid: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4
       },
       nickname: DataTypes.STRING,
       email: DataTypes.STRING,
@@ -26,25 +29,32 @@ module.exports = (sequelize, DataTypes) => {
       birthday: DataTypes.DATE,
       description: DataTypes.TEXT
     },
-    {
-      paranoid: true,
+    options: {
       indexes: [
         {
           unique: true,
-          fields: ['email', 'deletedAt']
+          fields: ['uuid', 'deleted_at']
         },
         {
           unique: true,
-          fields: ['phone', 'deletedAt']
+          fields: ['email', 'deleted_at']
+        },
+        {
+          unique: true,
+          fields: ['phone', 'deleted_at']
         }
       ]
+    },
+    associate: ({ adminRole, user, tenant, tenantUser }) => {
+      user.hasOne(adminRole, { foreignKey: 'userId', sourceKey: 'uuid', constraints: false });
+      user.belongsToMany(tenant, {
+        through: { model: tenantUser, unique: false },
+        otherKey: 'tenantId',
+        foreignKey: 'userId',
+        targetKey: 'uuid',
+        sourceKey: 'uuid',
+        constraints: false
+      });
     }
-  );
-
-  user.associate = ({ adminRole, user, tenant, tenantUser }) => {
-    user.hasOne(adminRole, { foreignKey: 'userId' });
-    user.belongsToMany(tenant, { through: { model: tenantUser, unique: false } });
   };
-
-  return user;
 };

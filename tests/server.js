@@ -1,6 +1,5 @@
 const fastify = require('fastify')({
-  logger: true,
-  querystringParser: str => require('qs').parse(str)
+  logger: true, querystringParser: str => require('qs').parse(str)
 });
 
 
@@ -15,7 +14,7 @@ fastify.register(require('@kne/fastify-sequelize'), {
     storage: sqliteStorage
   }, modelsGlobOptions: {
     syncOptions: {}
-  }
+  }, prefix: 't_account_'
 });
 
 fastify.register(require('@kne/fastify-file-manager'), {
@@ -36,21 +35,7 @@ fastify.register(require('fastify-plugin')(async (fastify) => {
   await fastify.sequelize.sync();
 }));
 
-fastify.addHook('onSend', async (request, reply, payload) => {
-  const contentType = reply.getHeader('content-type');
-  if (contentType && contentType.indexOf('application/json') > -1) {
-    const responseData = JSON.parse(payload);
-    if (responseData.statusCode && (responseData.message || responseData.error)) {
-      return JSON.stringify({
-        code: responseData.statusCode, msg: responseData.message || responseData.error
-      });
-    }
-    return JSON.stringify({
-      code: 0, data: JSON.parse(payload)
-    });
-  }
-  return payload;
-});
+fastify.register(require('@kne/fastify-response-data-format'));
 
 fastify.listen({ port: 3000 }, (err, address) => {
   if (err) throw err;

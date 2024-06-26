@@ -12,9 +12,10 @@ function userNameIsEmail(username) {
 }
 
 module.exports = fp(async (fastify, options) => {
+  const { models, services } = fastify.account;
   const login = async ({ username, password, ip }) => {
     const isEmail = userNameIsEmail(username);
-    const user = await fastify.account.models.user.findOne({
+    const user = await models.user.findOne({
       where: Object.assign(
         {},
         isEmail
@@ -38,16 +39,23 @@ module.exports = fp(async (fastify, options) => {
 
     await passwordAuthentication({ accountId: user.userAccountId, password });
 
-    await fastify.account.models.loginLog.create({
-      userId: user.id,
+    await models.loginLog.create({
+      userId: user.uuid,
       ip
     });
 
-    return fastify.jwt.sign({ payload: { id: user.id } });
+    return {
+      token: fastify.jwt.sign({ payload: { id: user.uuid } }),
+      user: Object.assign({}, user.get({ plain: true }), { id: user.uuid })
+    };
   };
 
   const passwordAuthentication = async ({ accountId, password }) => {
-    const userAccount = await fastify.account.models.userAccount.findByPk(accountId);
+    const userAccount = await models.userAccount.findOne({
+      where: {
+        uuid: accountId
+      }
+    });
     if (!userAccount) {
       throw new Error('账号不存在');
     }
@@ -69,22 +77,24 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const resetPassword = async ({ userId, password }) => {
-    const userInfo = await fastify.account.models.user.findByPk(userId);
+    const userInfo = await models.user.findOne({
+      where: { uuid: userId }
+    });
     if (!userInfo) {
       throw new Error('用户不存在');
     }
-    const account = await fastify.account.models.userAccount.create(
+    const account = await models.userAccount.create(
       Object.assign({}, await passwordEncryption(password), {
         belongToUserId: userId
       })
     );
 
-    await userInfo.update({ userAccountId: account.id });
+    await userInfo.update({ userAccountId: account.uuid });
   };
 
   const register = async ({ avatar, nickname, gender, birthday, description, phone, email, code, password, status, invitationCode }) => {
     const type = phone ? 0 : 1;
-    const verificationCode = await fastify.account.models.verificationCode.findOne({
+    const verificationCode = await models.verificationCode.findOne({
       where: {
         name: type === 0 ? phone : email,
         type,
@@ -99,7 +109,7 @@ module.exports = fp(async (fastify, options) => {
     verificationCode.status = 2;
     await verificationCode.save();
 
-    return await fastify.account.services.user.addUser({
+    return await services.user.addUser({
       avatar,
       nickname,
       gender,
@@ -117,7 +127,7 @@ module.exports = fp(async (fastify, options) => {
 
     // 这里写发送逻辑
 
-    await fastify.account.models.verificationCode.update(
+    await models.verificationCode.update(
       {
         status: 2
       },
@@ -130,7 +140,7 @@ module.exports = fp(async (fastify, options) => {
       }
     );
 
-    await fastify.account.models.verificationCode.create({
+    await models.verificationCode.create({
       name: email,
       type: 1,
       code
@@ -140,7 +150,7 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const verificationCodeValidate = async ({ name, type, code }) => {
-    const verificationCode = await fastify.account.models.verificationCode.findOne({
+    const verificationCode = await models.verificationCode.findOne({
       where: {
         name,
         type,
@@ -165,7 +175,7 @@ module.exports = fp(async (fastify, options) => {
 
     // 这里写发送逻辑
 
-    await fastify.account.models.verificationCode.update(
+    await models.verificationCode.update(
       {
         status: 2
       },
@@ -178,7 +188,7 @@ module.exports = fp(async (fastify, options) => {
       }
     );
 
-    await fastify.account.models.verificationCode.create({
+    await models.verificationCode.create({
       name: phone,
       type: 0,
       code
@@ -187,7 +197,7 @@ module.exports = fp(async (fastify, options) => {
     return code;
   };
 
-  fastify.account.services.account = {
+  services.account = {
     login,
     register,
     sendEmailCode,

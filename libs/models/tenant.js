@@ -1,11 +1,14 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'tenant',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true
+      },
+      uuid: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4
       },
       name: {
         type: DataTypes.STRING,
@@ -31,8 +34,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       description: DataTypes.TEXT
     },
-    {
-      paranoid: true
+    options: {
+      indexes: [
+        {
+          unique: true,
+          fields: ['uuid', 'deleted_at']
+        }
+      ]
     }
-  );
+  };
 };

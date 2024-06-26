@@ -1,7 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'tenantToken',
-    {
+module.exports = ({ DataTypes }) => {
+  return {
+    model: {
       tenantId: {
         type: DataTypes.UUID,
         allowNull: false
@@ -15,18 +14,17 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false //10:邀请用户加入租户
       },
-      createTenantUserId: {
+      createdTenantUserId: {
         type: DataTypes.UUID
       }
     },
-    {
-      paranoid: true,
+    options: {
       indexes: [
         {
           unique: true,
-          fields: ['tenantId', 'token', 'type', 'deletedAt']
+          fields: ['tenant_id', 'token', 'type', 'deleted_at']
         }
       ]
     }
-  );
+  };
 };

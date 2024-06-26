@@ -1,10 +1,11 @@
 const fp = require('fastify-plugin');
 
 module.exports = fp(async (fastify, options) => {
+  const { authenticate, services } = fastify.account;
   fastify.get(
     `${options.prefix}/admin/getRoleList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -30,14 +31,14 @@ module.exports = fp(async (fastify, options) => {
         },
         request.query
       );
-      return await fastify.account.services.tenant.getRoleList({ tenantId, perPage, currentPage, filter });
+      return await services.tenantRole.getTenantRoleList({ tenantId, perPage, currentPage, filter });
     }
   );
 
   fastify.post(
     `${options.prefix}/admin/addRole`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -52,7 +53,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { tenantId, name, description } = request.body;
-      await fastify.account.services.tenant.addRole({ tenantId, name, description });
+      await services.tenantRole.addTenantRole({ tenantId, name, description });
 
       return {};
     }
@@ -61,7 +62,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/saveRole`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -75,7 +76,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.tenant.saveRole(request.body);
+      await services.tenantRole.saveTenantRole(request.body);
       return {};
     }
   );
@@ -83,7 +84,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.post(
     `${options.prefix}/admin/removeRole`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         body: {
           type: 'object',
@@ -96,7 +97,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { id } = request.body;
-      await fastify.account.services.tenant.removeRole({ id });
+      await services.tenantRole.removeTenantRole({ id });
       return {};
     }
   );
@@ -104,7 +105,7 @@ module.exports = fp(async (fastify, options) => {
   fastify.get(
     `${options.prefix}/admin/getRolePermissionList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         query: {
           type: 'object',
@@ -117,14 +118,14 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { id } = request.query;
-      return await fastify.account.services.permission.getRolePermissionList({ roleId: id });
+      return await services.permission.getRolePermissionList({ roleId: id });
     }
   );
 
   fastify.post(
     `${options.prefix}/admin/saveRolePermissionList`,
     {
-      onRequest: [fastify.account.authenticate.user, fastify.account.authenticate.admin],
+      onRequest: [authenticate.user, authenticate.admin],
       schema: {
         roleId: { type: 'string' },
         applications: {
@@ -138,7 +139,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      await fastify.account.services.permission.saveRolePermissionList(request.body);
+      await services.permission.saveRolePermissionList(request.body);
       return {};
     }
   );
