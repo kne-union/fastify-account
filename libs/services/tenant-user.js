@@ -116,8 +116,8 @@ module.exports = fp(async (fastify, options) => {
     const currentTenant = currentTenantUser && tenantList.find(({ uuid }) => uuid === currentTenantUser.tenantId);
 
     return {
-      currentTenant: currentTenant && Object.assign({}, currentTenant, { id: currentTenant.uuid }),
-      currentTenantUser: currentTenantUser && Object.assign({}, currentTenantUser, { id: currentTenantUser.uuid }),
+      currentTenant: currentTenant && Object.assign({}, currentTenant.get({ plain: true }), { id: currentTenant.uuid }),
+      currentTenantUser: currentTenantUser && Object.assign({}, currentTenantUser.get({ plain: true }), { id: currentTenantUser.uuid }),
       tenantList: tenantList.map(item => {
         return Object.assign({}, item.get({ plain: true }), { id: item.uuid });
       }),
@@ -148,7 +148,7 @@ module.exports = fp(async (fastify, options) => {
     const tenant = await services.tenant.getTenant({ id: user.currentTenantId });
 
     const tenantUser = await models.tenantUser.findOne({
-      attributes: ['uuid', 'avatar', 'description', 'phone', 'email'],
+      attributes: ['uuid', 'avatar', 'name', 'description', 'phone', 'email'],
       include: [
         {
           attributes: ['id', 'name'],
