@@ -46,16 +46,12 @@ module.exports = fp(async (fastify, options) => {
       const output = [];
       const core = (list, node) => {
         const { children, other } = groupBy(list, item => (item.pid === node.id ? 'children' : 'other'));
-        if (!(other && other.length > 0)) {
-          return;
-        }
         if (!(children && children.length > 0)) {
           node.id !== 0 && output.push(node);
           return;
         }
-
         children.forEach(node => {
-          core(other, node);
+          core(other || [], node);
         });
         return output;
       };
