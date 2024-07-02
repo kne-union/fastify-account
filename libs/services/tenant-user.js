@@ -257,7 +257,7 @@ module.exports = fp(async (fastify, options) => {
     }
   };
 
-  const addTenantUser = async ({ tenantId, roleIds, orgIds, userId, ...tenantUser }) => {
+  const addTenantUser = async ({ tenantId, roleIds, orgIds, userId, ...tenantUser }, transaction) => {
     const tenant = await services.tenant.getTenant({ id: tenantId });
 
     const currentAccountNumber = await models.tenantUser.count({
@@ -270,7 +270,7 @@ module.exports = fp(async (fastify, options) => {
 
     await checkTenantUserInfoValidate({ tenantId, roleIds, orgIds, userId });
 
-    const t = await fastify.sequelize.instance.transaction();
+    const t = transaction || (await fastify.sequelize.instance.transaction());
 
     if (
       (await models.tenantUser.count({
@@ -319,9 +319,9 @@ module.exports = fp(async (fastify, options) => {
         { transaction: t }
       );
 
-      await t.commit();
+      !transaction && (await t.commit());
     } catch (e) {
-      await t.rollback();
+      !transaction && (await t.rollback());
       throw e;
     }
   };
@@ -466,6 +466,69 @@ module.exports = fp(async (fastify, options) => {
     };
   };
 
+  const includeTenantUserBatch = async ({ tenantId, list }) => {
+    await services.tenant.getTenant({ id: tenantId });
+    const errors = [],
+      successes = [];
+    for (let current of list) {
+      if (!(current.phone || current.email)) {
+        errors.push({ item: current, msg: '电话和邮箱不能同时为空' });
+        continue;
+      }
+      const currentQuery = [];
+      if (current.phone) {
+        currentQuery.push({ phone: current.phone });
+      }
+      if (current.email) {
+        currentQuery.push({ email: current.email });
+      }
+
+      if (
+        (await models.tenantUser.count({
+          where: {
+            [Op.or]: currentQuery
+          }
+        })) > 0
+      ) {
+        errors.push({ item: current, msg: '租户用户已经存在，或手机邮箱和已有租户用户重复' });
+        continue;
+      }
+      const t = await fastify.sequelize.instance.transaction();
+      try {
+        if (await services.user.accountIsExists(current, {})) {
+          errors.push({ item: current, msg: '用户已经存在，已发送加入租户邀请等待对方同意' });
+          continue;
+        }
+
+        const user = await services.user.addUser(
+          {
+            nickname: current.name,
+            phone: current.phone,
+            email: current.email,
+            password: services.account.md5(current.password || options.defaultPassword),
+            status: 1
+          },
+          { transaction: t }
+        );
+        await services.tenantUser.addTenantUser(
+          {
+            tenantId,
+            userId: user.id,
+            ...current
+          },
+          { transaction: t }
+        );
+        successes.push({ item: current });
+        await t.commit();
+      } catch (e) {
+        await t.rollback();
+        errors.push({ item: current, msg: e.message });
+      }
+    }
+
+    return { errors, successes };
+  };
+
   services.tenantUser = {
     getUserTenant,
     getTenantUserPermissionList,
@@ -477,6 +540,7 @@ module.exports = fp(async (fastify, options) => {
     deleteTenantUser,
     closeTenantUser,
     openTenantUser,
-    getTenantUserList
+    getTenantUserList,
+    includeTenantUserBatch
   };
 });

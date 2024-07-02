@@ -1,6 +1,7 @@
 const fp = require('fastify-plugin');
 const dayjs = require('dayjs');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 function generateRandom6DigitNumber() {
   const randomNumber = Math.random() * 1000000;
@@ -74,6 +75,12 @@ module.exports = fp(async (fastify, options) => {
       password: hash,
       salt
     };
+  };
+
+  const md5 = value => {
+    const hash = crypto.createHash('md5');
+    hash.update(value);
+    return hash.digest('hex');
   };
 
   const resetPassword = async ({ userId, password }) => {
@@ -198,6 +205,7 @@ module.exports = fp(async (fastify, options) => {
   };
 
   services.account = {
+    md5,
     login,
     register,
     sendEmailCode,

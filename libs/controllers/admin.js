@@ -34,7 +34,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const userInfo = request.body;
-      await services.admin.addUser(Object.assign({}, userInfo, { password: options.defaultPassword }));
+      await services.admin.addUser(Object.assign({}, userInfo, { password: services.account.md5(options.defaultPassword) }));
       return {};
     }
   );
