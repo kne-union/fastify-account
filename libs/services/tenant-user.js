@@ -257,7 +257,7 @@ module.exports = fp(async (fastify, options) => {
     }
   };
 
-  const addTenantUser = async ({ tenantId, roleIds, orgIds, userId, ...tenantUser }, transaction) => {
+  const addTenantUser = async ({ tenantId, roleIds = [], orgIds = [], userId, ...tenantUser }) => {
     const tenant = await services.tenant.getTenant({ id: tenantId });
 
     const currentAccountNumber = await models.tenantUser.count({
@@ -270,7 +270,7 @@ module.exports = fp(async (fastify, options) => {
 
     await checkTenantUserInfoValidate({ tenantId, roleIds, orgIds, userId });
 
-    const t = transaction || (await fastify.sequelize.instance.transaction());
+    const t = await fastify.sequelize.instance.transaction();
 
     if (
       (await models.tenantUser.count({
@@ -319,9 +319,9 @@ module.exports = fp(async (fastify, options) => {
         { transaction: t }
       );
 
-      !transaction && (await t.commit());
+      await t.commit();
     } catch (e) {
-      !transaction && (await t.rollback());
+      await t.rollback();
       throw e;
     }
   };
@@ -493,36 +493,39 @@ module.exports = fp(async (fastify, options) => {
         errors.push({ item: current, msg: '租户用户已经存在，或手机邮箱和已有租户用户重复' });
         continue;
       }
-      const t = await fastify.sequelize.instance.transaction();
-      try {
-        if (await services.user.accountIsExists(current, {})) {
-          errors.push({ item: current, msg: '用户已经存在，已发送加入租户邀请等待对方同意' });
-          continue;
-        }
 
-        const user = await services.user.addUser(
-          {
-            nickname: current.name,
-            phone: current.phone,
-            email: current.email,
-            password: services.account.md5(current.password || options.defaultPassword),
-            status: 1
-          },
-          { transaction: t }
-        );
+      if (await services.user.accountIsExists(current, {})) {
+        errors.push({ item: current, msg: '用户已经存在，已发送加入租户邀请等待对方同意' });
+        continue;
+      }
+
+      try {
+        const user = await services.user.addUser({
+          nickname: current.name,
+          phone: current.phone,
+          email: current.email,
+          password: services.account.md5(current.password || options.defaultPassword),
+          status: 1
+        });
+        const rootOrg = await services.tenantOrg.getTenantOrgRoot({ tenantId });
         await services.tenantUser.addTenantUser(
-          {
-            tenantId,
-            userId: user.id,
-            ...current
-          },
-          { transaction: t }
+          Object.assign(
+            {},
+            {
+              orgIds: [rootOrg.id],
+              roleIds: []
+            },
+            {
+              tenantId,
+              userId: user.id,
+              ...current
+            }
+          )
         );
         successes.push({ item: current });
-        await t.commit();
       } catch (e) {
-        await t.rollback();
         errors.push({ item: current, msg: e.message });
+        throw e;
       }
     }
 
