@@ -54,7 +54,7 @@ module.exports = fp(async (fastify, options) => {
     );
   };
 
-  const addUser = async ({ avatar, nickname, gender, birthday, description, phone, email, password, status }) => {
+  const addUser = async ({ avatar, nickname, gender, birthday, description, phone, email, password, status }, transaction) => {
     if ((await accountIsExists({ phone, email })) > 0) {
       throw new Error('手机号或者邮箱都不能重复');
     }
@@ -62,18 +62,21 @@ module.exports = fp(async (fastify, options) => {
       throw new Error('密码不能为空');
     }
     const account = await models.userAccount.create(await services.account.passwordEncryption(password));
-    const user = await models.user.create({
-      avatar,
-      nickname,
-      gender,
-      birthday,
-      description,
-      phone,
-      email,
-      status,
-      userAccountId: account.uuid
-    });
-    await account.update({ belongToUserId: user.uuid });
+    const user = await models.user.create(
+      {
+        avatar,
+        nickname,
+        gender,
+        birthday,
+        description,
+        phone,
+        email,
+        status,
+        userAccountId: account.uuid
+      },
+      { transaction }
+    );
+    await account.update({ belongToUserId: user.uuid }, { transaction });
 
     return Object.assign({}, user.get({ pain: true }), { id: user.uuid });
   };
