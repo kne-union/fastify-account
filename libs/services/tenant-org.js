@@ -74,11 +74,24 @@ module.exports = fp(async (fastify, options) => {
     return data.map(item => item.get({ plain: true }));
   };
 
+  const getTenantOrgRoot = async ({ tenantId }) => {
+    const data = await models.tenantOrg.findOne({
+      where: { tenantId, pid: 0 }
+    });
+
+    if (!data) {
+      throw new Error('该租户不存在根节点');
+    }
+
+    return data.get({ plain: true });
+  };
+
   services.tenantOrg = {
     getTenantOrgInstance,
     addTenantOrg,
     saveTenantOrg,
     deleteTenantOrg,
-    getTenantOrgList
+    getTenantOrgList,
+    getTenantOrgRoot
   };
 });
