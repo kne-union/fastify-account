@@ -17,17 +17,15 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
-  const checkSuperAdmin = async user => {
-    if (
+  const checkIsSuperAdmin = async user => {
+    return (
       (await models.adminRole.count({
         where: {
           userId: user.id,
           role: ROLE['SuperAdmin']
         }
       })) === 0
-    ) {
-      throw new Error('不能执行该操作，需要超级管理员权限');
-    }
+    );
   };
 
   const addUser = async ({ avatar, nickname, phone, email, password, description }) => {
@@ -72,7 +70,7 @@ module.exports = fp(async (fastify, options) => {
   services.admin = {
     initSuperAdmin,
     setSuperAdmin,
-    checkSuperAdmin,
+    checkIsSuperAdmin,
     generateTenantAdminVerifyCode,
     verifyTenantAdmin,
     addUser,

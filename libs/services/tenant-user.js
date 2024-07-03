@@ -213,6 +213,7 @@ module.exports = fp(async (fastify, options) => {
   const checkTenantUserInfoValidate = async ({ tenantId, roleIds, orgIds, userId }) => {
     await services.tenant.getTenant({ id: tenantId });
     if (
+      roleIds &&
       roleIds.length > 0 &&
       (await models.tenantRole.count({
         where: {
@@ -224,7 +225,7 @@ module.exports = fp(async (fastify, options) => {
     ) {
       throw new Error('包含租户不存在的角色');
     }
-    if (orgIds.length === 0) {
+    if (orgIds && orgIds.length === 0) {
       const tenantOrg = await models.tenantOrg.findOne({
         where: {
           pid: 0,
@@ -234,10 +235,11 @@ module.exports = fp(async (fastify, options) => {
       if (!tenantOrg) {
         throw new Error('租户根节点不存在');
       }
-      orgIds = [tenantOrg.id];
     }
 
     if (
+      orgIds &&
+      orgIds.length > 0 &&
       (await models.tenantOrg.count({
         where: {
           tenantId,
@@ -257,7 +259,7 @@ module.exports = fp(async (fastify, options) => {
     }
   };
 
-  const addTenantUser = async ({ tenantId, roleIds = [], orgIds = [], userId, ...tenantUser }) => {
+  const addTenantUser = async ({ tenantId, roleIds, orgIds, userId, ...tenantUser }) => {
     const tenant = await services.tenant.getTenant({ id: tenantId });
 
     const currentAccountNumber = await models.tenantUser.count({
@@ -363,43 +365,47 @@ module.exports = fp(async (fastify, options) => {
       });
       await currentTenantUser.save({ transaction: t });
       // 修改角色
-      const needDeleteTenantRole = tenantRoleIds.filter(targetId => roleIds.indexOf(targetId) === -1);
-      const needAddTenantRole = roleIds.filter(targetId => tenantRoleIds.indexOf(targetId) === -1);
-      await models.tenantUserRole.destroy({
-        where: {
-          tenantId,
-          tenantUserId: currentTenantUser.uuid,
-          tenantRoleId: {
-            [Op.in]: needDeleteTenantRole
-          }
-        },
-        transaction: t
-      });
-      await models.tenantUserRole.bulkCreate(
-        needAddTenantRole.map(tenantRoleId => {
-          return { tenantId, tenantUserId: currentTenantUser.uuid, tenantRoleId };
-        }),
-        { transaction: t }
-      );
+      if (roleIds) {
+        const needDeleteTenantRole = tenantRoleIds.filter(targetId => roleIds.indexOf(targetId) === -1);
+        const needAddTenantRole = roleIds.filter(targetId => tenantRoleIds.indexOf(targetId) === -1);
+        await models.tenantUserRole.destroy({
+          where: {
+            tenantId,
+            tenantUserId: currentTenantUser.uuid,
+            tenantRoleId: {
+              [Op.in]: needDeleteTenantRole
+            }
+          },
+          transaction: t
+        });
+        await models.tenantUserRole.bulkCreate(
+          needAddTenantRole.map(tenantRoleId => {
+            return { tenantId, tenantUserId: currentTenantUser.uuid, tenantRoleId };
+          }),
+          { transaction: t }
+        );
+      }
       //修改组织
-      const needDeleteTenantOrg = tenantOrgIds.filter(targetId => orgIds.indexOf(targetId) === -1);
-      const needAddTenantOrg = orgIds.filter(targetId => tenantOrgIds.indexOf(targetId) === -1);
-      await models.tenantUserOrg.destroy({
-        where: {
-          tenantId,
-          tenantUserId: currentTenantUser.uuid,
-          tenantOrgId: {
-            [Op.in]: needDeleteTenantOrg
-          }
-        },
-        transaction: t
-      });
-      await models.tenantUserOrg.bulkCreate(
-        needAddTenantOrg.map(tenantOrgId => {
-          return { tenantId, tenantUserId: currentTenantUser.uuid, tenantOrgId };
-        }),
-        { transaction: t }
-      );
+      if (orgIds) {
+        const needDeleteTenantOrg = tenantOrgIds.filter(targetId => orgIds.indexOf(targetId) === -1);
+        const needAddTenantOrg = orgIds.filter(targetId => tenantOrgIds.indexOf(targetId) === -1);
+        await models.tenantUserOrg.destroy({
+          where: {
+            tenantId,
+            tenantUserId: currentTenantUser.uuid,
+            tenantOrgId: {
+              [Op.in]: needDeleteTenantOrg
+            }
+          },
+          transaction: t
+        });
+        await models.tenantUserOrg.bulkCreate(
+          needAddTenantOrg.map(tenantOrgId => {
+            return { tenantId, tenantUserId: currentTenantUser.uuid, tenantOrgId };
+          }),
+          { transaction: t }
+        );
+      }
       await t.commit();
     } catch (e) {
       await t.rollback();
