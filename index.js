@@ -2,6 +2,7 @@ const fp = require('fastify-plugin');
 const packageJson = require('./package.json');
 const path = require('path');
 const merge = require('lodash/merge');
+const { Unauthorized } = require('http-errors');
 
 module.exports = fp(
   async function (fastify, options) {
@@ -46,7 +47,9 @@ module.exports = fp(
               request.tenantInfo = await fastify.account.services.tenantUser.getTenantUserByUserId(request.userInfo);
             },
             admin: async request => {
-              request.adminInfo = await fastify.account.services.admin.checkSuperAdmin(request.userInfo);
+              if (!(await fastify.account.services.admin.checkIsSuperAdmin(request.userInfo))) {
+                throw Unauthorized('不能执行该操作，需要超级管理员权限');
+              }
             }
           }
         ]
