@@ -24,7 +24,7 @@ module.exports = fp(async (fastify, options) => {
           userId: user.id,
           role: ROLE['SuperAdmin']
         }
-      })) === 0
+      })) > 0
     );
   };
 
