@@ -201,14 +201,30 @@ module.exports = fp(async (fastify, options) => {
         query: {
           type: 'object',
           properties: {
-            tenantId: { type: 'string' }
+            tenantId: { type: 'string' },
+            filter: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' }
+              }
+            },
+            currentPage: { type: 'number' },
+            perPage: { type: 'number' }
           }
         }
       }
     },
     async request => {
-      const { tenantId } = request.query;
-      return await services.tenantUser.getTenantUserList({ tenantId });
+      const { filter, tenantId, currentPage, perPage } = Object.assign(
+        {},
+        {
+          filter: {},
+          currentPage: 1,
+          perPage: 20
+        },
+        request.query
+      );
+      return await services.tenantUser.getTenantUserList({ tenantId, filter, currentPage, perPage });
     }
   );
 
