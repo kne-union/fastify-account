@@ -22,7 +22,7 @@ npm i --save @kne/fastify-account
 ### API
 
 ---
-title: "@kne/fastify-account v1.0.0-alpha.10"
+title: "@kne/fastify-account v1.0.0-alpha.11"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -42,7 +42,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.10</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.11</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -87,19 +87,8 @@ fastify的用户管理账号等实现
   "type": "object",
   "properties": {
     "code": {
-      "type": "number"
-    },
-    "data": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "string",
-          "description": "验证码"
-        }
-      }
-    },
-    "msg": {
-      "type": "string"
+      "type": "string",
+      "description": "验证码"
     }
   }
 }
@@ -117,10 +106,7 @@ Status Code **200**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» code|number|false|none|none|
-|» data|object|false|none|none|
-|»» code|string|false|none|验证码|
-|» msg|string|false|none|none|
+|» code|string|false|none|验证码|
 
 <aside class="success">
 This operation does not require authentication
@@ -431,6 +417,48 @@ This operation does not require authentication
 `GET /api/v1/account/admin/getSuperAdminInfo`
 
 <h3 id="get__api_v1_account_admin_getsuperadmininfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_setSuperAdmin
+
+`POST /api/v1/account/admin/setSuperAdmin`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "status",
+    "userId"
+  ],
+  "properties": {
+    "status": {
+      "type": "boolean"
+    },
+    "userId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_setsuperadmin-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» status|body|boolean|true|none|
+|» userId|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_setsuperadmin-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1988,6 +2016,28 @@ This operation does not require authentication
 `GET /api/v1/account/tenant/getTenantUserInfo`
 
 <h3 id="get__api_v1_account_tenant_gettenantuserinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_tenant_getTenantUserList
+
+`GET /api/v1/account/tenant/getTenantUserList`
+
+<h3 id="get__api_v1_account_tenant_gettenantuserlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|filter|query|object|false|none|
+|currentPage|query|number|false|none|
+|perPage|query|number|false|none|
+
+<h3 id="get__api_v1_account_tenant_gettenantuserlist-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
