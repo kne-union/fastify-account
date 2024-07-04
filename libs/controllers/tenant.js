@@ -22,6 +22,41 @@ module.exports = fp(async (fastify, options) => {
   );
 
   fastify.get(
+    `${options.prefix}/tenant/getTenantUserList`,
+    {
+      onRequest: [authenticate.user, authenticate.tenant],
+      schema: {
+        query: {
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' }
+              }
+            },
+            currentPage: { type: 'number' },
+            perPage: { type: 'number' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { id: tenantId } = request.tenantInfo.tenant;
+      const { filter, currentPage, perPage } = Object.assign(
+        {},
+        {
+          filter: {},
+          currentPage: 1,
+          perPage: 20
+        },
+        request.query
+      );
+      return await services.tenantUser.getTenantUserList({ tenantId, currentPage, perPage, filter });
+    }
+  );
+
+  fastify.get(
     `${options.prefix}/tenant/orgList`,
     {
       onRequest: [authenticate.user, authenticate.tenant]

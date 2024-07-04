@@ -19,14 +19,7 @@ module.exports = fp(async (fastify, options) => {
                 schema: {
                   type: 'object',
                   properties: {
-                    code: { type: 'number' },
-                    data: {
-                      type: 'object',
-                      properties: {
-                        code: { type: 'string', description: '验证码' }
-                      }
-                    },
-                    msg: { type: 'string' }
+                    code: { type: 'string', description: '验证码' }
                   }
                 }
               }

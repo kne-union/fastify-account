@@ -2,7 +2,7 @@ const fp = require('fastify-plugin');
 
 const ROLE = {
   SuperAdmin: 'SuperAdmin',
-  TenantAdmin: 'TenantAdmin'
+  Common: 'Common'
 };
 
 module.exports = fp(async (fastify, options) => {
@@ -41,7 +41,7 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const setSuperAdmin = async targetUser => {
-    const user = await services.user.getUserInfo(targetUser);
+    const user = await services.user.getUser(targetUser);
     if (
       (await models.adminRole.count({
         where: {
@@ -59,9 +59,30 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
-  const generateTenantAdminVerifyCode = async () => {};
+  const cancelSuperAdmin = async targetUser => {
+    const user = await services.user.getUser(targetUser);
+    if (
+      !(await models.adminRole.count({
+        where: {
+          userId: user.id,
+          role: ROLE['SuperAdmin']
+        }
+      })) > 0
+    ) {
+      throw new Error('当前用户不是超级管理员');
+    }
 
-  const verifyTenantAdmin = async () => {};
+    await models.adminRole.update(
+      {
+        role: ROLE['Common']
+      },
+      {
+        where: {
+          userId: user.id
+        }
+      }
+    );
+  };
 
   const resetUserPassword = async ({ userId, password }) => {
     await services.account.resetPassword({ userId, password });
@@ -70,9 +91,8 @@ module.exports = fp(async (fastify, options) => {
   services.admin = {
     initSuperAdmin,
     setSuperAdmin,
+    cancelSuperAdmin,
     checkIsSuperAdmin,
-    generateTenantAdminVerifyCode,
-    verifyTenantAdmin,
     addUser,
     resetUserPassword
   };
