@@ -9,7 +9,7 @@ module.exports = fp(async (fastify, options) => {
       onRequest: [authenticate.user]
     },
     async request => {
-      await services.admin.initSuperAdmin(await services.user.getUser(request.authenticatePayload));
+      await services.admin.initSuperAdmin(request.userInfo);
       return {};
     }
   );
@@ -21,6 +21,28 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       return { userInfo: request.userInfo };
+    }
+  );
+
+  fastify.post(
+    `${options.prefix}/admin/setSuperAdmin`,
+    {
+      onRequest: [authenticate.user, authenticate.admin],
+      schema: {
+        body: {
+          type: 'object',
+          required: ['status', 'userId'],
+          properties: {
+            status: { type: 'boolean' },
+            userId: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { status, userId } = request.body;
+      await services.admin[status ? 'setSuperAdmin' : 'cancelSuperAdmin'](await services.user.getUser({ id: userId }));
+      return {};
     }
   );
 

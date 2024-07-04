@@ -456,12 +456,23 @@ module.exports = fp(async (fastify, options) => {
     await tenantUser.save();
   };
 
-  const getTenantUserList = async ({ tenantId }) => {
+  const getTenantUserList = async ({ tenantId, currentPage, perPage, filter }) => {
+    const queryFilter = {};
     await services.tenant.getTenant({ id: tenantId });
+
+    ['name', 'phone', 'email'].forEach(key => {
+      if (filter && filter[key]) {
+        queryFilter[key] = {
+          [Op.like]: `%${filter[key]}%`
+        };
+      }
+    });
 
     const { count, rows } = await fastify.account.models.tenantUser.findAndCountAll({
       include: [fastify.account.models.tenantRole, fastify.account.models.tenantOrg, fastify.account.models.user],
-      where: { tenantId }
+      where: Object.assign({}, queryFilter, { tenantId }),
+      offset: currentPage * (currentPage - 1),
+      limit: perPage
     });
 
     return {
