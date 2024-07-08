@@ -11,7 +11,7 @@ module.exports = fp(async (fastify, options) => {
     }
     const { count, rows } = await models.tenantRole.findAndCountAll({
       where: Object.assign({}, queryFilter, { tenantId }),
-      offset: currentPage * (currentPage - 1),
+      offset: perPage * (currentPage - 1),
       limit: perPage
     });
 

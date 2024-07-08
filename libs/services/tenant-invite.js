@@ -5,7 +5,7 @@ module.exports = fp(async (fastify, options) => {
     const queryFilter = {};
     const { count, rows } = await models.tenantToken.findAndCountAll({
       where: Object.assign({}, queryFilter, { tenantId, type: 10 }),
-      offset: currentPage * (currentPage - 1),
+      offset: perPage * (currentPage - 1),
       limit: perPage
     });
     return { pageData: rows, totalCount: count };
