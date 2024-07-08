@@ -471,7 +471,7 @@ module.exports = fp(async (fastify, options) => {
     const { count, rows } = await fastify.account.models.tenantUser.findAndCountAll({
       include: [fastify.account.models.tenantRole, fastify.account.models.tenantOrg, fastify.account.models.user],
       where: Object.assign({}, queryFilter, { tenantId }),
-      offset: currentPage * (currentPage - 1),
+      offset: perPage * (currentPage - 1),
       limit: perPage
     });
 

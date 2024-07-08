@@ -98,7 +98,7 @@ module.exports = fp(async (fastify, options) => {
 
     const { count, rows } = await models.tenant.findAndCountAll({
       where: queryFilter,
-      offset: currentPage * (currentPage - 1),
+      offset: perPage * (currentPage - 1),
       limit: perPage
     });
 
