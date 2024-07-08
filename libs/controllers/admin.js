@@ -66,7 +66,10 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
-        query: {}
+        query: {
+          perPage: { type: 'number' },
+          currentPage: { type: 'number' }
+        }
       }
     },
     async request => {

@@ -1,5 +1,5 @@
 ---
-title: "@kne/fastify-account v1.0.0-alpha.12"
+title: "@kne/fastify-account v1.0.0-alpha.13"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -19,7 +19,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.12</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.13</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -477,6 +477,13 @@ This operation does not require authentication
 ## get__api_v1_account_admin_getAllUserList
 
 `GET /api/v1/account/admin/getAllUserList`
+
+<h3 id="get__api_v1_account_admin_getalluserlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|perPage|query|number|false|none|
+|currentPage|query|number|false|none|
 
 <h3 id="get__api_v1_account_admin_getalluserlist-responses">Responses</h3>
 
@@ -1091,6 +1098,8 @@ This operation does not require authentication
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |tenantId|query|string|true|none|
+|perPage|query|number|false|none|
+|currentPage|query|number|false|none|
 |filter|query|object|false|none|
 
 <h3 id="get__api_v1_account_admin_getrolelist-responses">Responses</h3>
