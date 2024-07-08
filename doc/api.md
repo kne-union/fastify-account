@@ -27,424 +27,6 @@ fastify的用户管理账号等实现
 
 <h1 id="-kne-fastify-account-default">Default</h1>
 
-## post__api_v1_account_sendEmailCode
-
-`POST /api/v1/account/sendEmailCode`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "email"
-  ],
-  "properties": {
-    "email": {
-      "type": "string",
-      "description": "邮箱"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_sendemailcode-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» email|body|string|true|邮箱|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "code": {
-      "type": "string",
-      "description": "验证码"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_sendemailcode-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
-
-<h3 id="post__api_v1_account_sendemailcode-responseschema">Response Schema</h3>
-
-Status Code **200**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» code|string|false|none|验证码|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_sendSMSCode
-
-`POST /api/v1/account/sendSMSCode`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "phone"
-  ],
-  "properties": {
-    "phone": {
-      "type": "string",
-      "description": "电话"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_sendsmscode-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» phone|body|string|true|电话|
-
-<h3 id="post__api_v1_account_sendsmscode-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_validateCode
-
-`POST /api/v1/account/validateCode`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "name",
-    "type",
-    "code"
-  ],
-  "properties": {
-    "name": {
-      "type": "string",
-      "description": "被验证的账号，手机或邮箱"
-    },
-    "type": {
-      "type": "number",
-      "description": "0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员"
-    },
-    "code": {
-      "type": "string",
-      "description": "接受到的验证码"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_validatecode-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» name|body|string|true|被验证的账号，手机或邮箱|
-|» type|body|number|true|0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员|
-|» code|body|string|true|接受到的验证码|
-
-<h3 id="post__api_v1_account_validatecode-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_accountIsExists
-
-`POST /api/v1/account/accountIsExists`
-
-> Body parameter
-
-```json
-{
-  "oneOf": [
-    {
-      "type": "object",
-      "required": [
-        "phone"
-      ],
-      "properties": {
-        "phone": {
-          "type": "string"
-        }
-      }
-    },
-    {
-      "type": "object",
-      "required": [
-        "email"
-      ],
-      "properties": {
-        "email": {
-          "type": "string"
-        }
-      }
-    }
-  ]
-}
-```
-
-<h3 id="post__api_v1_account_accountisexists-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|any|false|none|
-
-<h3 id="post__api_v1_account_accountisexists-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_register
-
-`POST /api/v1/account/register`
-
-> Body parameter
-
-```json
-{
-  "oneOf": [
-    {
-      "type": "object",
-      "required": [
-        "phone",
-        "password",
-        "code"
-      ],
-      "properties": {
-        "avatar": {
-          "type": "string"
-        },
-        "phone": {
-          "type": "string"
-        },
-        "code": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "invitationCode": {
-          "type": "string"
-        },
-        "nickname": {
-          "type": "string"
-        },
-        "gender": {
-          "type": "string"
-        },
-        "birthday": {
-          "type": "string",
-          "format": "date"
-        },
-        "description": {
-          "type": "string"
-        }
-      }
-    },
-    {
-      "type": "object",
-      "required": [
-        "email",
-        "password",
-        "code"
-      ],
-      "properties": {
-        "avatar": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "code": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "invitationCode": {
-          "type": "string"
-        },
-        "nickname": {
-          "type": "string"
-        },
-        "gender": {
-          "type": "string"
-        },
-        "birthday": {
-          "type": "string",
-          "format": "date"
-        },
-        "description": {
-          "type": "string"
-        }
-      }
-    }
-  ]
-}
-```
-
-<h3 id="post__api_v1_account_register-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|any|false|none|
-
-<h3 id="post__api_v1_account_register-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_login
-
-`POST /api/v1/account/login`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "username",
-    "password"
-  ],
-  "properties": {
-    "username": {
-      "type": "string"
-    },
-    "password": {
-      "type": "string"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_login-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» username|body|string|true|none|
-|» password|body|string|true|none|
-
-<h3 id="post__api_v1_account_login-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_initSuperAdmin
-
-`POST /api/v1/account/initSuperAdmin`
-
-<h3 id="post__api_v1_account_initsuperadmin-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## get__api_v1_account_admin_getSuperAdminInfo
-
-`GET /api/v1/account/admin/getSuperAdminInfo`
-
-<h3 id="get__api_v1_account_admin_getsuperadmininfo-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_admin_setSuperAdmin
-
-`POST /api/v1/account/admin/setSuperAdmin`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "status",
-    "userId"
-  ],
-  "properties": {
-    "status": {
-      "type": "boolean"
-    },
-    "userId": {
-      "type": "string"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_admin_setsuperadmin-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» status|body|boolean|true|none|
-|» userId|body|string|true|none|
-
-<h3 id="post__api_v1_account_admin_setsuperadmin-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
 ## post__api_v1_account_admin_addUser
 
 `POST /api/v1/account/admin/addUser`
@@ -659,60 +241,6 @@ This operation does not require authentication
 |» id|body|string|true|none|
 
 <h3 id="post__api_v1_account_admin_openuser-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_admin_addApplication
-
-`POST /api/v1/account/admin/addApplication`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "name",
-    "code"
-  ],
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "url": {
-      "type": "string"
-    },
-    "avatar": {
-      "type": "string"
-    },
-    "code": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_admin_addapplication-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» name|body|string|true|none|
-|» url|body|string|false|none|
-|» avatar|body|string|false|none|
-|» code|body|string|true|none|
-|» description|body|string|false|none|
-
-<h3 id="post__api_v1_account_admin_addapplication-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -2092,6 +1620,704 @@ This operation does not require authentication
 |» tenantId|body|string|true|none|
 
 <h3 id="post__api_v1_account_setcurrenttenantid-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+<h1 id="-kne-fastify-account--">账号</h1>
+
+## post__api_v1_account_sendEmailCode
+
+`POST /api/v1/account/sendEmailCode`
+
+*发送邮箱验证码*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "email"
+  ],
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "邮箱"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_sendemailcode-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» email|body|string|true|邮箱|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "验证码"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_sendemailcode-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_sendemailcode-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» code|string|false|none|验证码|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_sendSMSCode
+
+`POST /api/v1/account/sendSMSCode`
+
+*发送短信验证码*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "phone"
+  ],
+  "properties": {
+    "phone": {
+      "type": "string",
+      "description": "电话"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_sendsmscode-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» phone|body|string|true|电话|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "验证码"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_sendsmscode-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_sendsmscode-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» code|string|false|none|验证码|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_validateCode
+
+`POST /api/v1/account/validateCode`
+
+*验证码验证*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "name",
+    "type",
+    "code"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "被验证的账号，手机或邮箱"
+    },
+    "type": {
+      "type": "number",
+      "description": "0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员"
+    },
+    "code": {
+      "type": "string",
+      "description": "接受到的验证码"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_validatecode-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» name|body|string|true|被验证的账号，手机或邮箱|
+|» type|body|number|true|0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员|
+|» code|body|string|true|接受到的验证码|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+<h3 id="post__api_v1_account_validatecode-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_validatecode-responseschema">Response Schema</h3>
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_accountIsExists
+
+`POST /api/v1/account/accountIsExists`
+
+*账号是否已存在*
+
+> Body parameter
+
+```json
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "phone"
+      ],
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "电话"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "邮箱"
+        }
+      }
+    }
+  ]
+}
+```
+
+<h3 id="post__api_v1_account_accountisexists-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|any|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "isExists": {
+      "type": "boolean",
+      "description": "true已存在，false不存在"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_accountisexists-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_accountisexists-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» isExists|boolean|false|none|true已存在，false不存在|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_register
+
+`POST /api/v1/account/register`
+
+*注册账号*
+
+> Body parameter
+
+```json
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "phone",
+        "password",
+        "code"
+      ],
+      "properties": {
+        "avatar": {
+          "type": "string",
+          "description": "头像图片id"
+        },
+        "phone": {
+          "type": "string",
+          "description": "电话"
+        },
+        "code": {
+          "type": "string",
+          "description": "验证码"
+        },
+        "password": {
+          "type": "string",
+          "description": "密码（需要md5加密）"
+        },
+        "invitationCode": {
+          "type": "string",
+          "description": "邀请码，用来默认加入租户"
+        },
+        "nickname": {
+          "type": "string",
+          "description": "昵称"
+        },
+        "gender": {
+          "type": "string",
+          "description": "性别"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date",
+          "description": "出生日期"
+        },
+        "description": {
+          "type": "string",
+          "description": "个人简介"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "email",
+        "password",
+        "code"
+      ],
+      "properties": {
+        "avatar": {
+          "type": "string",
+          "description": "头像图片id"
+        },
+        "email": {
+          "type": "string",
+          "description": "邮箱"
+        },
+        "code": {
+          "type": "string",
+          "description": "验证码"
+        },
+        "password": {
+          "type": "string",
+          "description": "密码（需要md5加密）"
+        },
+        "invitationCode": {
+          "type": "string",
+          "description": "邀请码，用来默认加入租户"
+        },
+        "nickname": {
+          "type": "string",
+          "description": "昵称"
+        },
+        "gender": {
+          "type": "string",
+          "description": "性别"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date",
+          "description": "出生日期"
+        },
+        "description": {
+          "type": "string",
+          "description": "个人简介"
+        }
+      }
+    }
+  ]
+}
+```
+
+<h3 id="post__api_v1_account_register-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|any|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+<h3 id="post__api_v1_account_register-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_register-responseschema">Response Schema</h3>
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_login
+
+`POST /api/v1/account/login`
+
+*登录*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "username",
+    "password"
+  ],
+  "properties": {
+    "username": {
+      "type": "string",
+      "description": "用户名"
+    },
+    "password": {
+      "type": "string",
+      "description": "密码"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_login-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» username|body|string|true|用户名|
+|» password|body|string|true|密码|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "用户token"
+    },
+    "currentTenantId": {
+      "type": "string",
+      "description": "当前租户id"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_login-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_login-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» token|string|false|none|用户token|
+|» currentTenantId|string|false|none|当前租户id|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+<h1 id="-kne-fastify-account--">管理后台</h1>
+
+## post__api_v1_account_initSuperAdmin
+
+`POST /api/v1/account/initSuperAdmin`
+
+*初始化用户为管理员*
+
+用于系统初始化时，设置第一个用户，只能使用一次，其他用户由该用户创建
+
+<h3 id="post__api_v1_account_initsuperadmin-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_admin_getSuperAdminInfo
+
+`GET /api/v1/account/admin/getSuperAdminInfo`
+
+*获取管理员信息*
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "userInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "用户id"
+        },
+        "nickname": {
+          "type": "string",
+          "description": "用户昵称"
+        },
+        "email": {
+          "type": "string",
+          "description": "邮箱"
+        },
+        "phone": {
+          "type": "string",
+          "description": "电话"
+        },
+        "gender": {
+          "type": "string",
+          "description": "性别"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date",
+          "description": "出生日期"
+        },
+        "description": {
+          "type": "string",
+          "description": "个人简介"
+        },
+        "currentTenantId": {
+          "type": "string",
+          "description": "当前租户ID"
+        },
+        "status": {
+          "type": "number",
+          "description": "状态"
+        }
+      }
+    }
+  }
+}
+```
+
+<h3 id="get__api_v1_account_admin_getsuperadmininfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="get__api_v1_account_admin_getsuperadmininfo-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» userInfo|object|false|none|none|
+|»» id|string|false|none|用户id|
+|»» nickname|string|false|none|用户昵称|
+|»» email|string|false|none|邮箱|
+|»» phone|string|false|none|电话|
+|»» gender|string|false|none|性别|
+|»» birthday|string(date)|false|none|出生日期|
+|»» description|string|false|none|个人简介|
+|»» currentTenantId|string|false|none|当前租户ID|
+|»» status|number|false|none|状态|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_setSuperAdmin
+
+`POST /api/v1/account/admin/setSuperAdmin`
+
+*设置用户为超级管理员*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "status",
+    "userId"
+  ],
+  "properties": {
+    "status": {
+      "type": "boolean",
+      "description": "true:将用户设置为超级管理员,false:取消用户超级管理员"
+    },
+    "userId": {
+      "type": "string",
+      "description": "用户ID"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_setsuperadmin-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» status|body|boolean|true|true:将用户设置为超级管理员,false:取消用户超级管理员|
+|» userId|body|string|true|用户ID|
+
+<h3 id="post__api_v1_account_admin_setsuperadmin-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+<h1 id="-kne-fastify-account--">管理后台-权限</h1>
+
+## post__api_v1_account_admin_addApplication
+
+`POST /api/v1/account/admin/addApplication`
+
+*添加应用*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "name",
+    "code"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "avatar": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_addapplication-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» name|body|string|true|none|
+|» url|body|string|false|none|
+|» avatar|body|string|false|none|
+|» code|body|string|true|none|
+|» description|body|string|false|none|
+
+<h3 id="post__api_v1_account_admin_addapplication-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
