@@ -12,6 +12,8 @@ module.exports = fp(async (fastify, options) => {
           required: ['tenantId'],
           properties: {
             tenantId: { type: 'string' },
+            perPage: { type: 'number' },
+            currentPage: { type: 'number' },
             filter: {
               type: 'object',
               properties: {

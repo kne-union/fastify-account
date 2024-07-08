@@ -7,6 +7,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '添加应用',
         body: {
           type: 'object',
           required: ['name', 'code'],
