@@ -64,6 +64,16 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
+  const exportPermissionList = async ({ applicationIds, tenantId }) => {
+    return await Promise.all(
+      (applicationIds || []).map(async applicationId => {
+        let application = await services.application.getApplication({ id: applicationId });
+        application.permissions = await services.permission.getPermissionList({ applicationId, tenantId });
+        return application;
+      })
+    );
+  };
+
   const deletePermission = async ({ id }) => {
     const currentPermission = await models.permission.findByPk(id);
 
@@ -357,6 +367,7 @@ module.exports = fp(async (fastify, options) => {
   services.permission = {
     addPermission,
     getPermissionList,
+    exportPermissionList,
     deletePermission,
     savePermission,
     saveTenantPermissionList,

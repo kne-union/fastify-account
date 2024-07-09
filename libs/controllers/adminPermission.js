@@ -152,6 +152,29 @@ module.exports = fp(async (fastify, options) => {
   );
 
   fastify.post(
+    `${options.prefix}/admin/exportPermissionList`,
+    {
+      onRequest: [authenticate.user, authenticate.admin],
+      schema: {
+        tags: ['管理后台-权限'],
+        summary: '导出应用权限列表',
+        body: {
+          type: 'object',
+          required: ['applicationIds'],
+          properties: {
+            applicationIds: { type: 'array', items: { type: 'string' } },
+            tenantId: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { applicationIds, tenantId } = request.body;
+      return await services.permission.exportPermissionList({ applicationIds, tenantId });
+    }
+  );
+
+  fastify.post(
     `${options.prefix}/admin/deletePermission`,
     {
       onRequest: [authenticate.user, authenticate.admin],
