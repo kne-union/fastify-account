@@ -722,6 +722,10 @@
     },
     "/api/v1/account/admin/saveApplication": {
       "post": {
+        "summary": "修改应用",
+        "tags": [
+          "管理后台-权限"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -766,6 +770,10 @@
     },
     "/api/v1/account/admin/deleteApplication": {
       "post": {
+        "summary": "删除应用",
+        "tags": [
+          "管理后台-权限"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -793,6 +801,10 @@
     },
     "/api/v1/account/admin/getApplicationList": {
       "get": {
+        "summary": "获取应用列表",
+        "tags": [
+          "管理后台-权限"
+        ],
         "parameters": [
           {
             "schema": {
@@ -812,6 +824,10 @@
     },
     "/api/v1/account/admin/addPermission": {
       "post": {
+        "summary": "添加应用权限",
+        "tags": [
+          "管理后台-权限"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -862,6 +878,10 @@
     },
     "/api/v1/account/admin/getPermissionList": {
       "get": {
+        "summary": "获取应用权限列表",
+        "tags": [
+          "管理后台-权限"
+        ],
         "parameters": [
           {
             "schema": {
@@ -889,6 +909,10 @@
     },
     "/api/v1/account/admin/deletePermission": {
       "post": {
+        "summary": "删除应用权限",
+        "tags": [
+          "管理后台-权限"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -916,6 +940,10 @@
     },
     "/api/v1/account/admin/savePermission": {
       "post": {
+        "summary": "修改应用权限",
+        "tags": [
+          "管理后台-权限"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -953,8 +981,35 @@
         }
       }
     },
+    "/api/v1/account/admin/getTenantPermissionList": {
+      "get": {
+        "summary": "获取租户应用权限配置",
+        "tags": [
+          "管理后台-权限"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "tenantId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/api/v1/account/admin/saveTenantPermissionList": {
       "post": {
+        "summary": "修改租户应用权限配置",
+        "tags": [
+          "管理后台-权限"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -987,25 +1042,6 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/getTenantPermissionList": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "tenantId",
-            "required": true
-          }
-        ],
         "responses": {
           "200": {
             "description": "Default Response"
