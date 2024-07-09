@@ -3,7 +3,7 @@
   "info": {
     "title": "账号后台管理",
     "description": "账号后台管理",
-    "version": "1.0.0-alpha.13"
+    "version": "1.0.0-alpha.14"
   },
   "components": {
     "schemas": {}
@@ -505,6 +505,10 @@
     },
     "/api/v1/account/admin/addUser": {
       "post": {
+        "summary": "添加用户",
+        "tags": [
+          "管理后台"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -524,6 +528,10 @@
     },
     "/api/v1/account/admin/getAllUserList": {
       "get": {
+        "summary": "获取用户列表",
+        "tags": [
+          "管理后台"
+        ],
         "parameters": [
           {
             "schema": {
@@ -551,6 +559,10 @@
     },
     "/api/v1/account/admin/resetUserPassword": {
       "post": {
+        "summary": "重置用户账号密码",
+        "tags": [
+          "管理后台"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -582,6 +594,10 @@
     },
     "/api/v1/account/admin/saveUser": {
       "post": {
+        "summary": "修改用户信息",
+        "tags": [
+          "管理后台"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -624,6 +640,10 @@
     },
     "/api/v1/account/admin/closeUser": {
       "post": {
+        "summary": "关闭用户",
+        "tags": [
+          "管理后台"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -651,6 +671,10 @@
     },
     "/api/v1/account/admin/openUser": {
       "post": {
+        "summary": "将用户设置为正常",
+        "tags": [
+          "管理后台"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -902,7 +926,160 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "isModule": {
+                        "type": "number"
+                      },
+                      "isMust": {
+                        "type": "number"
+                      },
+                      "type": {
+                        "type": "number"
+                      },
+                      "pid": {
+                        "type": "number"
+                      },
+                      "paths": {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "number"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "deletedAt": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/exportPermissionList": {
+      "post": {
+        "summary": "导出应用权限列表",
+        "tags": [
+          "管理后台-权限"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "applicationIds"
+                ],
+                "properties": {
+                  "applicationIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "tenantId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "number"
+                      },
+                      "permissions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "number"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "isModule": {
+                              "type": "number"
+                            },
+                            "isMust": {
+                              "type": "number"
+                            },
+                            "type": {
+                              "type": "number"
+                            },
+                            "pid": {
+                              "type": "number"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

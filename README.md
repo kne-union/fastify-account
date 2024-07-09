@@ -2209,6 +2209,52 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+## post__api_v1_account_admin_exportPermissionList
+
+`POST /api/v1/account/admin/exportPermissionList`
+
+*导出应用权限列表*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "applicationIds"
+  ],
+  "properties": {
+    "applicationIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tenantId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_exportpermissionlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» applicationIds|body|[string]|true|none|
+|» tenantId|body|string|false|none|
+
+<h3 id="post__api_v1_account_admin_exportpermissionlist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 ## post__api_v1_account_admin_deletePermission
 
 `POST /api/v1/account/admin/deletePermission`
