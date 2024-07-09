@@ -88,6 +88,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台'],
+        summary: '添加用户',
         body: {}
       }
     },
@@ -103,6 +105,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台'],
+        summary: '获取用户列表',
         query: {
           perPage: { type: 'number' },
           currentPage: { type: 'number' }
@@ -130,6 +134,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台'],
+        summary: '重置用户账号密码',
         body: {
           type: 'object',
           required: ['userId', 'password'],
@@ -151,6 +157,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台'],
+        summary: '修改用户信息',
         body: {
           type: 'object',
           required: ['id'],
@@ -177,6 +185,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台'],
+        summary: '关闭用户',
         body: {
           type: 'object',
           required: ['id'],
@@ -198,6 +208,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台'],
+        summary: '将用户设置为正常',
         body: {
           type: 'object',
           required: ['id'],
