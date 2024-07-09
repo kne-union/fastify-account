@@ -2,7 +2,8 @@ const fp = require('fastify-plugin');
 const packageJson = require('./package.json');
 const path = require('path');
 const merge = require('lodash/merge');
-const { Unauthorized } = require('http-errors');
+const get = require('lodash/get');
+const { Unauthorized, Forbidden } = require('http-errors');
 
 module.exports = fp(
   async function (fastify, options) {
@@ -13,7 +14,8 @@ module.exports = fp(
         dbTableNamePrefix: 't_account_',
         isTest: false,
         jwt: {
-          secret: 'super-secret'
+          secret: 'super-secret',
+          expires: null
         },
         defaultPassword: 'Aa000000!'
       },
@@ -39,7 +41,9 @@ module.exports = fp(
             user: async request => {
               const info = await request.jwtVerify();
               //这里判断失效时间
-              //info.iat
+              if (options.jwt.expires && Date.now() - info.iat * 1000 > options.jwt.expires) {
+                throw Unauthorized('身份认证超时');
+              }
               request.authenticatePayload = info.payload;
               request.userInfo = await fastify.account.services.user.getUser(request.authenticatePayload);
             },
@@ -49,6 +53,15 @@ module.exports = fp(
             admin: async request => {
               if (!(await fastify.account.services.admin.checkIsSuperAdmin(request.userInfo))) {
                 throw Unauthorized('不能执行该操作，需要超级管理员权限');
+              }
+            },
+            createPermission: permission => async request => {
+              const permissions = get(request.tenantInfo, 'tenantUser.permissions');
+              if (!permissions) {
+                throw Forbidden('未获取到权限信息');
+              }
+              if (!(permission && permissions.indexOf(permission) > -1)) {
+                throw Forbidden('用户没有权限执行该操作');
               }
             }
           }
