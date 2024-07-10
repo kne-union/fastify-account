@@ -1,8 +1,12 @@
 const fp = require('fastify-plugin');
 const isNil = require('lodash/isNil');
+const get = require('lodash/get');
+const groupBy = require('lodash/groupBy');
+
+const uniq = require('lodash/uniq');
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
-
+  const { Op } = fastify.sequelize.Sequelize;
   const addPermission = async ({ applicationId, pid, code, name, type, isModule, isMust, description }) => {
     if (!(await services.application.getApplication({ id: applicationId }))) {
       throw new Error('应用不存在');
@@ -47,10 +51,10 @@ module.exports = fp(async (fastify, options) => {
       const tenantPermissions = await models.tenantPermission.findAll({
         where: { tenantId }
       });
-      query[fastify.sequelize.Sequelize.Op.or] = [
+      query[Op.or] = [
         {
           id: {
-            [fastify.sequelize.Sequelize.Op.in]: tenantPermissions.map(({ permissionId }) => permissionId)
+            [Op.in]: tenantPermissions.map(({ permissionId }) => permissionId)
           }
         },
         { isMust: 1 }
@@ -62,6 +66,57 @@ module.exports = fp(async (fastify, options) => {
     return await models.permission.findAll({
       where: Object.assign({}, { applicationId }, query)
     });
+  };
+
+  const parsePermissionListJSON = async ({ file }) => {
+    const data = JSON.parse(await file.toBuffer());
+    await Promise.all(
+      data.map(async application => {
+        const { permissions, ...other } = application;
+        const app = await services.application.getApplicationByCode({ code: application.code });
+
+        if (!app) {
+          const newApplication = await services.application.addApplication(other);
+          const permissionsPidMapping = groupBy(permissions, 'pid');
+          const addPermissions = async (pid, applicationId) =>
+            await Promise.all(
+              (get(permissionsPidMapping, pid) || []).map(async ({ id, ...permissionProps }) => {
+                const permission = await services.permission.addPermission(Object.assign({}, permissionProps, { applicationId, pid }));
+                await addPermissions(permission.id, applicationId);
+              })
+            );
+          await addPermissions(0, newApplication.uuid);
+        } else {
+          const permissionsPidMapping = groupBy(permissions, 'pid');
+          const addPermissions = async (pid, applicationId, importPid) => {
+            await Promise.all(
+              (get(permissionsPidMapping, importPid || pid) || []).map(async ({ id, ...permissionProps }) => {
+                const current = await models.permission.findOne({ where: { code: permissionProps.code, pid } });
+                if (current) {
+                  await addPermissions(current.id, applicationId, id);
+                } else {
+                  const permission = await services.permission.addPermission(Object.assign({}, permissionProps, { applicationId, pid }));
+                  await addPermissions(permission.id, applicationId);
+                }
+              })
+            );
+          };
+          await addPermissions(0, app.uuid);
+        }
+        return app;
+      })
+    );
+    return data;
+  };
+
+  const exportPermissionList = async ({ applicationIds, tenantId }) => {
+    return await Promise.all(
+      (applicationIds || []).map(async applicationId => {
+        let application = await services.application.getApplication({ id: applicationId });
+        application.permissions = await services.permission.getPermissionList({ applicationId, tenantId });
+        return application;
+      })
+    );
   };
 
   const deletePermission = async ({ id }) => {
@@ -90,7 +145,7 @@ module.exports = fp(async (fastify, options) => {
       await models.tenantPermission.destroy({
         where: {
           permissionId: {
-            [fastify.sequelize.Sequelize.Op.in]: permissionIdList
+            [Op.in]: permissionIdList
           }
         },
         transaction: t
@@ -98,7 +153,7 @@ module.exports = fp(async (fastify, options) => {
       await models.tenantRolePermission.destroy({
         where: {
           permissionId: {
-            [fastify.sequelize.Sequelize.Op.in]: permissionIdList
+            [Op.in]: permissionIdList
           }
         },
         transaction: t
@@ -106,7 +161,7 @@ module.exports = fp(async (fastify, options) => {
       await models.permission.destroy({
         where: {
           id: {
-            [fastify.sequelize.Sequelize.Op.in]: permissionIdList
+            [Op.in]: permissionIdList
           }
         },
         transaction: t
@@ -159,7 +214,7 @@ module.exports = fp(async (fastify, options) => {
       await models.tenantRoleApplication.destroy({
         where: {
           applicationId: {
-            [fastify.sequelize.Sequelize.Op.in]: needDeleteApplications
+            [Op.in]: needDeleteApplications
           },
           tenantId
         },
@@ -169,7 +224,7 @@ module.exports = fp(async (fastify, options) => {
       await models.tenantRolePermission.destroy({
         where: {
           permissionId: {
-            [fastify.sequelize.Sequelize.Op.in]: needDeletePermissions
+            [Op.in]: needDeletePermissions
           },
           tenantId
         },
@@ -179,7 +234,7 @@ module.exports = fp(async (fastify, options) => {
       await models.tenantApplication.destroy({
         where: {
           applicationId: {
-            [fastify.sequelize.Sequelize.Op.in]: needDeleteApplications
+            [Op.in]: needDeleteApplications
           },
           tenantId
         },
@@ -189,7 +244,7 @@ module.exports = fp(async (fastify, options) => {
       await models.tenantPermission.destroy({
         where: {
           permissionId: {
-            [fastify.sequelize.Sequelize.Op.in]: needDeletePermissions
+            [Op.in]: needDeletePermissions
           },
           tenantId
         },
@@ -239,15 +294,20 @@ module.exports = fp(async (fastify, options) => {
       where: { tenantId }
     });
 
+    const mustPermissions = await models.permission.findAll({
+      attributes: ['id'],
+      where: { isMust: 1 }
+    });
+
     const tenantApplicationIds = tenantApplications.map(({ applicationId }) => applicationId);
-    const tenantPermissionIds = tenantPermissions.map(({ permissionId }) => permissionId);
+    const tenantPermissionIds = uniq([...mustPermissions.map(({ id }) => id), ...tenantPermissions.map(({ permissionId }) => permissionId)]);
 
     const currentApplications = await models.tenantRoleApplication.findAll({
       where: {
         roleId: role.id,
         tenantId,
         applicationId: {
-          [fastify.sequelize.Sequelize.Op.in]: tenantApplicationIds
+          [Op.in]: tenantApplicationIds
         }
       }
     });
@@ -256,7 +316,7 @@ module.exports = fp(async (fastify, options) => {
       where: {
         roleId: role.id,
         tenantId,
-        permissionId: { [fastify.sequelize.Sequelize.Op.in]: tenantPermissionIds }
+        permissionId: { [Op.in]: tenantPermissionIds }
       }
     });
 
@@ -276,7 +336,7 @@ module.exports = fp(async (fastify, options) => {
         (await models.tenantRoleApplication.destroy({
           where: {
             applicationId: {
-              [fastify.sequelize.Sequelize.Op.in]: needDeleteApplications
+              [Op.in]: needDeleteApplications
             },
             tenantId
           },
@@ -287,7 +347,7 @@ module.exports = fp(async (fastify, options) => {
         (await models.tenantRolePermission.destroy({
           where: {
             permissionId: {
-              [fastify.sequelize.Sequelize.Op.in]: needDeletePermissions
+              [Op.in]: needDeletePermissions
             },
             tenantId
           },
@@ -357,6 +417,7 @@ module.exports = fp(async (fastify, options) => {
   services.permission = {
     addPermission,
     getPermissionList,
+    exportPermissionList,
     deletePermission,
     savePermission,
     saveTenantPermissionList,

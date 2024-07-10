@@ -33,6 +33,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '修改应用',
         body: {
           type: 'object',
           required: ['id', 'name', 'code'],
@@ -58,6 +60,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '删除应用',
         body: {
           type: 'object',
           required: ['id'],
@@ -79,6 +83,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '获取应用列表',
         query: {
           type: 'object',
           properties: {
@@ -98,6 +104,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '添加应用权限',
         body: {
           type: 'object',
           required: ['applicationId', 'name', 'code'],
@@ -125,12 +133,43 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '获取应用权限列表',
         query: {
           type: 'object',
           required: ['applicationId'],
           properties: {
             applicationId: { type: 'string' },
             tenantId: { type: 'string' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      code: { type: 'string' },
+                      name: { type: 'string' },
+                      isModule: { type: 'number' },
+                      isMust: { type: 'number' },
+                      type: { type: 'number' },
+                      pid: { type: 'number' },
+                      paths: { type: 'array', items: { type: 'number' } },
+                      description: { type: 'string' },
+                      status: { type: 'number' },
+                      createdAt: { type: 'string' },
+                      updatedAt: { type: 'string' },
+                      deletedAt: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -141,11 +180,83 @@ module.exports = fp(async (fastify, options) => {
     }
   );
 
+  fastify.post(`${options.prefix}/admin/parsePermissionList`, {}, async request => {
+    const file = await request.file();
+    if (!file) {
+      throw new Error('不能获取到上传文件');
+    }
+
+    return await services.permission.parsePermissionListJSON({ file });
+  });
+
+  fastify.post(
+    `${options.prefix}/admin/exportPermissionList`,
+    {
+      onRequest: [authenticate.user, authenticate.admin],
+      schema: {
+        tags: ['管理后台-权限'],
+        summary: '导出应用权限列表',
+        body: {
+          type: 'object',
+          required: ['applicationIds'],
+          properties: {
+            applicationIds: { type: 'array', items: { type: 'string' } },
+            tenantId: { type: 'string' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      code: { type: 'string' },
+                      name: { type: 'string' },
+                      url: { type: 'string' },
+                      description: { type: 'string' },
+                      status: { type: 'number' },
+                      permissions: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'number' },
+                            code: { type: 'string' },
+                            name: { type: 'string' },
+                            isModule: { type: 'number' },
+                            isMust: { type: 'number' },
+                            type: { type: 'number' },
+                            pid: { type: 'number' },
+                            description: { type: 'string' },
+                            status: { type: 'number' }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    async request => {
+      const { applicationIds, tenantId } = request.body;
+      return await services.permission.exportPermissionList({ applicationIds, tenantId });
+    }
+  );
+
   fastify.post(
     `${options.prefix}/admin/deletePermission`,
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '删除应用权限',
         body: {
           type: 'object',
           required: ['id'],
@@ -169,6 +280,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '修改应用权限',
         body: {
           type: 'object',
           required: ['id'],
@@ -188,11 +301,35 @@ module.exports = fp(async (fastify, options) => {
     }
   );
 
+  fastify.get(
+    `${options.prefix}/admin/getTenantPermissionList`,
+    {
+      onRequest: [authenticate.user, authenticate.admin],
+      schema: {
+        tags: ['管理后台-权限'],
+        summary: '获取租户应用权限配置',
+        query: {
+          type: 'object',
+          required: ['tenantId'],
+          properties: {
+            tenantId: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { tenantId } = request.query;
+      return await services.permission.getTenantPermissionList({ tenantId });
+    }
+  );
+
   fastify.post(
     `${options.prefix}/admin/saveTenantPermissionList`,
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-权限'],
+        summary: '修改租户应用权限配置',
         body: {
           type: 'object',
           required: ['tenantId', 'applications', 'permissions'],
@@ -214,26 +351,6 @@ module.exports = fp(async (fastify, options) => {
       await services.permission.saveTenantPermissionList(request.body);
 
       return {};
-    }
-  );
-
-  fastify.get(
-    `${options.prefix}/admin/getTenantPermissionList`,
-    {
-      onRequest: [authenticate.user, authenticate.admin],
-      schema: {
-        query: {
-          type: 'object',
-          required: ['tenantId'],
-          properties: {
-            tenantId: { type: 'string' }
-          }
-        }
-      }
-    },
-    async request => {
-      const { tenantId } = request.query;
-      return await services.permission.getTenantPermissionList({ tenantId });
     }
   );
 });
