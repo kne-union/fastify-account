@@ -26,6 +26,21 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
+  const getApplicationByCode = async ({ code }) => {
+    const application = await models.application.findOne({
+      where: {
+        code
+      }
+    });
+    if (application) {
+      await getApplicationInstance({ id: application.uuid });
+      return Object.assign({}, application.get({ plain: true }), {
+        id: application.uuid
+      });
+    }
+    return null;
+  };
+
   const addApplication = async application => {
     const currentApplication = await models.application.create(application);
     return Object.assign({}, currentApplication.get({ plain: true }), {
@@ -143,6 +158,7 @@ module.exports = fp(async (fastify, options) => {
   services.application = {
     addApplication,
     getApplication,
+    getApplicationByCode,
     saveApplication,
     deleteApplication,
     getApplicationList,
