@@ -88,6 +88,21 @@ module.exports = fp(async (fastify, options) => {
             );
           await addPermissions(0, newApplication.uuid);
         } else {
+          const permissionsPidMapping = groupBy(permissions, 'pid');
+          const addPermissions = async (pid, applicationId, importPid) => {
+            await Promise.all(
+              (get(permissionsPidMapping, importPid || pid) || []).map(async ({ id, ...permissionProps }) => {
+                const current = await models.permission.findOne({ where: { code: permissionProps.code, pid } });
+                if (current) {
+                  await addPermissions(current.id, applicationId, id);
+                } else {
+                  const permission = await services.permission.addPermission(Object.assign({}, permissionProps, { applicationId, pid }));
+                  await addPermissions(permission.id, applicationId);
+                }
+              })
+            );
+          };
+          await addPermissions(0, app.uuid);
         }
         return app;
       })
