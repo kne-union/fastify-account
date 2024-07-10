@@ -1,5 +1,8 @@
 const fp = require('fastify-plugin');
 const isNil = require('lodash/isNil');
+const get = require('lodash/get');
+const groupBy = require('lodash/groupBy');
+
 const uniq = require('lodash/uniq');
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
@@ -63,6 +66,32 @@ module.exports = fp(async (fastify, options) => {
     return await models.permission.findAll({
       where: Object.assign({}, { applicationId }, query)
     });
+  };
+
+  const parsePermissionListJSON = async ({ file }) => {
+    const data = JSON.parse(await file.toBuffer());
+    await Promise.all(
+      data.map(async application => {
+        const { permissions, ...other } = application;
+        const app = await services.application.getApplicationByCode({ code: application.code });
+
+        if (!app) {
+          const newApplication = await services.application.addApplication(other);
+          const permissionsPidMapping = groupBy(permissions, 'pid');
+          const addPermissions = async (pid, applicationId) =>
+            await Promise.all(
+              (get(permissionsPidMapping, pid) || []).map(async ({ id, ...permissionProps }) => {
+                const permission = await services.permission.addPermission(Object.assign({}, permissionProps, { applicationId, pid }));
+                await addPermissions(permission.id, applicationId);
+              })
+            );
+          await addPermissions(0, newApplication.uuid);
+        } else {
+        }
+        return app;
+      })
+    );
+    return data;
   };
 
   const exportPermissionList = async ({ applicationIds, tenantId }) => {

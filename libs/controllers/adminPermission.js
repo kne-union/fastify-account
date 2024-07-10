@@ -180,6 +180,15 @@ module.exports = fp(async (fastify, options) => {
     }
   );
 
+  fastify.post(`${options.prefix}/admin/parsePermissionList`, {}, async request => {
+    const file = await request.file();
+    if (!file) {
+      throw new Error('不能获取到上传文件');
+    }
+
+    return await services.permission.parsePermissionListJSON({ file });
+  });
+
   fastify.post(
     `${options.prefix}/admin/exportPermissionList`,
     {

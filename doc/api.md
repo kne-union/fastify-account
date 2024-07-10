@@ -27,6 +27,20 @@ fastify的用户管理账号等实现
 
 <h1 id="-kne-fastify-account-default">Default</h1>
 
+## post__api_v1_account_admin_parsePermissionList
+
+`POST /api/v1/account/admin/parsePermissionList`
+
+<h3 id="post__api_v1_account_admin_parsepermissionlist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 ## get__api_v1_account_admin_getRoleList
 
 `GET /api/v1/account/admin/getRoleList`
