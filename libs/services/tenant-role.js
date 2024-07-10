@@ -83,16 +83,9 @@ module.exports = fp(async (fastify, options) => {
     return await models.permission.findAll({
       attributes: ['id', 'code', 'name', 'isModule', 'pid', 'applicationId', 'paths'],
       where: {
-        [Op.or]: [
-          {
-            id: {
-              [Op.in]: tenantRolePermission.map(({ permissionId }) => permissionId)
-            }
-          },
-          {
-            isMust: true
-          }
-        ]
+        id: {
+          [Op.in]: tenantRolePermission.map(({ permissionId }) => permissionId)
+        }
       }
     });
   };
