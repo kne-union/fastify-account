@@ -17,8 +17,16 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const addTenantOrg = async org => {
-    if (await models.tenantOrg.count({ where: { name: org.name } })) {
-      throw new Error('组织名称不能重复');
+    if (
+      await models.tenantOrg.count({
+        where: {
+          name: org.name,
+          pid: org.pid,
+          tenantId: org.tenantId
+        }
+      })
+    ) {
+      throw new Error('组织名称在同一父组织下有重复');
     }
 
     return await models.tenantOrg.create({
