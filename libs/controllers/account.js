@@ -6,7 +6,7 @@ module.exports = fp(async (fastify, options) => {
     {
       schema: {
         tags: ['账号'],
-        summary: '发送邮箱验证码',
+        summary: '发送登录邮箱验证码',
         body: {
           type: 'object',
           required: ['email'],
@@ -32,7 +32,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { email } = request.body;
-      const code = await services.account.sendEmailCode({ email });
+      const code = await services.account.sendVerificationCode({ name: email, type: 0, messageType: 1 });
       return options.isTest ? { code } : {};
     }
   );
@@ -42,7 +42,7 @@ module.exports = fp(async (fastify, options) => {
     {
       schema: {
         tags: ['账号'],
-        summary: '发送短信验证码',
+        summary: '发送登录短信验证码',
         body: {
           type: 'object',
           required: ['phone'],
@@ -68,7 +68,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { phone } = request.body;
-      const code = await services.account.sendSMSCode({ phone });
+      const code = await services.account.sendVerificationCode({ name: phone, type: 0, messageType: 0 });
       return options.isTest ? { code } : {};
     }
   );
@@ -84,7 +84,7 @@ module.exports = fp(async (fastify, options) => {
           required: ['name', 'type', 'code'],
           properties: {
             name: { type: 'string', description: '被验证的账号，手机或邮箱' },
-            type: { type: 'number', description: '0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员' },
+            type: { type: 'number', description: '0:注册,2:登录,4:验证租户管理员,5:忘记密码' },
             code: { type: 'string', description: '接受到的验证码' }
           }
         },
@@ -251,6 +251,137 @@ module.exports = fp(async (fastify, options) => {
       const { username, password } = request.body;
       const { token, user } = await services.account.login({ username, password, ip: request.ip });
       return { token, currentTenantId: user.currentTenantId };
+    }
+  );
+
+  fastify.post(
+    `${options.prefix}/modifyPassword`,
+    {
+      schema: {
+        tags: ['账号'],
+        summary: '新用户重置新密码',
+        body: {
+          oneOf: [
+            {
+              type: 'object',
+              required: ['email', 'newPwd', 'oldPwd'],
+              properties: {
+                email: { type: 'string', description: '邮箱' },
+                newPwd: { type: 'string', description: '新密码' },
+                oldPwd: { type: 'string', description: '原密码' }
+              }
+            },
+            {
+              type: 'object',
+              required: ['phone', 'newPwd', 'oldPwd'],
+              properties: {
+                phone: { type: 'string', description: '手机号' },
+                newPwd: { type: 'string', description: '新密码' },
+                oldPwd: { type: 'string', description: '原密码' }
+              }
+            }
+          ]
+        }
+      }
+    },
+    async request => {
+      await services.account.modifyPassword(request.body);
+      return {};
+    }
+  );
+
+  fastify.post(
+    `${options.prefix}/resetPassword`,
+    {
+      schema: {
+        tags: ['账号'],
+        summary: '用户重置密码',
+        body: {
+          oneOf: [
+            {
+              type: 'object',
+              required: ['email', 'newPwd', 'token'],
+              properties: {
+                email: { type: 'string', description: '邮箱' },
+                newPwd: { type: 'string', description: '新密码' },
+                token: { type: 'string', description: '验证token' }
+              }
+            },
+            {
+              type: 'object',
+              required: ['phone', 'newPwd'],
+              properties: {
+                phone: { type: 'string', description: '手机号' },
+                newPwd: { type: 'string', description: '新密码' },
+                token: { type: 'string', description: '验证token' }
+              }
+            }
+          ]
+        }
+      }
+    },
+    async request => {
+      await services.account.resetPassword({
+        email: request.body.email,
+        password: request.body.newPwd,
+        token: request.body.token
+      });
+
+      return {};
+    }
+  );
+
+  fastify.post(
+    `${options.prefix}/forgetPwd`,
+    {
+      schema: {
+        tags: ['账号'],
+        summary: '忘记密码',
+        body: {
+          oneOf: [
+            {
+              type: 'object',
+              required: ['email'],
+              properties: {
+                email: { type: 'string', description: '邮箱' }
+              }
+            },
+            {
+              type: 'object',
+              required: ['phone'],
+              properties: {
+                phone: { type: 'string', description: '手机号' }
+              }
+            }
+          ]
+        }
+      }
+    },
+    async request => {
+      const name = request.body.email || request.body.phone;
+      const token = await services.account.sendJWTVerificationCode({ name, type: 5, messageType: 3 });
+      return options.isTest ? { token } : {};
+    }
+  );
+
+  fastify.post(
+    `${options.prefix}/parseResetToken`,
+    {
+      schema: {
+        tags: ['账号'],
+        summary: '通过token获取name',
+        body: {
+          type: 'object',
+          required: ['token'],
+          properties: {
+            token: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      const { name } = await services.account.verificationJWTCodeValidate(request.body);
+      return { name };
     }
   );
 });
