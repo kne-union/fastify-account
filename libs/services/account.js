@@ -51,6 +51,34 @@ module.exports = fp(async (fastify, options) => {
     };
   };
 
+  const modifyPassword = async ({ email, phone, oldPwd, newPwd }) => {
+    const user = await models.user.findOne({
+      where: Object.assign(
+        {},
+        email
+          ? {
+              email
+            }
+          : {
+              phone
+            },
+        {
+          status: 1
+        }
+      )
+    });
+    if (!user) {
+      throw new Error('新用户密码只能初始化一次');
+    }
+    if (oldPwd === newPwd) {
+      throw new Error('重置密码不能和初始化密码相同');
+    }
+    await passwordAuthentication({ accountId: user.userAccountId, password: oldPwd });
+    await resetPassword({ userId: user.uuid, password: newPwd });
+    user.status = 0;
+    await user.save();
+  };
+
   const passwordAuthentication = async ({ accountId, password }) => {
     const userAccount = await models.userAccount.findOne({
       where: {
@@ -83,16 +111,20 @@ module.exports = fp(async (fastify, options) => {
     return hash.digest('hex');
   };
 
-  const resetPassword = async ({ userId, password }) => {
+  const resetPassword = async ({ password, token }) => {
+    const { name } = await verificationJWTCodeValidate({ token });
+
+    const isEmail = userNameIsEmail(name);
+
     const userInfo = await models.user.findOne({
-      where: { uuid: userId }
+      where: isEmail ? { email: name } : { phone: name }
     });
     if (!userInfo) {
       throw new Error('用户不存在');
     }
     const account = await models.userAccount.create(
       Object.assign({}, await passwordEncryption(password), {
-        belongToUserId: userId
+        belongToUserId: userInfo.uuid
       })
     );
 
@@ -101,20 +133,10 @@ module.exports = fp(async (fastify, options) => {
 
   const register = async ({ avatar, nickname, gender, birthday, description, phone, email, code, password, status, invitationCode }) => {
     const type = phone ? 0 : 1;
-    const verificationCode = await models.verificationCode.findOne({
-      where: {
-        name: type === 0 ? phone : email,
-        type,
-        code,
-        status: 1
-      }
-    });
-    if (!verificationCode) {
+
+    if (!(await verificationCodeValidate({ name: type === 0 ? phone : email, type, code }))) {
       throw new Error('验证码不正确或者已经过期');
     }
-
-    verificationCode.status = 2;
-    await verificationCode.save();
 
     return await services.user.addUser({
       avatar,
@@ -129,30 +151,31 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
-  const sendEmailCode = async ({ email }) => {
+  const generateVerificationCode = async ({ name, type }) => {
     const code = generateRandom6DigitNumber();
-
-    // 这里写发送逻辑
-
     await models.verificationCode.update(
       {
         status: 2
       },
       {
         where: {
-          name: email,
-          type: 1,
+          name,
+          type,
           status: 0
         }
       }
     );
-
     await models.verificationCode.create({
-      name: email,
-      type: 1,
+      name,
+      type,
       code
     });
+    return code;
+  };
 
+  const sendVerificationCode = async ({ name, type, messageType }) => {
+    const code = await generateVerificationCode({ name, type });
+    // 这里写发送逻辑
     return code;
   };
 
@@ -177,40 +200,31 @@ module.exports = fp(async (fastify, options) => {
     return isPass;
   };
 
-  const sendSMSCode = async ({ phone }) => {
-    const code = generateRandom6DigitNumber();
-
+  const sendJWTVerificationCode = async ({ name, type, messageType }) => {
+    const code = await generateVerificationCode({ name, type });
+    const token = fastify.jwt.sign({ name, type, code });
     // 这里写发送逻辑
+    return token;
+  };
 
-    await models.verificationCode.update(
-      {
-        status: 2
-      },
-      {
-        where: {
-          name: phone,
-          type: 0,
-          status: 0
-        }
-      }
-    );
-
-    await models.verificationCode.create({
-      name: phone,
-      type: 0,
-      code
-    });
-
-    return code;
+  const verificationJWTCodeValidate = async ({ token }) => {
+    const { iat, name, type, code } = fastify.jwt.decode(token);
+    if (!(await verificationCodeValidate({ name, type, code }))) {
+      throw new Error('验证码不正确或者已经过期');
+    }
+    return { name, type, code };
   };
 
   services.account = {
     md5,
     login,
+    modifyPassword,
     register,
-    sendEmailCode,
-    sendSMSCode,
+    generateVerificationCode,
+    sendVerificationCode,
     verificationCodeValidate,
+    sendJWTVerificationCode,
+    verificationJWTCodeValidate,
     passwordEncryption,
     passwordAuthentication,
     resetPassword
