@@ -22,7 +22,7 @@ npm i --save @kne/fastify-account
 ### API
 
 ---
-title: "@kne/fastify-account v1.0.0-alpha.16"
+title: "@kne/fastify-account v1.0.0-alpha.17"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -42,7 +42,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.16</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.17</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -1082,7 +1082,7 @@ This operation does not require authentication
 
 `POST /api/v1/account/sendEmailCode`
 
-*发送邮箱验证码*
+*发送登录邮箱验证码*
 
 > Body parameter
 
@@ -1146,7 +1146,7 @@ This operation does not require authentication
 
 `POST /api/v1/account/sendSMSCode`
 
-*发送短信验证码*
+*发送登录短信验证码*
 
 > Body parameter
 
@@ -1229,7 +1229,7 @@ This operation does not require authentication
     },
     "type": {
       "type": "number",
-      "description": "0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员"
+      "description": "0:注册,2:登录,4:验证租户管理员,5:忘记密码"
     },
     "code": {
       "type": "string",
@@ -1245,7 +1245,7 @@ This operation does not require authentication
 |---|---|---|---|---|
 |body|body|object|true|none|
 |» name|body|string|true|被验证的账号，手机或邮箱|
-|» type|body|number|true|0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员|
+|» type|body|number|true|0:注册,2:登录,4:验证租户管理员,5:忘记密码|
 |» code|body|string|true|接受到的验证码|
 
 > Example responses
@@ -1558,6 +1558,249 @@ Status Code **200**
 |---|---|---|---|---|
 |» token|string|false|none|用户token|
 |» currentTenantId|string|false|none|当前租户id|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_modifyPassword
+
+`POST /api/v1/account/modifyPassword`
+
+*新用户重置新密码*
+
+> Body parameter
+
+```json
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "email",
+        "newPwd",
+        "oldPwd"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "邮箱"
+        },
+        "newPwd": {
+          "type": "string",
+          "description": "新密码"
+        },
+        "oldPwd": {
+          "type": "string",
+          "description": "原密码"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "phone",
+        "newPwd",
+        "oldPwd"
+      ],
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "手机号"
+        },
+        "newPwd": {
+          "type": "string",
+          "description": "新密码"
+        },
+        "oldPwd": {
+          "type": "string",
+          "description": "原密码"
+        }
+      }
+    }
+  ]
+}
+```
+
+<h3 id="post__api_v1_account_modifypassword-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|any|false|none|
+
+<h3 id="post__api_v1_account_modifypassword-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_resetPassword
+
+`POST /api/v1/account/resetPassword`
+
+*用户重置密码*
+
+> Body parameter
+
+```json
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "email",
+        "newPwd",
+        "token"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "邮箱"
+        },
+        "newPwd": {
+          "type": "string",
+          "description": "新密码"
+        },
+        "token": {
+          "type": "string",
+          "description": "验证token"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "phone",
+        "newPwd"
+      ],
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "手机号"
+        },
+        "newPwd": {
+          "type": "string",
+          "description": "新密码"
+        },
+        "token": {
+          "type": "string",
+          "description": "验证token"
+        }
+      }
+    }
+  ]
+}
+```
+
+<h3 id="post__api_v1_account_resetpassword-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|any|false|none|
+
+<h3 id="post__api_v1_account_resetpassword-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_forgetPwd
+
+`POST /api/v1/account/forgetPwd`
+
+*忘记密码*
+
+> Body parameter
+
+```json
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "邮箱"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "phone"
+      ],
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "手机号"
+        }
+      }
+    }
+  ]
+}
+```
+
+<h3 id="post__api_v1_account_forgetpwd-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|any|false|none|
+
+<h3 id="post__api_v1_account_forgetpwd-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_parseResetToken
+
+`POST /api/v1/account/parseResetToken`
+
+*通过token获取name*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "token"
+  ],
+  "properties": {
+    "token": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_parseresettoken-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» token|body|string|true|none|
+
+<h3 id="post__api_v1_account_parseresettoken-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
 
 <aside class="success">
 This operation does not require authentication

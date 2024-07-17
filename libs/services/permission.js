@@ -81,7 +81,12 @@ module.exports = fp(async (fastify, options) => {
           const addPermissions = async (pid, applicationId) =>
             await Promise.all(
               (get(permissionsPidMapping, pid) || []).map(async ({ id, ...permissionProps }) => {
-                const permission = await services.permission.addPermission(Object.assign({}, permissionProps, { applicationId, pid }));
+                const permission = await services.permission.addPermission(
+                  Object.assign({}, permissionProps, {
+                    applicationId,
+                    pid
+                  })
+                );
                 await addPermissions(permission.id, applicationId);
               })
             );
@@ -95,7 +100,12 @@ module.exports = fp(async (fastify, options) => {
                 if (current) {
                   await addPermissions(current.id, applicationId, id);
                 } else {
-                  const permission = await services.permission.addPermission(Object.assign({}, permissionProps, { applicationId, pid }));
+                  const permission = await services.permission.addPermission(
+                    Object.assign({}, permissionProps, {
+                      applicationId,
+                      pid
+                    })
+                  );
                   await addPermissions(permission.id, applicationId);
                 }
               })
@@ -274,13 +284,15 @@ module.exports = fp(async (fastify, options) => {
     }
   };
 
-  const saveRolePermissionList = async ({ roleId, applications, permissions }) => {
+  const saveRolePermissionList = async ({ roleId, tenantId, applications, permissions }) => {
     const role = await models.tenantRole.findByPk(roleId);
     if (!role) {
       throw new Error('角色不存在');
     }
 
-    const tenantId = role.tenantId;
+    if (tenantId && role.tenantId !== tenantId) {
+      throw new Error('数据已过期，请刷新页面后重试');
+    }
 
     await services.tenant.getTenant({ id: tenantId });
 
@@ -399,11 +411,16 @@ module.exports = fp(async (fastify, options) => {
     return { applications, permissions };
   };
 
-  const getRolePermissionList = async ({ roleId }) => {
+  const getRolePermissionList = async ({ roleId, tenantId }) => {
     const role = await models.tenantRole.findByPk(roleId);
     if (!role) {
       throw new Error('角色不存在');
     }
+
+    if (tenantId && role.tenantId !== tenantId) {
+      throw new Error('数据已过期，请刷新页面后重试');
+    }
+
     const applications = await models.tenantRoleApplication.findAll({
       where: { roleId: role.id, tenantId: role.tenantId }
     });

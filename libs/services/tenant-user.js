@@ -194,7 +194,7 @@ module.exports = fp(async (fastify, options) => {
       tenantUser: Object.assign({}, outputTenantUser, {
         permissions: userPermissionList
       }),
-      user
+      userInfo: user
     };
   };
 

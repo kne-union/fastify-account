@@ -37,8 +37,11 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
-  const saveTenantOrg = async ({ id, ...otherInfo }) => {
+  const saveTenantOrg = async ({ id, tenantId, ...otherInfo }) => {
     const tenantOrg = await getTenantOrgInstance({ id });
+    if (tenantId && tenantOrg.tenantId !== tenantId) {
+      throw new Error('数据已过期，请刷新页面后重试');
+    }
     if (
       await models.tenantOrg.count({
         where: {
@@ -63,8 +66,12 @@ module.exports = fp(async (fastify, options) => {
   const deleteTenantOrg = async ({ id, tenantId }) => {
     const tenantOrg = await getTenantOrgInstance({ id });
 
+    if (tenantId && tenantOrg.tenantId !== tenantOrg) {
+      throw new Error('数据已过期，请刷新页面后重试');
+    }
+
     const { rows } = await models.tenantOrg.findAndCountAll({
-      where: { tenantId, pid: id }
+      where: { tenantId: tenantOrg.tenantId, pid: id }
     });
 
     if (rows?.length) {
