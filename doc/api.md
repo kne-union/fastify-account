@@ -3300,5 +3300,122 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+<h1 id="-kne-fastify-account--">租户管理-权限</h1>
+
+## get__api_v1_account_tenant_getApplicationList
+
+`GET /api/v1/account/tenant/getApplicationList`
+
+*获取应用列表*
+
+<h3 id="get__api_v1_account_tenant_getapplicationlist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_tenant_getPermissionList
+
+`GET /api/v1/account/tenant/getPermissionList`
+
+*获取应用权限列表*
+
+<h3 id="get__api_v1_account_tenant_getpermissionlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|applicationId|query|string|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "number"
+      },
+      "code": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "isModule": {
+        "type": "number"
+      },
+      "isMust": {
+        "type": "number"
+      },
+      "type": {
+        "type": "number"
+      },
+      "pid": {
+        "type": "number"
+      },
+      "paths": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      },
+      "description": {
+        "type": "string"
+      },
+      "status": {
+        "type": "number"
+      },
+      "createdAt": {
+        "type": "string"
+      },
+      "updatedAt": {
+        "type": "string"
+      },
+      "deletedAt": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+<h3 id="get__api_v1_account_tenant_getpermissionlist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="get__api_v1_account_tenant_getpermissionlist-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» id|number|false|none|none|
+|» code|string|false|none|none|
+|» name|string|false|none|none|
+|» isModule|number|false|none|none|
+|» isMust|number|false|none|none|
+|» type|number|false|none|none|
+|» pid|number|false|none|none|
+|» paths|[number]|false|none|none|
+|» description|string|false|none|none|
+|» status|number|false|none|none|
+|» createdAt|string|false|none|none|
+|» updatedAt|string|false|none|none|
+|» deletedAt|string|false|none|none|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 # Schemas
 

@@ -294,6 +294,8 @@ module.exports = fp(async (fastify, options) => {
       throw new Error('数据已过期，请刷新页面后重试');
     }
 
+    tenantId = role.tenantId;
+
     await services.tenant.getTenant({ id: tenantId });
 
     const tenantApplications = await models.tenantApplication.findAll({

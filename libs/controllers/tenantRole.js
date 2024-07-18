@@ -148,4 +148,72 @@ module.exports = fp(async (fastify, options) => {
       return {};
     }
   );
+
+  fastify.get(
+    `${options.prefix}/tenant/getApplicationList`,
+    {
+      onRequest: [authenticate.user, authenticate.tenant],
+      schema: {
+        tags: ['租户管理-权限'],
+        summary: '获取应用列表'
+      }
+    },
+    async request => {
+      const { id: tenantId } = request.tenantInfo.tenant;
+      const appName = request.headers['x-app-name'];
+      return await services.application.getApplicationList({ tenantId, appName });
+    }
+  );
+
+  fastify.get(
+    `${options.prefix}/tenant/getPermissionList`,
+    {
+      onRequest: [authenticate.user, authenticate.tenant],
+      schema: {
+        tags: ['租户管理-权限'],
+        summary: '获取应用权限列表',
+        query: {
+          type: 'object',
+          required: ['applicationId'],
+          properties: {
+            applicationId: { type: 'string' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'number' },
+                      code: { type: 'string' },
+                      name: { type: 'string' },
+                      isModule: { type: 'number' },
+                      isMust: { type: 'number' },
+                      type: { type: 'number' },
+                      pid: { type: 'number' },
+                      paths: { type: 'array', items: { type: 'number' } },
+                      description: { type: 'string' },
+                      status: { type: 'number' },
+                      createdAt: { type: 'string' },
+                      updatedAt: { type: 'string' },
+                      deletedAt: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    async request => {
+      const { id: tenantId } = request.tenantInfo.tenant;
+      const { applicationId } = request.query;
+      return await services.permission.getPermissionList({ applicationId, tenantId });
+    }
+  );
 });

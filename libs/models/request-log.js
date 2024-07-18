@@ -5,12 +5,21 @@ module.exports = ({ DataTypes }) => {
         type: DataTypes.UUID,
         allowNull: false
       },
-      ip: DataTypes.STRING,
-      currentTenantId: {
+      tenantId: {
         type: DataTypes.UUID
+      },
+      type: {
+        type: DataTypes.STRING,
+        comment: 'user,tenant,admin'
       },
       applicationId: {
         type: DataTypes.UUID
+      },
+      action: {
+        type: DataTypes.TEXT
+      },
+      summary: {
+        type: DataTypes.TEXT
       }
     }
   };

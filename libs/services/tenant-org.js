@@ -1,7 +1,7 @@
 const fp = require('fastify-plugin');
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
-
+  const { Op } = fastify.sequelize.Sequelize;
   const getTenantOrgInstance = async ({ id }) => {
     const tenantOrg = await models.tenantOrg.findByPk(id, {
       where: {
@@ -47,14 +47,20 @@ module.exports = fp(async (fastify, options) => {
         where: {
           name: otherInfo.name,
           pid: otherInfo.pid,
-          tenantId: otherInfo.tenantId
+          [Op.not]: {
+            id
+          }
         }
       })
     ) {
       throw new Error('组织名称在同一父组织下有重复');
     }
 
-    ['name', 'enName', 'tenantId', 'pid'].forEach(name => {
+    if (otherInfo.pid === tenantOrg.id) {
+      throw new Error('不能用自己作为自己的父节点');
+    }
+
+    ['name', 'enName', 'pid'].forEach(name => {
       if (otherInfo[name]) {
         tenantOrg[name] = otherInfo[name];
       }
@@ -66,15 +72,15 @@ module.exports = fp(async (fastify, options) => {
   const deleteTenantOrg = async ({ id, tenantId }) => {
     const tenantOrg = await getTenantOrgInstance({ id });
 
-    if (tenantId && tenantOrg.tenantId !== tenantOrg) {
+    if (tenantId && tenantOrg.tenantId !== tenantId) {
       throw new Error('数据已过期，请刷新页面后重试');
     }
 
-    const { rows } = await models.tenantOrg.findAndCountAll({
+    const count = await models.tenantOrg.count({
       where: { tenantId: tenantOrg.tenantId, pid: id }
     });
 
-    if (rows?.length) {
+    if (count > 0) {
       throw new Error('组织下有用户或子组织无法删除');
     }
 
