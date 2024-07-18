@@ -127,7 +127,12 @@ module.exports = fp(async (fastify, options) => {
     });
     return {
       pageData: rows.map(item => {
-        return Object.assign({}, item.get({ pain: true }), { id: item.uuid });
+        return Object.assign({}, item.get({ pain: true }), {
+          id: item.uuid,
+          tenants: item.tenants.map(({ uuid, name }) => {
+            return { id: uuid, name };
+          })
+        });
       }),
       totalCount: count
     };

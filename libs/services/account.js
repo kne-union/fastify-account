@@ -14,7 +14,7 @@ function userNameIsEmail(username) {
 
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
-  const login = async ({ username, password, ip }) => {
+  const login = async ({ username, password, ip, appName }) => {
     const isEmail = userNameIsEmail(username);
     const user = await models.user.findOne({
       where: Object.assign(
@@ -40,9 +40,13 @@ module.exports = fp(async (fastify, options) => {
 
     await passwordAuthentication({ accountId: user.userAccountId, password });
 
+    const application = appName && (await services.application.getApplicationByCode({ code: appName }));
+
     await models.loginLog.create({
       userId: user.uuid,
-      ip
+      ip,
+      currentTenantId: user.currentTenantId,
+      applicationId: application?.id
     });
 
     return {

@@ -137,11 +137,18 @@ module.exports = fp(async (fastify, options) => {
     return currentTenantUser;
   };
 
-  const getTenantUserByUserId = async user => {
+  const getTenantUserByUserId = async ({ userInfo: user, appName }) => {
     if (!user.currentTenantId) {
       throw new Unauthorized('没有找到当前绑定租户');
     }
+
     const tenant = await services.tenant.getTenant({ id: user.currentTenantId });
+
+    const tenantApplications = await services.application.getApplicationList({ tenantId: tenant.id, appName });
+
+    if (appName && !tenantApplications.some(item => item.code === appName)) {
+      throw Unauthorized('当前租户没有开通该应用权限');
+    }
 
     const tenantUser = await models.tenantUser.findOne({
       attributes: ['uuid', 'avatar', 'name', 'description', 'phone', 'email'],
@@ -181,9 +188,13 @@ module.exports = fp(async (fastify, options) => {
     const tenantRoleIds = tenantUser.tenantRoles.map(({ id }) => id);
     tenantRoleIds.push(defaultTenant.id);
 
-    const { userPermissionList } = await getTenantUserPermissionList({ tenantRoleIds });
+    const { userPermissionList, applications: roleApplications } = await getTenantUserPermissionList({ tenantRoleIds });
     if (!tenantUser) {
       throw new Error('当前租户用户不存在或者已经被关闭');
+    }
+
+    if (appName && !roleApplications.some(item => item.code === appName)) {
+      throw Unauthorized('当前用户没有开通该应用权限');
     }
 
     const outputTenantUser = Object.assign({}, tenantUser.get({ plain: true }), { id: tenantUser.uuid });
@@ -194,7 +205,7 @@ module.exports = fp(async (fastify, options) => {
       tenantUser: Object.assign({}, outputTenantUser, {
         permissions: userPermissionList
       }),
-      user
+      userInfo: user
     };
   };
 

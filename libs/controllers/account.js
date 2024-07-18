@@ -249,7 +249,8 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { username, password } = request.body;
-      const { token, user } = await services.account.login({ username, password, ip: request.ip });
+      const appName = request.headers['x-app-name'];
+      const { token, user } = await services.account.login({ username, password, ip: request.ip, appName });
       return { token, currentTenantId: user.currentTenantId };
     }
   );
