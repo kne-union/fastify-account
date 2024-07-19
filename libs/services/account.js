@@ -14,7 +14,7 @@ function userNameIsEmail(username) {
 
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
-  const login = async ({ username, password, ip }) => {
+  const login = async ({ username, password, ip, appName }) => {
     const isEmail = userNameIsEmail(username);
     const user = await models.user.findOne({
       where: Object.assign(
@@ -40,9 +40,13 @@ module.exports = fp(async (fastify, options) => {
 
     await passwordAuthentication({ accountId: user.userAccountId, password });
 
+    const application = appName && (await services.application.getApplicationByCode({ code: appName }));
+
     await models.loginLog.create({
       userId: user.uuid,
-      ip
+      ip,
+      currentTenantId: user.currentTenantId,
+      applicationId: application?.id
     });
 
     return {
@@ -51,22 +55,25 @@ module.exports = fp(async (fastify, options) => {
     };
   };
 
+  const resetPassword = async ({ password, userId }) => {
+    const userInfo = await services.user.getUserInstance({ id: userId });
+    const account = await models.userAccount.create(
+      Object.assign({}, await passwordEncryption(password), {
+        belongToUserId: userInfo.uuid
+      })
+    );
+
+    await userInfo.update({ userAccountId: account.uuid });
+  };
+
+  const resetPasswordByToken = async ({ password, token }) => {
+    const { name } = await verificationJWTCodeValidate({ token });
+    const user = await services.user.getUserInstanceByName({ name, status: [0, 1] });
+    await resetPassword({ password, userId: user.uuid });
+  };
+
   const modifyPassword = async ({ email, phone, oldPwd, newPwd }) => {
-    const user = await models.user.findOne({
-      where: Object.assign(
-        {},
-        email
-          ? {
-              email
-            }
-          : {
-              phone
-            },
-        {
-          status: 1
-        }
-      )
-    });
+    const user = await services.user.getUserInstanceByName({ name: email || phone, status: 1 });
     if (!user) {
       throw new Error('新用户密码只能初始化一次');
     }
@@ -111,30 +118,9 @@ module.exports = fp(async (fastify, options) => {
     return hash.digest('hex');
   };
 
-  const resetPassword = async ({ password, token }) => {
-    const { name } = await verificationJWTCodeValidate({ token });
-
-    const isEmail = userNameIsEmail(name);
-
-    const userInfo = await models.user.findOne({
-      where: isEmail ? { email: name } : { phone: name }
-    });
-    if (!userInfo) {
-      throw new Error('用户不存在');
-    }
-    const account = await models.userAccount.create(
-      Object.assign({}, await passwordEncryption(password), {
-        belongToUserId: userInfo.uuid
-      })
-    );
-
-    await userInfo.update({ userAccountId: account.uuid });
-  };
-
   const register = async ({ avatar, nickname, gender, birthday, description, phone, email, code, password, status, invitationCode }) => {
     const type = phone ? 0 : 1;
-
-    if (!(await verificationCodeValidate({ name: type === 0 ? phone : email, type, code }))) {
+    if (!(await verificationCodeValidate({ name: type === 0 ? phone : email, type: 0, code }))) {
       throw new Error('验证码不正确或者已经过期');
     }
 
@@ -173,9 +159,12 @@ module.exports = fp(async (fastify, options) => {
     return code;
   };
 
-  const sendVerificationCode = async ({ name, type, messageType }) => {
+  const sendVerificationCode = async ({ name, type }) => {
+    // messageType: 0:短信验证码，1:邮件验证码 type: 0:注册,2:登录,4:验证租户管理员,5:忘记密码
     const code = await generateVerificationCode({ name, type });
+    const isEmail = userNameIsEmail(name);
     // 这里写发送逻辑
+    await options.sendMessage({ name, type, messageType: isEmail ? 1 : 0, props: { code } });
     return code;
   };
 
@@ -200,10 +189,12 @@ module.exports = fp(async (fastify, options) => {
     return isPass;
   };
 
-  const sendJWTVerificationCode = async ({ name, type, messageType }) => {
+  const sendJWTVerificationCode = async ({ name, type }) => {
     const code = await generateVerificationCode({ name, type });
     const token = fastify.jwt.sign({ name, type, code });
+    const isEmail = userNameIsEmail(name);
     // 这里写发送逻辑
+    await options.sendMessage({ name, type, messageType: isEmail ? 1 : 0, props: { token } });
     return token;
   };
 
@@ -227,6 +218,7 @@ module.exports = fp(async (fastify, options) => {
     verificationJWTCodeValidate,
     passwordEncryption,
     passwordAuthentication,
-    resetPassword
+    resetPassword,
+    resetPasswordByToken
   };
 });

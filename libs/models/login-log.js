@@ -5,7 +5,13 @@ module.exports = ({ DataTypes }) => {
         type: DataTypes.UUID,
         allowNull: false
       },
-      ip: DataTypes.STRING
+      ip: DataTypes.STRING,
+      currentTenantId: {
+        type: DataTypes.UUID
+      },
+      applicationId: {
+        type: DataTypes.UUID
+      }
     }
   };
 };

@@ -29,7 +29,11 @@ fastify.register(require('@fastify/swagger'), {
   }
 });
 
-fastify.register(require('../index'), { isTest: true, jwt: { expires: 1000 * 60 * 60 * 24 } });
+fastify.register(require('../index'), {
+  isTest: true, sendMessage: async ({name, type, messageType, props}) => {
+    console.log('send message:', name, type, messageType, props);
+  }, jwt: { expires: 1000 * 60 * 60 * 24 }
+});
 
 fastify.register(require('fastify-plugin')(async (fastify) => {
   await fastify.sequelize.sync();

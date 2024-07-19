@@ -116,7 +116,7 @@ module.exports = fp(async (fastify, options) => {
     }
   };
 
-  const getApplicationList = async ({ tenantId }) => {
+  const getApplicationList = async ({ tenantId, appName }) => {
     const query = {};
     if (tenantId) {
       const tenant = await services.tenant.getTenant({ id: tenantId });
@@ -129,6 +129,9 @@ module.exports = fp(async (fastify, options) => {
       query.uuid = {
         [fastify.sequelize.Sequelize.Op.in]: tenantApplications.map(({ applicationId }) => applicationId)
       };
+    }
+    if (appName) {
+      query['code'] = appName;
     }
     const list = await models.application.findAll({
       where: query

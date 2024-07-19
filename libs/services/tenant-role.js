@@ -42,8 +42,12 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
-  const saveTenantRole = async ({ id, ...otherInfo }) => {
+  const saveTenantRole = async ({ id, tenantId, ...otherInfo }) => {
     const tenantRole = await getTenantRoleInstance({ id });
+
+    if (tenantId && tenantRole.tenantId !== tenantId) {
+      throw new Error('数据已过期，请刷新页面后重试');
+    }
 
     ['name', 'description'].forEach(name => {
       if (otherInfo[name]) {
@@ -54,8 +58,12 @@ module.exports = fp(async (fastify, options) => {
     await tenantRole.save();
   };
 
-  const removeTenantRole = async ({ id }) => {
+  const removeTenantRole = async ({ id, tenantId }) => {
     const tenantRole = await getTenantRoleInstance({ id });
+
+    if (tenantId && tenantRole.tenantId !== tenantId) {
+      throw new Error('数据已过期，请刷新页面后重试');
+    }
 
     await services.tenantUser.checkTenantRoleUsed({ tenantRoleId: tenantRole.id });
 

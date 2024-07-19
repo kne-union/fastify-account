@@ -17,11 +17,10 @@ module.exports = fp(
           secret: 'super-secret',
           expires: null
         },
-        defaultPassword: 'Aa000000!'
+        sendMessage: async () => {}
       },
       options
     );
-    fastify.register(require('fastify-ip'));
     fastify.register(require('@fastify/jwt'), options.jwt);
     fastify.register(require('@kne/fastify-namespace'), {
       options,
@@ -46,14 +45,41 @@ module.exports = fp(
               }
               request.authenticatePayload = info.payload;
               request.userInfo = await fastify.account.services.user.getUser(request.authenticatePayload);
+              request.appName = request.headers['x-app-name'];
+              await fastify.account.services.requestLog.addRequestLog({
+                userInfo: request.userInfo,
+                tenantId: request.userInfo.currentTenantId,
+                appName: request.appName,
+                type: 'user',
+                action: `${request.routerPath}:${request.method}`,
+                summary: request.routeSchema?.summary
+              });
             },
             tenant: async request => {
-              request.tenantInfo = await fastify.account.services.tenantUser.getTenantUserByUserId(request.userInfo);
+              request.tenantInfo = await fastify.account.services.tenantUser.getTenantUserByUserId({
+                userInfo: request.userInfo,
+                appName: request.appName
+              });
+              await fastify.account.services.requestLog.addRequestLog({
+                userInfo: request.userInfo,
+                tenantId: request.tenantInfo.tenant.id,
+                appName: request.appName,
+                type: 'tenant',
+                action: `${request.routerPath}:${request.method}`,
+                summary: request.routeSchema?.summary
+              });
             },
             admin: async request => {
               if (!(await fastify.account.services.admin.checkIsSuperAdmin(request.userInfo))) {
                 throw Unauthorized('不能执行该操作，需要超级管理员权限');
               }
+              await fastify.account.services.requestLog.addRequestLog({
+                userInfo: request.userInfo,
+                appName: request.appName,
+                type: 'admin',
+                action: `${request.routerPath}:${request.method}`,
+                summary: request.routeSchema?.summary
+              });
             },
             createPermission: permission => async request => {
               const permissions = get(request.tenantInfo, 'tenantUser.permissions');
