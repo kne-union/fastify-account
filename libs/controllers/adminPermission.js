@@ -353,4 +353,27 @@ module.exports = fp(async (fastify, options) => {
       return {};
     }
   );
+
+  fastify.post(
+    `${options.prefix}/admin/copyPermissions`,
+    {
+      onRequest: [authenticate.user, authenticate.admin],
+      schema: {
+        tags: ['管理后台-权限'],
+        summary: '复制应用权限到目标应用',
+        body: {
+          type: 'object',
+          required: ['applicationId', 'originApplicationId'],
+          properties: {
+            applicationId: { type: 'string' },
+            originApplicationId: { type: 'string' }
+          }
+        }
+      }
+    },
+    async request => {
+      await services.permission.copyPermissions(request.body);
+      return {};
+    }
+  );
 });

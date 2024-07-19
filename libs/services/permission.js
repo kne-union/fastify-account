@@ -68,62 +68,75 @@ module.exports = fp(async (fastify, options) => {
     });
   };
 
+  const importPermissionsToApplication = async ({ applicationId, permissions }) => {
+    const permissionsPidMapping = groupBy(permissions, 'pid');
+    const pidMapping = {};
+    for (let pid of await Promise.all(Object.keys(permissionsPidMapping).sort())) {
+      const targetPid = pid === '0' ? 0 : pidMapping[pid];
+      await Promise.all(
+        permissionsPidMapping[pid].map(async item => {
+          const originPermission = await models.permission.findOne({
+            where: {
+              pid: targetPid,
+              code: item.code,
+              applicationId
+            }
+          });
+          if (originPermission) {
+            pidMapping[item.id] = originPermission.id;
+            return;
+          }
+          const newPermission = await services.permission.addPermission({
+            applicationId,
+            pid: targetPid,
+            code: item.code,
+            name: item.name,
+            type: item.type,
+            isModule: item.isModule,
+            isMust: item.isMust,
+            description: item.description
+          });
+          pidMapping[item.id] = newPermission.id;
+        })
+      );
+    }
+  };
+
   const parsePermissionListJSON = async ({ file }) => {
     const data = JSON.parse(await file.toBuffer());
     await Promise.all(
       data.map(async application => {
         const { permissions, ...other } = application;
-        const app = await services.application.getApplicationByCode({ code: application.code });
-
+        let app = await services.application.getApplicationByCode({ code: application.code });
         if (!app) {
-          const newApplication = await services.application.addApplication(other);
-          const permissionsPidMapping = groupBy(permissions, 'pid');
-          const addPermissions = async (pid, applicationId) =>
-            await Promise.all(
-              (get(permissionsPidMapping, pid) || []).map(async ({ id, ...permissionProps }) => {
-                const permission = await services.permission.addPermission(
-                  Object.assign({}, permissionProps, {
-                    applicationId,
-                    pid
-                  })
-                );
-                await addPermissions(permission.id, applicationId);
-              })
-            );
-          await addPermissions(0, newApplication.uuid);
-        } else {
-          const permissionsPidMapping = groupBy(permissions, 'pid');
-          const addPermissions = async (pid, applicationId, importPid) => {
-            await Promise.all(
-              (get(permissionsPidMapping, importPid || pid) || []).map(async ({ id, ...permissionProps }) => {
-                const current = await models.permission.findOne({ where: { code: permissionProps.code, pid } });
-                if (current) {
-                  await addPermissions(current.id, applicationId, id);
-                } else {
-                  const permission = await services.permission.addPermission(
-                    Object.assign({}, permissionProps, {
-                      applicationId,
-                      pid
-                    })
-                  );
-                  await addPermissions(permission.id, applicationId);
-                }
-              })
-            );
-          };
-          await addPermissions(0, app.uuid);
+          app = await services.application.addApplication(other);
         }
+        await services.permission.importPermissionsToApplication({ applicationId: app.uuid, permissions });
         return app;
       })
     );
     return data;
   };
 
-  const exportPermissionList = async ({ applicationIds, tenantId }) => {
+  const copyPermissions = async ({ applicationId, originApplicationId }) => {
+    if (applicationId === originApplicationId) {
+      throw new Error('复制对象不能和自己相同');
+    }
+    await services.application.getApplication({ id: originApplicationId });
+    await services.application.getApplication({ id: applicationId });
+    const permissions = await models.permission.findAll({
+      where: { applicationId: originApplicationId }
+    });
+    await services.permission.importPermissionsToApplication({ applicationId, permissions });
+  };
+
+  const exportPermissionList = async ({ applicationIds }) => {
     return await Promise.all(
       (applicationIds || []).map(async applicationId => {
         let application = await services.application.getApplication({ id: applicationId });
-        application.permissions = await services.permission.getPermissionList({ applicationId, tenantId });
+        application.permissions = await models.permission.findAll({
+          where: { applicationId }
+        });
         return application;
       })
     );
@@ -442,6 +455,9 @@ module.exports = fp(async (fastify, options) => {
     saveTenantPermissionList,
     saveRolePermissionList,
     getTenantPermissionList,
-    getRolePermissionList
+    getRolePermissionList,
+    parsePermissionListJSON,
+    copyPermissions,
+    importPermissionsToApplication
   };
 });
