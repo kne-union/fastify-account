@@ -2,6 +2,12 @@ const fp = require('fastify-plugin');
 const { Unauthorized } = require('http-errors');
 const get = require('lodash/get');
 const pick = require('lodash/pick');
+const isNil = require('lodash/isNil');
+
+function userNameIsEmail(username) {
+  return /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(username);
+}
+
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
 
@@ -10,6 +16,27 @@ module.exports = fp(async (fastify, options) => {
       where: {
         uuid: id
       }
+    });
+
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+
+    return user;
+  };
+
+  const getUserInstanceByName = async ({ name, status }) => {
+    const isEmail = userNameIsEmail(name);
+    const query = {};
+    if (!isNil(status)) {
+      query['status'] = Array.isArray(status)
+        ? {
+            [fastify.sequelize.Sequelize.Op.or]: status
+          }
+        : status;
+    }
+    const user = await models.user.findOne({
+      where: Object.assign({}, isEmail ? { email: name } : { phone: name }, query)
     });
 
     if (!user) {
@@ -141,6 +168,7 @@ module.exports = fp(async (fastify, options) => {
   services.user = {
     getUser,
     getUserInstance,
+    getUserInstanceByName,
     saveUser,
     accountIsExists,
     addUser,
