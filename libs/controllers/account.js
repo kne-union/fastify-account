@@ -32,7 +32,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { email } = request.body;
-      const code = await services.account.sendVerificationCode({ name: email, type: 0, messageType: 1 });
+      const code = await services.account.sendVerificationCode({ name: email, type: 0 });
       return options.isTest ? { code } : {};
     }
   );
@@ -68,7 +68,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { phone } = request.body;
-      const code = await services.account.sendVerificationCode({ name: phone, type: 0, messageType: 0 });
+      const code = await services.account.sendVerificationCode({ name: phone, type: 0 });
       return options.isTest ? { code } : {};
     }
   );
@@ -298,32 +298,17 @@ module.exports = fp(async (fastify, options) => {
         tags: ['账号'],
         summary: '用户重置密码',
         body: {
-          oneOf: [
-            {
-              type: 'object',
-              required: ['email', 'newPwd', 'token'],
-              properties: {
-                email: { type: 'string', description: '邮箱' },
-                newPwd: { type: 'string', description: '新密码' },
-                token: { type: 'string', description: '验证token' }
-              }
-            },
-            {
-              type: 'object',
-              required: ['phone', 'newPwd'],
-              properties: {
-                phone: { type: 'string', description: '手机号' },
-                newPwd: { type: 'string', description: '新密码' },
-                token: { type: 'string', description: '验证token' }
-              }
-            }
-          ]
+          type: 'object',
+          required: ['newPwd', 'token'],
+          properties: {
+            newPwd: { type: 'string', description: '新密码' },
+            token: { type: 'string', description: '验证token' }
+          }
         }
       }
     },
     async request => {
-      await services.account.resetPassword({
-        email: request.body.email,
+      await services.account.resetPasswordByToken({
         password: request.body.newPwd,
         token: request.body.token
       });
@@ -360,7 +345,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const name = request.body.email || request.body.phone;
-      const token = await services.account.sendJWTVerificationCode({ name, type: 5, messageType: 3 });
+      const token = await services.account.sendJWTVerificationCode({ name, type: 5 });
       return options.isTest ? { token } : {};
     }
   );

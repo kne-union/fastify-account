@@ -92,7 +92,8 @@ module.exports = fp(async (fastify, options) => {
     const user = await services.user.getUser(authenticatePayload);
     const tenantUserList = await models.tenantUser.findAll({
       where: {
-        userId: user.id
+        userId: user.id,
+        status: 0
       }
     });
 

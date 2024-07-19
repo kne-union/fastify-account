@@ -1,6 +1,6 @@
 {
   "name": "@kne/fastify-account",
-  "version": "1.0.0-alpha.17",
+  "version": "1.0.0-alpha.18",
   "description": "fastify的用户管理账号等实现",
   "main": "index.js",
   "scripts": {

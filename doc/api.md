@@ -2101,51 +2101,21 @@ This operation does not require authentication
 
 ```json
 {
-  "oneOf": [
-    {
-      "type": "object",
-      "required": [
-        "email",
-        "newPwd",
-        "token"
-      ],
-      "properties": {
-        "email": {
-          "type": "string",
-          "description": "邮箱"
-        },
-        "newPwd": {
-          "type": "string",
-          "description": "新密码"
-        },
-        "token": {
-          "type": "string",
-          "description": "验证token"
-        }
-      }
+  "type": "object",
+  "required": [
+    "newPwd",
+    "token"
+  ],
+  "properties": {
+    "newPwd": {
+      "type": "string",
+      "description": "新密码"
     },
-    {
-      "type": "object",
-      "required": [
-        "phone",
-        "newPwd"
-      ],
-      "properties": {
-        "phone": {
-          "type": "string",
-          "description": "手机号"
-        },
-        "newPwd": {
-          "type": "string",
-          "description": "新密码"
-        },
-        "token": {
-          "type": "string",
-          "description": "验证token"
-        }
-      }
+    "token": {
+      "type": "string",
+      "description": "验证token"
     }
-  ]
+  }
 }
 ```
 
@@ -2153,7 +2123,9 @@ This operation does not require authentication
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|body|body|any|false|none|
+|body|body|object|true|none|
+|» newPwd|body|string|true|新密码|
+|» token|body|string|true|验证token|
 
 <h3 id="post__api_v1_account_resetpassword-responses">Responses</h3>
 
