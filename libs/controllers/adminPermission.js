@@ -247,11 +247,7 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { applicationIds, tenantId } = request.body;
-      const data = await services.permission.exportPermissionList({ applicationIds, tenantId });
-      const stream = Readable.from(JSON.stringify(data));
-      const buf = await new Response(stream).arrayBuffer();
-      console.log(buf); // "Hello, world!"
-      return buf;
+      return await services.permission.exportPermissionList({ applicationIds, tenantId });
     }
   );
 
