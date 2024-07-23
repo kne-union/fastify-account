@@ -1,4 +1,5 @@
 const fp = require('fastify-plugin');
+const { Readable } = require('stream');
 
 module.exports = fp(async (fastify, options) => {
   const { authenticate, services } = fastify.account;
@@ -246,7 +247,11 @@ module.exports = fp(async (fastify, options) => {
     },
     async request => {
       const { applicationIds, tenantId } = request.body;
-      return await services.permission.exportPermissionList({ applicationIds, tenantId });
+      const data = await services.permission.exportPermissionList({ applicationIds, tenantId });
+      const stream = Readable.from(JSON.stringify(data));
+      const buf = await new Response(stream).arrayBuffer();
+      console.log(buf); // "Hello, world!"
+      return buf;
     }
   );
 

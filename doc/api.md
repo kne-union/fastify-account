@@ -2619,6 +2619,50 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+## post__api_v1_account_admin_getOperationLogList
+
+`POST /api/v1/account/admin/getOperationLogList`
+
+*获取操作日志列表*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "filter": {
+      "type": "object"
+    },
+    "perPage": {
+      "type": "number"
+    },
+    "currentPage": {
+      "type": "number"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_getoperationloglist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|false|none|
+|» filter|body|object|false|none|
+|» perPage|body|number|false|none|
+|» currentPage|body|number|false|none|
+
+<h3 id="post__api_v1_account_admin_getoperationloglist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 <h1 id="-kne-fastify-account--">管理后台-权限</h1>
 
 ## post__api_v1_account_admin_addApplication

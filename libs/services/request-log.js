@@ -1,4 +1,5 @@
 const fp = require('fastify-plugin');
+
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
 
@@ -15,5 +16,22 @@ module.exports = fp(async (fastify, options) => {
     return {};
   };
 
-  services.requestLog = { addRequestLog };
+  const getRequestLogList = async ({ filter, perPage, currentPage }) => {
+    const { count, rows } = await models.requestLog.findAndCountAll({
+      include: [models.application, models.user],
+      order: [['createdAt', 'DESC']],
+      where: filter,
+      offset: perPage * (currentPage - 1),
+      limit: perPage
+    });
+    return {
+      pageData: rows,
+      totalCount: count
+    };
+  };
+
+  services.requestLog = {
+    addRequestLog,
+    getRequestLogList
+  };
 });
