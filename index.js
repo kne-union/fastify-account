@@ -56,6 +56,7 @@ module.exports = fp(
               });
             },
             tenant: async request => {
+              request.appName = request.headers['x-app-name'];
               request.tenantInfo = await fastify.account.services.tenantUser.getTenantUserByUserId({
                 userInfo: request.userInfo,
                 appName: request.appName
@@ -73,6 +74,7 @@ module.exports = fp(
               if (!(await fastify.account.services.admin.checkIsSuperAdmin(request.userInfo))) {
                 throw Unauthorized('不能执行该操作，需要超级管理员权限');
               }
+              request.appName = request.headers['x-app-name'];
               await fastify.account.services.requestLog.addRequestLog({
                 userInfo: request.userInfo,
                 appName: request.appName,
