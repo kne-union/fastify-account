@@ -20,7 +20,7 @@ module.exports = fp(async (fastify, options) => {
     const { count, rows } = await models.requestLog.findAndCountAll({
       include: [models.application, models.user],
       order: [['createdAt', 'DESC']],
-      where: filter,
+      where: Object.assign({}, { type: 'user' }, filter),
       offset: perPage * (currentPage - 1),
       limit: perPage
     });
