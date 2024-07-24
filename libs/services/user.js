@@ -142,7 +142,15 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getAllUserList = async ({ filter, perPage, currentPage }) => {
-    const { nickname, ...otherFilter } = filter;
+    const queryFilter = {};
+
+    ['nickname'].forEach(key => {
+      if (filter && filter[key]) {
+        queryFilter[key] = {
+          [Op.like]: `%${filter[key]}%`
+        };
+      }
+    });
     const { count, rows } = await models.user.findAndCountAll({
       include: [
         {
@@ -153,12 +161,7 @@ module.exports = fp(async (fastify, options) => {
           model: models.tenant
         }
       ],
-      where: {
-        nickname: {
-          [Op.like]: `%${nickname}%`,
-          ...otherFilter
-        }
-      },
+      where: queryFilter,
       offset: perPage * (currentPage - 1),
       limit: perPage
     });
