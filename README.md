@@ -667,7 +667,7 @@ This operation does not require authentication
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|string|false|none|
+|tenantId|query|string|true|none|
 |filter|query|object|false|none|
 |currentPage|query|number|false|none|
 |perPage|query|number|false|none|
@@ -2642,20 +2642,24 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
-## post__api_v1_account_admin_getOperationLogList
+## post__api_v1_account_admin_getAllOperationLogList
 
-`POST /api/v1/account/admin/getOperationLogList`
+`POST /api/v1/account/admin/getAllOperationLogList`
 
-*获取操作日志列表*
+*获取所有操作日志列表*
 
 > Body parameter
 
 ```json
 {
   "type": "object",
+  "required": [],
   "properties": {
     "filter": {
       "type": "object"
+    },
+    "type": {
+      "type": "string"
     },
     "perPage": {
       "type": "number"
@@ -2667,16 +2671,66 @@ This operation does not require authentication
 }
 ```
 
-<h3 id="post__api_v1_account_admin_getoperationloglist-parameters">Parameters</h3>
+<h3 id="post__api_v1_account_admin_getalloperationloglist-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |body|body|object|false|none|
 |» filter|body|object|false|none|
+|» type|body|string|false|none|
 |» perPage|body|number|false|none|
 |» currentPage|body|number|false|none|
 
-<h3 id="post__api_v1_account_admin_getoperationloglist-responses">Responses</h3>
+<h3 id="post__api_v1_account_admin_getalloperationloglist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_getTenantOperationLogList
+
+`POST /api/v1/account/admin/getTenantOperationLogList`
+
+*获取租户操作日志列表*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "filter": {
+      "type": "object"
+    },
+    "type": {
+      "type": "string"
+    },
+    "perPage": {
+      "type": "number"
+    },
+    "currentPage": {
+      "type": "number"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_gettenantoperationloglist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|false|none|
+|» filter|body|object|false|none|
+|» type|body|string|false|none|
+|» perPage|body|number|false|none|
+|» currentPage|body|number|false|none|
+
+<h3 id="post__api_v1_account_admin_gettenantoperationloglist-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
