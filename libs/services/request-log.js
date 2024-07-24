@@ -16,11 +16,11 @@ module.exports = fp(async (fastify, options) => {
     return {};
   };
 
-  const getRequestLogList = async ({ filter, perPage, currentPage }) => {
+  const getRequestLogList = async ({ filter, type, perPage, currentPage }) => {
     const { count, rows } = await models.requestLog.findAndCountAll({
       include: [models.application, models.user],
       order: [['createdAt', 'DESC']],
-      where: Object.assign({}, { type: 'user' }, filter),
+      where: Object.assign({}, filter, { type }),
       offset: perPage * (currentPage - 1),
       limit: perPage
     });
