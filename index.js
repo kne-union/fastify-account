@@ -61,6 +61,9 @@ module.exports = fp(
                 userInfo: request.userInfo,
                 appName: request.appName
               });
+              request.tenantInfo.companyInfo = await fastify.account.services.tenantCompany.getTenantCompanyInfo({
+                tenantId: request.tenantInfo.tenant.id
+              });
               await fastify.account.services.requestLog.addRequestLog({
                 userInfo: request.userInfo,
                 tenantId: request.tenantInfo.tenant.id,
