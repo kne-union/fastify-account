@@ -31,10 +31,11 @@ module.exports = fp(async (fastify, options) => {
       schema: {
         tags: ['管理后台'],
         summary: '修改租户管理的公司信息',
-        required: ['tenantId'],
+        required: ['tenantId', 'id'],
         body: {
           type: 'object',
           properties: {
+            id: { type: 'number' },
             tenantId: { type: 'string' },
             name: { type: 'string' },
             shortName: { type: 'string' },

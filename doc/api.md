@@ -2653,6 +2653,9 @@ This operation does not require authentication
 {
   "type": "object",
   "properties": {
+    "id": {
+      "type": "number"
+    },
     "tenantId": {
       "type": "string"
     },
@@ -2680,6 +2683,7 @@ This operation does not require authentication
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |body|body|object|false|none|
+|» id|body|number|false|none|
 |» tenantId|body|string|false|none|
 |» name|body|string|false|none|
 |» shortName|body|string|false|none|
@@ -3528,7 +3532,13 @@ This operation does not require authentication
 ```json
 {
   "type": "object",
+  "required": [
+    "id"
+  ],
   "properties": {
+    "id": {
+      "type": "number"
+    },
     "name": {
       "type": "string"
     },
@@ -3552,7 +3562,8 @@ This operation does not require authentication
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|body|body|object|false|none|
+|body|body|object|true|none|
+|» id|body|number|true|none|
 |» name|body|string|false|none|
 |» shortName|body|string|false|none|
 |» themeColor|body|string|false|none|

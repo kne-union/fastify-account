@@ -34,7 +34,9 @@ module.exports = fp(async (fastify, options) => {
         summary: '修改租户的公司信息',
         body: {
           type: 'object',
+          required: ['id'],
           properties: {
+            id: { type: 'number' },
             name: { type: 'string' },
             shortName: { type: 'string' },
             themeColor: { type: 'string' },

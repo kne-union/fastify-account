@@ -28,8 +28,15 @@ module.exports = fp(async (fastify, options) => {
     return await getTenantCompanyInfoInstance({ tenantId });
   };
 
-  const saveTenantCompanyInfo = async ({ tenantId, ...others }) => {
-    const tenantCompanyInfo = await getTenantCompanyInfoInstance({ tenantId });
+  const saveTenantCompanyInfo = async ({ tenantId, id, ...others }) => {
+    const tenantCompanyInfo = await models.companyInfo.findOne({
+      where: {
+        id
+      }
+    });
+    if (tenantId !== tenantCompanyInfo.tenantId) {
+      throw new Error('租户Id和当前租户用户的租户Id不一致');
+    }
     ['name', 'shortName', 'themeColor', 'logo', 'description'].forEach(name => {
       if (!isNil(others[name])) {
         tenantCompanyInfo[name] = others[name];
