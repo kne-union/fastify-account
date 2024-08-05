@@ -8,6 +8,8 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.tenant],
       schema: {
+        tags: ['租户平台'],
+        summary: '获取租户的公司信息',
         query: {
           type: 'object',
           properties: {
@@ -28,9 +30,13 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.tenant],
       schema: {
+        tags: ['租户平台'],
+        summary: '修改租户的公司信息',
         body: {
           type: 'object',
+          required: ['id'],
           properties: {
+            id: { type: 'number' },
             name: { type: 'string' },
             shortName: { type: 'string' },
             themeColor: { type: 'string' },

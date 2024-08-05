@@ -989,77 +989,6 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
-## get__api_v1_account_tenant_getCompanyInfo
-
-`GET /api/v1/account/tenant/getCompanyInfo`
-
-<h3 id="get__api_v1_account_tenant_getcompanyinfo-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|currentPage|query|number|false|none|
-|perPage|query|number|false|none|
-
-<h3 id="get__api_v1_account_tenant_getcompanyinfo-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_tenant_saveCompanyInfo
-
-`POST /api/v1/account/tenant/saveCompanyInfo`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "shortName": {
-      "type": "string"
-    },
-    "themeColor": {
-      "type": "string"
-    },
-    "logo": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_tenant_savecompanyinfo-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|false|none|
-|» name|body|string|false|none|
-|» shortName|body|string|false|none|
-|» themeColor|body|string|false|none|
-|» logo|body|string|false|none|
-|» description|body|string|false|none|
-
-<h3 id="post__api_v1_account_tenant_savecompanyinfo-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
 ## post__api_v1_account_tenant_addOrg
 
 `POST /api/v1/account/tenant/addOrg`
@@ -2713,6 +2642,88 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+## get__api_v1_account_admin_getCompanyInfo
+
+`GET /api/v1/account/admin/getCompanyInfo`
+
+*获取租户管理的公司信息*
+
+<h3 id="get__api_v1_account_admin_getcompanyinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|tenantId|query|string|false|none|
+
+<h3 id="get__api_v1_account_admin_getcompanyinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_saveCompanyInfo
+
+`POST /api/v1/account/admin/saveCompanyInfo`
+
+*修改租户管理的公司信息*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number"
+    },
+    "tenantId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "shortName": {
+      "type": "string"
+    },
+    "themeColor": {
+      "type": "string"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_savecompanyinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|false|none|
+|» id|body|number|false|none|
+|» tenantId|body|string|false|none|
+|» name|body|string|false|none|
+|» shortName|body|string|false|none|
+|» themeColor|body|string|false|none|
+|» logo|body|string|false|none|
+|» description|body|string|false|none|
+
+<h3 id="post__api_v1_account_admin_savecompanyinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 ## post__api_v1_account_admin_getAllOperationLogList
 
 `POST /api/v1/account/admin/getAllOperationLogList`
@@ -3499,6 +3510,90 @@ This operation does not require authentication
 |» originApplicationId|body|string|true|none|
 
 <h3 id="post__api_v1_account_admin_copypermissions-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+<h1 id="-kne-fastify-account--">租户平台</h1>
+
+## get__api_v1_account_tenant_getCompanyInfo
+
+`GET /api/v1/account/tenant/getCompanyInfo`
+
+*获取租户的公司信息*
+
+<h3 id="get__api_v1_account_tenant_getcompanyinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|currentPage|query|number|false|none|
+|perPage|query|number|false|none|
+
+<h3 id="get__api_v1_account_tenant_getcompanyinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_tenant_saveCompanyInfo
+
+`POST /api/v1/account/tenant/saveCompanyInfo`
+
+*修改租户的公司信息*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "number"
+    },
+    "name": {
+      "type": "string"
+    },
+    "shortName": {
+      "type": "string"
+    },
+    "themeColor": {
+      "type": "string"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_tenant_savecompanyinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» id|body|number|true|none|
+|» name|body|string|false|none|
+|» shortName|body|string|false|none|
+|» themeColor|body|string|false|none|
+|» logo|body|string|false|none|
+|» description|body|string|false|none|
+
+<h3 id="post__api_v1_account_tenant_savecompanyinfo-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
