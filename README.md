@@ -22,7 +22,7 @@ npm i --save @kne/fastify-account
 ### API
 
 ---
-title: "@kne/fastify-account v1.0.0-alpha.18"
+title: "@kne/fastify-account v1.0.0-alpha.21"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -42,7 +42,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.18</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.21</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -2773,9 +2773,9 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
-## post__api_v1_account_admin_getTenantOperationLogList
+## post__api_v1_account_tenant_getTenantOperationLogList
 
-`POST /api/v1/account/admin/getTenantOperationLogList`
+`POST /api/v1/account/tenant/getTenantOperationLogList`
 
 *获取租户操作日志列表*
 
@@ -2802,7 +2802,7 @@ This operation does not require authentication
 }
 ```
 
-<h3 id="post__api_v1_account_admin_gettenantoperationloglist-parameters">Parameters</h3>
+<h3 id="post__api_v1_account_tenant_gettenantoperationloglist-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2812,7 +2812,7 @@ This operation does not require authentication
 |» perPage|body|number|false|none|
 |» currentPage|body|number|false|none|
 
-<h3 id="post__api_v1_account_admin_gettenantoperationloglist-responses">Responses</h3>
+<h3 id="post__api_v1_account_tenant_gettenantoperationloglist-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
