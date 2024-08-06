@@ -16,7 +16,7 @@ module.exports = ({ DataTypes }) => {
         type: DataTypes.UUID
       },
       action: {
-        type: DataTypes.TEXT
+        type: DataTypes.STRING
       },
       summary: {
         type: DataTypes.TEXT
