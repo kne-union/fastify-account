@@ -7,7 +7,6 @@ const { Unauthorized, Forbidden } = require('http-errors');
 
 module.exports = fp(
   async function (fastify, options) {
-    await fastify.sequelize.addModels(path.resolve(__dirname, './models'));
     options = merge(
       {
         prefix: `/api/v${packageJson.version.split('.')[0]}/account`, //如果为true，发送邮件和短信将不调用，验证码随response返回
