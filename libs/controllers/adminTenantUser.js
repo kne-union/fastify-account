@@ -9,6 +9,7 @@ module.exports = fp(async (fastify, options) => {
       schema: {
         query: {
           type: 'object',
+          required: ['tenantId'],
           properties: {
             tenantId: { type: 'string' },
             filter: {

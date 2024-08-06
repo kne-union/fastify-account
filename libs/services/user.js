@@ -10,6 +10,7 @@ function userNameIsEmail(username) {
 
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
+  const { Op } = fastify.sequelize.Sequelize;
 
   const getUserInstance = async ({ id }) => {
     const user = await models.user.findOne({
@@ -141,6 +142,15 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getAllUserList = async ({ filter, perPage, currentPage }) => {
+    const queryFilter = {};
+
+    ['nickname'].forEach(key => {
+      if (filter && filter[key]) {
+        queryFilter[key] = {
+          [Op.like]: `%${filter[key]}%`
+        };
+      }
+    });
     const { count, rows } = await models.user.findAndCountAll({
       include: [
         {
@@ -150,7 +160,10 @@ module.exports = fp(async (fastify, options) => {
         {
           model: models.tenant
         }
-      ]
+      ],
+      where: queryFilter,
+      offset: perPage * (currentPage - 1),
+      limit: perPage
     });
     return {
       pageData: rows.map(item => {

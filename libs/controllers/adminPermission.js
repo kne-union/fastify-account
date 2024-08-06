@@ -1,4 +1,5 @@
 const fp = require('fastify-plugin');
+const { Readable } = require('stream');
 
 module.exports = fp(async (fastify, options) => {
   const { authenticate, services } = fastify.account;

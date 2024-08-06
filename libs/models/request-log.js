@@ -34,6 +34,10 @@ module.exports = ({ DataTypes }) => {
           fields: ['action', 'type']
         }
       ]
+    },
+    associate: ({ requestLog, application, user }) => {
+      requestLog.belongsTo(application, { targetKey: 'uuid', constraints: false });
+      requestLog.belongsTo(user, { targetKey: 'uuid', constraints: false });
     }
   };
 };

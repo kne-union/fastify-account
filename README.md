@@ -22,7 +22,7 @@ npm i --save @kne/fastify-account
 ### API
 
 ---
-title: "@kne/fastify-account v1.0.0-alpha.17"
+title: "@kne/fastify-account v1.0.0-alpha.18"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -42,7 +42,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.17</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.18</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -667,7 +667,7 @@ This operation does not require authentication
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|tenantId|query|string|false|none|
+|tenantId|query|string|true|none|
 |filter|query|object|false|none|
 |currentPage|query|number|false|none|
 |perPage|query|number|false|none|
@@ -2124,51 +2124,21 @@ This operation does not require authentication
 
 ```json
 {
-  "oneOf": [
-    {
-      "type": "object",
-      "required": [
-        "email",
-        "newPwd",
-        "token"
-      ],
-      "properties": {
-        "email": {
-          "type": "string",
-          "description": "邮箱"
-        },
-        "newPwd": {
-          "type": "string",
-          "description": "新密码"
-        },
-        "token": {
-          "type": "string",
-          "description": "验证token"
-        }
-      }
+  "type": "object",
+  "required": [
+    "newPwd",
+    "token"
+  ],
+  "properties": {
+    "newPwd": {
+      "type": "string",
+      "description": "新密码"
     },
-    {
-      "type": "object",
-      "required": [
-        "phone",
-        "newPwd"
-      ],
-      "properties": {
-        "phone": {
-          "type": "string",
-          "description": "手机号"
-        },
-        "newPwd": {
-          "type": "string",
-          "description": "新密码"
-        },
-        "token": {
-          "type": "string",
-          "description": "验证token"
-        }
-      }
+    "token": {
+      "type": "string",
+      "description": "验证token"
     }
-  ]
+  }
 }
 ```
 
@@ -2176,7 +2146,9 @@ This operation does not require authentication
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|body|body|any|false|none|
+|body|body|object|true|none|
+|» newPwd|body|string|true|新密码|
+|» token|body|string|true|验证token|
 
 <h3 id="post__api_v1_account_resetpassword-responses">Responses</h3>
 
@@ -2661,6 +2633,186 @@ This operation does not require authentication
 |» id|body|string|true|none|
 
 <h3 id="post__api_v1_account_admin_openuser-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_admin_getCompanyInfo
+
+`GET /api/v1/account/admin/getCompanyInfo`
+
+*获取租户管理的公司信息*
+
+<h3 id="get__api_v1_account_admin_getcompanyinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|tenantId|query|string|false|none|
+
+<h3 id="get__api_v1_account_admin_getcompanyinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_saveCompanyInfo
+
+`POST /api/v1/account/admin/saveCompanyInfo`
+
+*修改租户管理的公司信息*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number"
+    },
+    "tenantId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "shortName": {
+      "type": "string"
+    },
+    "themeColor": {
+      "type": "string"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_savecompanyinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|false|none|
+|» id|body|number|false|none|
+|» tenantId|body|string|false|none|
+|» name|body|string|false|none|
+|» shortName|body|string|false|none|
+|» themeColor|body|string|false|none|
+|» logo|body|string|false|none|
+|» description|body|string|false|none|
+
+<h3 id="post__api_v1_account_admin_savecompanyinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_getAllOperationLogList
+
+`POST /api/v1/account/admin/getAllOperationLogList`
+
+*获取所有操作日志列表*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "filter": {
+      "type": "object"
+    },
+    "type": {
+      "type": "string"
+    },
+    "perPage": {
+      "type": "number"
+    },
+    "currentPage": {
+      "type": "number"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_getalloperationloglist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|false|none|
+|» filter|body|object|false|none|
+|» type|body|string|false|none|
+|» perPage|body|number|false|none|
+|» currentPage|body|number|false|none|
+
+<h3 id="post__api_v1_account_admin_getalloperationloglist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_getTenantOperationLogList
+
+`POST /api/v1/account/admin/getTenantOperationLogList`
+
+*获取租户操作日志列表*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "filter": {
+      "type": "object"
+    },
+    "type": {
+      "type": "string"
+    },
+    "perPage": {
+      "type": "number"
+    },
+    "currentPage": {
+      "type": "number"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_gettenantoperationloglist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|false|none|
+|» filter|body|object|false|none|
+|» type|body|string|false|none|
+|» perPage|body|number|false|none|
+|» currentPage|body|number|false|none|
+
+<h3 id="post__api_v1_account_admin_gettenantoperationloglist-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -3314,6 +3466,134 @@ This operation does not require authentication
 |» permissions|body|[number]|true|none|
 
 <h3 id="post__api_v1_account_admin_savetenantpermissionlist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_copyPermissions
+
+`POST /api/v1/account/admin/copyPermissions`
+
+*复制应用权限到目标应用*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "applicationId",
+    "originApplicationId"
+  ],
+  "properties": {
+    "applicationId": {
+      "type": "string"
+    },
+    "originApplicationId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_copypermissions-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» applicationId|body|string|true|none|
+|» originApplicationId|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_copypermissions-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+<h1 id="-kne-fastify-account--">租户平台</h1>
+
+## get__api_v1_account_tenant_getCompanyInfo
+
+`GET /api/v1/account/tenant/getCompanyInfo`
+
+*获取租户的公司信息*
+
+<h3 id="get__api_v1_account_tenant_getcompanyinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|currentPage|query|number|false|none|
+|perPage|query|number|false|none|
+
+<h3 id="get__api_v1_account_tenant_getcompanyinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_tenant_saveCompanyInfo
+
+`POST /api/v1/account/tenant/saveCompanyInfo`
+
+*修改租户的公司信息*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "number"
+    },
+    "name": {
+      "type": "string"
+    },
+    "shortName": {
+      "type": "string"
+    },
+    "themeColor": {
+      "type": "string"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_tenant_savecompanyinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» id|body|number|true|none|
+|» name|body|string|false|none|
+|» shortName|body|string|false|none|
+|» themeColor|body|string|false|none|
+|» logo|body|string|false|none|
+|» description|body|string|false|none|
+
+<h3 id="post__api_v1_account_tenant_savecompanyinfo-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
