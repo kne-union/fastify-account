@@ -1,5 +1,5 @@
 ---
-title: "@kne/fastify-account v1.0.0-alpha.17"
+title: "@kne/fastify-account v1.0.0-alpha.18"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -19,7 +19,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.17</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.18</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -3263,6 +3263,50 @@ This operation does not require authentication
 |» permissions|body|[number]|true|none|
 
 <h3 id="post__api_v1_account_admin_savetenantpermissionlist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_copyPermissions
+
+`POST /api/v1/account/admin/copyPermissions`
+
+*复制应用权限到目标应用*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "applicationId",
+    "originApplicationId"
+  ],
+  "properties": {
+    "applicationId": {
+      "type": "string"
+    },
+    "originApplicationId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_copypermissions-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» applicationId|body|string|true|none|
+|» originApplicationId|body|string|true|none|
+
+<h3 id="post__api_v1_account_admin_copypermissions-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
