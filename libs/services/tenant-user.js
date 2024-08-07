@@ -139,11 +139,15 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getTenantUserByUserId = async ({ userInfo: user, appName }) => {
-    if (!user.currentTenantId) {
+    if (!user?.currentTenantId) {
       throw new Unauthorized('没有找到当前绑定租户');
     }
 
     const tenant = await services.tenant.getTenant({ id: user.currentTenantId });
+
+    if (!tenant) {
+      throw new Error('当前租户不能使用');
+    }
 
     const tenantApplications = await services.application.getApplicationList({ tenantId: tenant.id, appName });
 

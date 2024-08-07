@@ -40,7 +40,7 @@ module.exports = fp(async (fastify, options) => {
   );
 
   fastify.post(
-    `${options.prefix}/admin/getTenantOperationLogList`,
+    `${options.prefix}/tenant/getTenantOperationLogList`,
     {
       onRequest: [authenticate.user, authenticate.tenant],
       schema: {
