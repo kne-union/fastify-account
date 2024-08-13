@@ -7,25 +7,63 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-租户'],
+        summary: '获取租户列表',
         query: {
           type: 'object',
           properties: {
             name: {
-              type: 'string'
+              type: 'string',
+              description: '租户名'
             },
             serviceStartTime: {
               type: 'string',
-              format: 'date-time'
+              format: 'date-time',
+              description: '服务开始时间'
             },
             serviceEndTime: {
               type: 'string',
-              format: 'date-time'
+              format: 'date-time',
+              description: '服务结束时间'
             },
             perPage: {
-              type: 'number'
+              type: 'number',
+              description: '每页条数'
             },
             currentPage: {
-              type: 'number'
+              type: 'number',
+              description: '页数'
+            }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    pageData: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', description: '租户id' },
+                          name: { type: 'string', description: '租户名称' },
+                          description: { type: 'string', description: '租户简介' },
+                          serviceStartTime: { type: 'string', description: '服务开始时间' },
+                          serviceEndTime: { type: 'string', description: '服务结束时间' },
+                          accountNumber: { type: 'number', description: '最大租户用户数量' },
+                          status: { type: 'number', description: '0:正常,10:过期被关闭,11:已禁用,12:已关闭' },
+                          createdAt: { type: 'string', description: '创建时间' },
+                          updatedAt: { type: 'string', description: '更新时间' }
+                        }
+                      }
+                    },
+                    totalCount: { type: 'number', description: '总数量' }
+                  }
+                }
+              }
             }
           }
         }
@@ -52,10 +90,34 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-租户'],
+        summary: '获取租户基本信息',
         query: {
           type: 'object',
           properties: {
-            id: { type: 'string' }
+            id: { type: 'string', description: '租户id' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', description: '租户id' },
+                    name: { type: 'string', description: '租户名称' },
+                    description: { type: 'string', description: '租户简介' },
+                    serviceStartTime: { type: 'string', description: '服务开始时间' },
+                    serviceEndTime: { type: 'string', description: '服务结束时间' },
+                    accountNumber: { type: 'number', description: '最大租户用户数量' },
+                    status: { type: 'number', description: '0:正常,10:过期被关闭,11:已禁用,12:已关闭' },
+                    createdAt: { type: 'string', description: '创建时间' },
+                    updatedAt: { type: 'string', description: '更新时间' }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -71,11 +133,20 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-租户'],
+        summary: '关闭租户',
         body: {
           type: 'object',
           required: ['tenantId'],
           properties: {
-            tenantId: { type: 'string' }
+            tenantId: { type: 'string', description: '租户id' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {}
+            }
           }
         }
       }
@@ -92,11 +163,20 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-租户'],
+        summary: '开启租户',
         body: {
           type: 'object',
           required: ['tenantId'],
           properties: {
-            tenantId: { type: 'string' }
+            tenantId: { type: 'string', description: '租户id' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {}
+            }
           }
         }
       }
@@ -113,19 +193,26 @@ module.exports = fp(async (fastify, options) => {
     {
       onRequest: [authenticate.user, authenticate.admin],
       schema: {
+        tags: ['管理后台-租户'],
+        summary: '添加租户',
         body: {
           type: 'object',
           required: ['name', 'accountNumber', 'serviceStartTime', 'serviceEndTime'],
           properties: {
-            name: { type: 'string' },
-            accountNumber: { type: 'number' },
-            serviceStartTime: {
-              type: 'string',
-              format: 'date-time'
-            },
-            serviceEndTime: {
-              type: 'string',
-              format: 'date-time'
+            name: { type: 'string', description: '租户名称' },
+            description: { type: 'string', description: '租户简介' },
+            serviceStartTime: { type: 'string', description: '服务开始时间' },
+            serviceEndTime: { type: 'string', description: '服务结束时间' },
+            accountNumber: { type: 'number', description: '最大租户用户数量' },
+            status: { type: 'number', description: '0:正常,10:过期被关闭,11:已禁用,12:已关闭' },
+            createdAt: { type: 'string', description: '创建时间' },
+            updatedAt: { type: 'string', description: '更新时间' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {}
             }
           }
         }
@@ -146,16 +233,18 @@ module.exports = fp(async (fastify, options) => {
           type: 'object',
           required: ['id', 'name', 'accountNumber', 'serviceStartTime', 'serviceEndTime'],
           properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-            accountNumber: { type: 'number' },
-            serviceStartTime: {
-              type: 'string',
-              format: 'date-time'
-            },
-            serviceEndTime: {
-              type: 'string',
-              format: 'date-time'
+            id: { type: 'string', description: '租户id' },
+            name: { type: 'string', description: '租户名称' },
+            description: { type: 'string', description: '租户简介' },
+            serviceStartTime: { type: 'string', description: '服务开始时间' },
+            serviceEndTime: { type: 'string', description: '服务结束时间' },
+            accountNumber: { type: 'number', description: '最大租户用户数量' }
+          }
+        },
+        response: {
+          200: {
+            content: {
+              'application/json': {}
             }
           }
         }

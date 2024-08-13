@@ -3,7 +3,7 @@
   "info": {
     "title": "账号后台管理",
     "description": "账号后台管理",
-    "version": "1.0.0-alpha.14"
+    "version": "1.0.0-alpha.21"
   },
   "components": {
     "schemas": {}
@@ -11,7 +11,7 @@
   "paths": {
     "/api/v1/account/sendEmailCode": {
       "post": {
-        "summary": "发送邮箱验证码",
+        "summary": "发送登录邮箱验证码",
         "tags": [
           "账号"
         ],
@@ -56,7 +56,7 @@
     },
     "/api/v1/account/sendSMSCode": {
       "post": {
-        "summary": "发送短信验证码",
+        "summary": "发送登录短信验证码",
         "tags": [
           "账号"
         ],
@@ -122,7 +122,7 @@
                   },
                   "type": {
                     "type": "number",
-                    "description": "0:手机注册,1:邮箱注册,2:手机登录,3:邮箱登录,4:验证租户管理员"
+                    "description": "0:注册,2:登录,4:验证租户管理员,5:忘记密码"
                   },
                   "code": {
                     "type": "string",
@@ -384,6 +384,188 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/account/modifyPassword": {
+      "post": {
+        "summary": "新用户重置新密码",
+        "tags": [
+          "账号"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "email",
+                      "newPwd",
+                      "oldPwd"
+                    ],
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "description": "邮箱"
+                      },
+                      "newPwd": {
+                        "type": "string",
+                        "description": "新密码"
+                      },
+                      "oldPwd": {
+                        "type": "string",
+                        "description": "原密码"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "phone",
+                      "newPwd",
+                      "oldPwd"
+                    ],
+                    "properties": {
+                      "phone": {
+                        "type": "string",
+                        "description": "手机号"
+                      },
+                      "newPwd": {
+                        "type": "string",
+                        "description": "新密码"
+                      },
+                      "oldPwd": {
+                        "type": "string",
+                        "description": "原密码"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/resetPassword": {
+      "post": {
+        "summary": "用户重置密码",
+        "tags": [
+          "账号"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "newPwd",
+                  "token"
+                ],
+                "properties": {
+                  "newPwd": {
+                    "type": "string",
+                    "description": "新密码"
+                  },
+                  "token": {
+                    "type": "string",
+                    "description": "验证token"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/forgetPwd": {
+      "post": {
+        "summary": "忘记密码",
+        "tags": [
+          "账号"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "email"
+                    ],
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "description": "邮箱"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "phone"
+                    ],
+                    "properties": {
+                      "phone": {
+                        "type": "string",
+                        "description": "手机号"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/parseResetToken": {
+      "post": {
+        "summary": "通过token获取name",
+        "tags": [
+          "账号"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }
@@ -985,6 +1167,15 @@
         }
       }
     },
+    "/api/v1/account/admin/parsePermissionList": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/api/v1/account/admin/exportPermissionList": {
       "post": {
         "summary": "导出应用权限列表",
@@ -1226,6 +1417,662 @@
         }
       }
     },
+    "/api/v1/account/admin/copyPermissions": {
+      "post": {
+        "summary": "复制应用权限到目标应用",
+        "tags": [
+          "管理后台-权限"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "applicationId",
+                  "originApplicationId"
+                ],
+                "properties": {
+                  "applicationId": {
+                    "type": "string"
+                  },
+                  "originApplicationId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/getAllTenantList": {
+      "get": {
+        "summary": "获取租户列表",
+        "tags": [
+          "管理后台-租户"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "description": "租户名"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "serviceStartTime",
+            "required": false,
+            "description": "服务开始时间"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "serviceEndTime",
+            "required": false,
+            "description": "服务结束时间"
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "perPage",
+            "required": false,
+            "description": "每页条数"
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "currentPage",
+            "required": false,
+            "description": "页数"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pageData": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "租户id"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "租户名称"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "租户简介"
+                          },
+                          "serviceStartTime": {
+                            "type": "string",
+                            "description": "服务开始时间"
+                          },
+                          "serviceEndTime": {
+                            "type": "string",
+                            "description": "服务结束时间"
+                          },
+                          "accountNumber": {
+                            "type": "number",
+                            "description": "最大租户用户数量"
+                          },
+                          "status": {
+                            "type": "number",
+                            "description": "0:正常,10:过期被关闭,11:已禁用,12:已关闭"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "创建时间"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "description": "更新时间"
+                          }
+                        }
+                      }
+                    },
+                    "totalCount": {
+                      "type": "number",
+                      "description": "总数量"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/getTenantInfo": {
+      "get": {
+        "summary": "获取租户基本信息",
+        "tags": [
+          "管理后台-租户"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "description": "租户id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "租户id"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "租户名称"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "租户简介"
+                    },
+                    "serviceStartTime": {
+                      "type": "string",
+                      "description": "服务开始时间"
+                    },
+                    "serviceEndTime": {
+                      "type": "string",
+                      "description": "服务结束时间"
+                    },
+                    "accountNumber": {
+                      "type": "number",
+                      "description": "最大租户用户数量"
+                    },
+                    "status": {
+                      "type": "number",
+                      "description": "0:正常,10:过期被关闭,11:已禁用,12:已关闭"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "description": "创建时间"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "description": "更新时间"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/closeTenant": {
+      "post": {
+        "summary": "关闭租户",
+        "tags": [
+          "管理后台-租户"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenantId"
+                ],
+                "properties": {
+                  "tenantId": {
+                    "type": "string",
+                    "description": "租户id"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "application/json": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/openTenant": {
+      "post": {
+        "summary": "开启租户",
+        "tags": [
+          "管理后台-租户"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenantId"
+                ],
+                "properties": {
+                  "tenantId": {
+                    "type": "string",
+                    "description": "租户id"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "application/json": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/addTenant": {
+      "post": {
+        "summary": "添加租户",
+        "tags": [
+          "管理后台-租户"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "accountNumber",
+                  "serviceStartTime",
+                  "serviceEndTime"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "租户名称"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "租户简介"
+                  },
+                  "serviceStartTime": {
+                    "type": "string",
+                    "description": "服务开始时间"
+                  },
+                  "serviceEndTime": {
+                    "type": "string",
+                    "description": "服务结束时间"
+                  },
+                  "accountNumber": {
+                    "type": "number",
+                    "description": "最大租户用户数量"
+                  },
+                  "status": {
+                    "type": "number",
+                    "description": "0:正常,10:过期被关闭,11:已禁用,12:已关闭"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "description": "创建时间"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "description": "更新时间"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "application/json": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/saveTenant": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name",
+                  "accountNumber",
+                  "serviceStartTime",
+                  "serviceEndTime"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "租户id"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "租户名称"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "租户简介"
+                  },
+                  "serviceStartTime": {
+                    "type": "string",
+                    "description": "服务开始时间"
+                  },
+                  "serviceEndTime": {
+                    "type": "string",
+                    "description": "服务结束时间"
+                  },
+                  "accountNumber": {
+                    "type": "number",
+                    "description": "最大租户用户数量"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "application/json": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/getInviteList": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "tenantId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/addInviteToken": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenantId"
+                ],
+                "properties": {
+                  "tenantId": {
+                    "type": "string"
+                  },
+                  "info": {
+                    "type": "object",
+                    "properties": {
+                      "roleIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        },
+                        "default": []
+                      },
+                      "orgIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        },
+                        "default": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/deleteInviteToken": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/getCompanyInfo": {
+      "get": {
+        "summary": "获取租户管理的公司信息",
+        "tags": [
+          "管理后台"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "tenantId",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/saveCompanyInfo": {
+      "post": {
+        "summary": "修改租户管理的公司信息",
+        "tags": [
+          "管理后台"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  },
+                  "tenantId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "shortName": {
+                    "type": "string"
+                  },
+                  "themeColor": {
+                    "type": "string"
+                  },
+                  "logo": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/tenant/addOrg": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/tenant/orgList": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "id",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/tenant/editOrg": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/tenant/removeOrg": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/api/v1/account/admin/getRoleList": {
       "get": {
         "parameters": [
@@ -1397,210 +2244,6 @@
         }
       }
     },
-    "/api/v1/account/admin/getAllTenantList": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "name",
-            "required": false
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "in": "query",
-            "name": "serviceStartTime",
-            "required": false
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "in": "query",
-            "name": "serviceEndTime",
-            "required": false
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "perPage",
-            "required": false
-          },
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "query",
-            "name": "currentPage",
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/getTenantInfo": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "id",
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/addTenant": {
-      "post": {
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "accountNumber",
-                  "serviceStartTime",
-                  "serviceEndTime"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "accountNumber": {
-                    "type": "number"
-                  },
-                  "serviceStartTime": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "serviceEndTime": {
-                    "type": "string",
-                    "format": "date-time"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/saveTenant": {
-      "post": {
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "id",
-                  "name",
-                  "accountNumber",
-                  "serviceStartTime",
-                  "serviceEndTime"
-                ],
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "accountNumber": {
-                    "type": "number"
-                  },
-                  "serviceStartTime": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "serviceEndTime": {
-                    "type": "string",
-                    "format": "date-time"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/tenant/addOrg": {
-      "post": {
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/tenant/orgList": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "id",
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/tenant/editOrg": {
-      "post": {
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/tenant/removeOrg": {
-      "post": {
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
     "/api/v1/account/admin/getTenantUserList": {
       "get": {
         "parameters": [
@@ -1610,7 +2253,7 @@
             },
             "in": "query",
             "name": "tenantId",
-            "required": false
+            "required": true
           },
           {
             "schema": {
@@ -1798,60 +2441,6 @@
         }
       }
     },
-    "/api/v1/account/admin/closeTenant": {
-      "post": {
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "tenantId"
-                ],
-                "properties": {
-                  "tenantId": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/api/v1/account/admin/openTenant": {
-      "post": {
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "tenantId"
-                ],
-                "properties": {
-                  "tenantId": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
     "/api/v1/account/admin/closeTenantUser": {
       "post": {
         "requestBody": {
@@ -1914,16 +2503,120 @@
         }
       }
     },
-    "/api/v1/account/admin/getInviteList": {
+    "/api/v1/account/admin/getAllOperationLogList": {
+      "post": {
+        "summary": "获取所有操作日志列表",
+        "tags": [
+          "管理后台"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                  "filter": {
+                    "type": "object"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  },
+                  "currentPage": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/admin/getTenantOperationLogList": {
+      "post": {
+        "summary": "获取租户操作日志列表",
+        "tags": [
+          "管理后台"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                  "filter": {
+                    "type": "object"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  },
+                  "currentPage": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/getUserTenant": {
       "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/getTenantUserInfo": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/getCompanyInfo": {
+      "get": {
+        "summary": "获取租户的公司信息",
+        "tags": [
+          "租户平台"
+        ],
         "parameters": [
           {
             "schema": {
-              "type": "string"
+              "type": "number"
             },
             "in": "query",
-            "name": "tenantId",
-            "required": true
+            "name": "currentPage",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "perPage",
+            "required": false
           }
         ],
         "responses": {
@@ -1933,38 +2626,38 @@
         }
       }
     },
-    "/api/v1/account/admin/addInviteToken": {
+    "/api/v1/account/tenant/saveCompanyInfo": {
       "post": {
+        "summary": "修改租户的公司信息",
+        "tags": [
+          "租户平台"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "required": [
-                  "tenantId"
+                  "id"
                 ],
                 "properties": {
-                  "tenantId": {
+                  "id": {
+                    "type": "number"
+                  },
+                  "name": {
                     "type": "string"
                   },
-                  "info": {
-                    "type": "object",
-                    "properties": {
-                      "roleIds": {
-                        "type": "array",
-                        "items": {
-                          "type": "number"
-                        },
-                        "default": []
-                      },
-                      "orgIds": {
-                        "type": "array",
-                        "items": {
-                          "type": "number"
-                        },
-                        "default": []
-                      }
-                    }
+                  "shortName": {
+                    "type": "string"
+                  },
+                  "themeColor": {
+                    "type": "string"
+                  },
+                  "logo": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
                   }
                 }
               }
@@ -1979,7 +2672,147 @@
         }
       }
     },
-    "/api/v1/account/admin/deleteInviteToken": {
+    "/api/v1/account/tenant/addOrg": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/orgList": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/editOrg": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/removeOrg": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/getRoleList": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "perPage",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "currentPage",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "number"
+                }
+              }
+            },
+            "in": "query",
+            "name": "filter",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/addRole": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/saveRole": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/removeRole": {
       "post": {
         "requestBody": {
           "content": {
@@ -2006,8 +2839,18 @@
         }
       }
     },
-    "/api/v1/account/tenant/getUserTenant": {
+    "/api/v1/account/tenant/getRolePermissionList": {
       "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "id",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "Default Response"
@@ -2015,11 +2858,101 @@
         }
       }
     },
-    "/api/v1/account/tenant/getTenantUserInfo": {
-      "get": {
+    "/api/v1/account/tenant/saveRolePermissionList": {
+      "post": {
         "responses": {
           "200": {
             "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/getApplicationList": {
+      "get": {
+        "summary": "获取应用列表",
+        "tags": [
+          "租户管理-权限"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/getPermissionList": {
+      "get": {
+        "summary": "获取应用权限列表",
+        "tags": [
+          "租户管理-权限"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "applicationId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "isModule": {
+                        "type": "number"
+                      },
+                      "isMust": {
+                        "type": "number"
+                      },
+                      "type": {
+                        "type": "number"
+                      },
+                      "pid": {
+                        "type": "number"
+                      },
+                      "paths": {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "number"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "deletedAt": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2064,8 +2997,190 @@
         }
       }
     },
-    "/api/v1/account/tenant/orgList": {
-      "get": {
+    "/api/v1/account/tenant/addTenantUser": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "name"
+                ],
+                "properties": {
+                  "roleIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "default": []
+                  },
+                  "orgIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "default": []
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "avatar": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/saveTenantUser": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "roleIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "default": []
+                  },
+                  "orgIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "default": []
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "avatar": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/deleteTenantUser": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenantUserId"
+                ],
+                "properties": {
+                  "tenantUserId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/closeTenantUser": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenantUserId"
+                ],
+                "properties": {
+                  "tenantUserId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/account/tenant/openTenantUser": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenantUserId"
+                ],
+                "properties": {
+                  "tenantUserId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Default Response"
