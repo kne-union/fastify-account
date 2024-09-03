@@ -64,178 +64,6 @@ fastify的用户管理账号等实现
 This operation does not require authentication
 </aside>
 
-## get__api_v1_account_admin_getAllTenantList
-
-`GET /api/v1/account/admin/getAllTenantList`
-
-<h3 id="get__api_v1_account_admin_getalltenantlist-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|name|query|string|false|none|
-|serviceStartTime|query|string(date-time)|false|none|
-|serviceEndTime|query|string(date-time)|false|none|
-|perPage|query|number|false|none|
-|currentPage|query|number|false|none|
-
-<h3 id="get__api_v1_account_admin_getalltenantlist-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## get__api_v1_account_admin_getTenantInfo
-
-`GET /api/v1/account/admin/getTenantInfo`
-
-<h3 id="get__api_v1_account_admin_gettenantinfo-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|query|string|false|none|
-
-<h3 id="get__api_v1_account_admin_gettenantinfo-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_admin_closeTenant
-
-`POST /api/v1/account/admin/closeTenant`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "tenantId"
-  ],
-  "properties": {
-    "tenantId": {
-      "type": "string"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_admin_closetenant-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» tenantId|body|string|true|none|
-
-<h3 id="post__api_v1_account_admin_closetenant-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_admin_openTenant
-
-`POST /api/v1/account/admin/openTenant`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "tenantId"
-  ],
-  "properties": {
-    "tenantId": {
-      "type": "string"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_admin_opentenant-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» tenantId|body|string|true|none|
-
-<h3 id="post__api_v1_account_admin_opentenant-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## post__api_v1_account_admin_addTenant
-
-`POST /api/v1/account/admin/addTenant`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "required": [
-    "name",
-    "accountNumber",
-    "serviceStartTime",
-    "serviceEndTime"
-  ],
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "accountNumber": {
-      "type": "number"
-    },
-    "serviceStartTime": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "serviceEndTime": {
-      "type": "string",
-      "format": "date-time"
-    }
-  }
-}
-```
-
-<h3 id="post__api_v1_account_admin_addtenant-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|object|true|none|
-|» name|body|string|true|none|
-|» accountNumber|body|number|true|none|
-|» serviceStartTime|body|string(date-time)|true|none|
-|» serviceEndTime|body|string(date-time)|true|none|
-
-<h3 id="post__api_v1_account_admin_addtenant-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
 ## post__api_v1_account_admin_saveTenant
 
 `POST /api/v1/account/admin/saveTenant`
@@ -254,21 +82,28 @@ This operation does not require authentication
   ],
   "properties": {
     "id": {
-      "type": "string"
+      "type": "string",
+      "description": "租户id"
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "租户名称"
     },
-    "accountNumber": {
-      "type": "number"
+    "description": {
+      "type": "string",
+      "description": "租户简介"
     },
     "serviceStartTime": {
       "type": "string",
-      "format": "date-time"
+      "description": "服务开始时间"
     },
     "serviceEndTime": {
       "type": "string",
-      "format": "date-time"
+      "description": "服务结束时间"
+    },
+    "accountNumber": {
+      "type": "number",
+      "description": "最大租户用户数量"
     }
   }
 }
@@ -279,17 +114,41 @@ This operation does not require authentication
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |body|body|object|true|none|
-|» id|body|string|true|none|
-|» name|body|string|true|none|
-|» accountNumber|body|number|true|none|
-|» serviceStartTime|body|string(date-time)|true|none|
-|» serviceEndTime|body|string(date-time)|true|none|
+|» id|body|string|true|租户id|
+|» name|body|string|true|租户名称|
+|» description|body|string|false|租户简介|
+|» serviceStartTime|body|string|true|服务开始时间|
+|» serviceEndTime|body|string|true|服务结束时间|
+|» accountNumber|body|number|true|最大租户用户数量|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "content": {
+      "application/json": {}
+    }
+  }
+}
+```
 
 <h3 id="post__api_v1_account_admin_savetenant-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_admin_savetenant-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» content|any|false|none|none|
 
 <aside class="success">
 This operation does not require authentication
@@ -3514,6 +3373,425 @@ This operation does not require authentication
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+<h1 id="-kne-fastify-account--">管理后台-租户</h1>
+
+## get__api_v1_account_admin_getAllTenantList
+
+`GET /api/v1/account/admin/getAllTenantList`
+
+*获取租户列表*
+
+<h3 id="get__api_v1_account_admin_getalltenantlist-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|name|query|string|false|租户名|
+|serviceStartTime|query|string(date-time)|false|服务开始时间|
+|serviceEndTime|query|string(date-time)|false|服务结束时间|
+|perPage|query|number|false|每页条数|
+|currentPage|query|number|false|页数|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "pageData": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "租户id"
+          },
+          "name": {
+            "type": "string",
+            "description": "租户名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "租户简介"
+          },
+          "serviceStartTime": {
+            "type": "string",
+            "description": "服务开始时间"
+          },
+          "serviceEndTime": {
+            "type": "string",
+            "description": "服务结束时间"
+          },
+          "accountNumber": {
+            "type": "number",
+            "description": "最大租户用户数量"
+          },
+          "status": {
+            "type": "number",
+            "description": "0:正常,10:过期被关闭,11:已禁用,12:已关闭"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间"
+          }
+        }
+      }
+    },
+    "totalCount": {
+      "type": "number",
+      "description": "总数量"
+    }
+  }
+}
+```
+
+<h3 id="get__api_v1_account_admin_getalltenantlist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="get__api_v1_account_admin_getalltenantlist-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» pageData|[object]|false|none|none|
+|»» id|string|false|none|租户id|
+|»» name|string|false|none|租户名称|
+|»» description|string|false|none|租户简介|
+|»» serviceStartTime|string|false|none|服务开始时间|
+|»» serviceEndTime|string|false|none|服务结束时间|
+|»» accountNumber|number|false|none|最大租户用户数量|
+|»» status|number|false|none|0:正常,10:过期被关闭,11:已禁用,12:已关闭|
+|»» createdAt|string|false|none|创建时间|
+|»» updatedAt|string|false|none|更新时间|
+|» totalCount|number|false|none|总数量|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_admin_getTenantInfo
+
+`GET /api/v1/account/admin/getTenantInfo`
+
+*获取租户基本信息*
+
+<h3 id="get__api_v1_account_admin_gettenantinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|query|string|false|租户id|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "租户id"
+    },
+    "name": {
+      "type": "string",
+      "description": "租户名称"
+    },
+    "description": {
+      "type": "string",
+      "description": "租户简介"
+    },
+    "serviceStartTime": {
+      "type": "string",
+      "description": "服务开始时间"
+    },
+    "serviceEndTime": {
+      "type": "string",
+      "description": "服务结束时间"
+    },
+    "accountNumber": {
+      "type": "number",
+      "description": "最大租户用户数量"
+    },
+    "status": {
+      "type": "number",
+      "description": "0:正常,10:过期被关闭,11:已禁用,12:已关闭"
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "创建时间"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "更新时间"
+    }
+  }
+}
+```
+
+<h3 id="get__api_v1_account_admin_gettenantinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="get__api_v1_account_admin_gettenantinfo-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» id|string|false|none|租户id|
+|» name|string|false|none|租户名称|
+|» description|string|false|none|租户简介|
+|» serviceStartTime|string|false|none|服务开始时间|
+|» serviceEndTime|string|false|none|服务结束时间|
+|» accountNumber|number|false|none|最大租户用户数量|
+|» status|number|false|none|0:正常,10:过期被关闭,11:已禁用,12:已关闭|
+|» createdAt|string|false|none|创建时间|
+|» updatedAt|string|false|none|更新时间|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_closeTenant
+
+`POST /api/v1/account/admin/closeTenant`
+
+*关闭租户*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string",
+      "description": "租户id"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_closetenant-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|租户id|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "content": {
+      "application/json": {}
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_closetenant-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_admin_closetenant-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» content|any|false|none|none|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_openTenant
+
+`POST /api/v1/account/admin/openTenant`
+
+*开启租户*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "tenantId"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string",
+      "description": "租户id"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_opentenant-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» tenantId|body|string|true|租户id|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "content": {
+      "application/json": {}
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_opentenant-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_admin_opentenant-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» content|any|false|none|none|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## post__api_v1_account_admin_addTenant
+
+`POST /api/v1/account/admin/addTenant`
+
+*添加租户*
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "required": [
+    "name",
+    "accountNumber",
+    "serviceStartTime",
+    "serviceEndTime"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "租户名称"
+    },
+    "description": {
+      "type": "string",
+      "description": "租户简介"
+    },
+    "serviceStartTime": {
+      "type": "string",
+      "description": "服务开始时间"
+    },
+    "serviceEndTime": {
+      "type": "string",
+      "description": "服务结束时间"
+    },
+    "accountNumber": {
+      "type": "number",
+      "description": "最大租户用户数量"
+    },
+    "status": {
+      "type": "number",
+      "description": "0:正常,10:过期被关闭,11:已禁用,12:已关闭"
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "创建时间"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "更新时间"
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_addtenant-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|object|true|none|
+|» name|body|string|true|租户名称|
+|» description|body|string|false|租户简介|
+|» serviceStartTime|body|string|true|服务开始时间|
+|» serviceEndTime|body|string|true|服务结束时间|
+|» accountNumber|body|number|true|最大租户用户数量|
+|» status|body|number|false|0:正常,10:过期被关闭,11:已禁用,12:已关闭|
+|» createdAt|body|string|false|创建时间|
+|» updatedAt|body|string|false|更新时间|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "content": {
+      "application/json": {}
+    }
+  }
+}
+```
+
+<h3 id="post__api_v1_account_admin_addtenant-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|Inline|
+
+<h3 id="post__api_v1_account_admin_addtenant-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» content|any|false|none|none|
 
 <aside class="success">
 This operation does not require authentication

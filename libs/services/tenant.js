@@ -3,7 +3,7 @@ const fp = require('fastify-plugin');
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
 
-  const getTenantInstance = async ({ id }) => {
+  const getTenantInstance = async ({ id, isClose = false }) => {
     const tenant = await models.tenant.findOne({
       where: {
         uuid: id
@@ -13,7 +13,7 @@ module.exports = fp(async (fastify, options) => {
       throw new Error('租户不存在');
     }
 
-    if (tenant.status !== 0) {
+    if (tenant.status !== 0 && !isClose) {
       throw new Error('租户已关闭');
     }
     return tenant;
@@ -26,13 +26,13 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const closeTenant = async ({ tenantId }) => {
-    const tenant = await getTenant({ id: tenantId });
+    const tenant = await getTenantInstance({ id: tenantId });
     tenant.status = 12;
     await tenant.save();
   };
 
   const openTenant = async ({ tenantId }) => {
-    const tenant = await getTenant({ id: tenantId });
+    const tenant = await getTenantInstance({ id: tenantId, isClose: true });
     tenant.status = 0;
     await tenant.save();
   };
