@@ -16,6 +16,7 @@ module.exports = fp(
           secret: 'super-secret',
           expires: null
         },
+        defaultPassword: 'Aa000000!',
         sendMessage: async () => {}
       },
       options
