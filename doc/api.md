@@ -1,5 +1,5 @@
 ---
-title: "@kne/fastify-account v1.0.0-alpha.21"
+title: "@kne/fastify-account v1.0.0-alpha.22"
 language_tabs:
   - shell: Shell
   - http: HTTP
@@ -19,7 +19,7 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.21</h1>
+<h1 id="-kne-fastify-account">@kne/fastify-account v1.0.0-alpha.22</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -802,20 +802,6 @@ This operation does not require authentication
 `GET /api/v1/account/tenant/getUserTenant`
 
 <h3 id="get__api_v1_account_tenant_getusertenant-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## get__api_v1_account_tenant_getTenantUserInfo
-
-`GET /api/v1/account/tenant/getTenantUserInfo`
-
-<h3 id="get__api_v1_account_tenant_gettenantuserinfo-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -2649,6 +2635,31 @@ This operation does not require authentication
 |» currentPage|body|number|false|none|
 
 <h3 id="post__api_v1_account_tenant_gettenantoperationloglist-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## get__api_v1_account_tenant_getTenantUserInfo
+
+`GET /api/v1/account/tenant/getTenantUserInfo`
+
+*获取租户用户所有操作日志列表*
+
+<h3 id="get__api_v1_account_tenant_gettenantuserinfo-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|filter|path|object|true|none|
+|type|path|string|true|none|
+|perPage|path|number|true|none|
+|currentPage|path|number|true|none|
+
+<h3 id="get__api_v1_account_tenant_gettenantuserinfo-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
