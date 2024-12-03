@@ -3,6 +3,7 @@ const { Unauthorized } = require('http-errors');
 const get = require('lodash/get');
 const pick = require('lodash/pick');
 const isNil = require('lodash/isNil');
+const isEmpty = require('lodash/isEmpty');
 
 function userNameIsEmail(username) {
   return /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(username);
@@ -142,20 +143,28 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getAllUserList = async ({ filter, perPage, currentPage }) => {
-    const queryFilter = {};
+    const queryFilter = {},
+      roleQueryFilter = {};
 
-    ['nickname'].forEach(key => {
+    ['nickname', 'status', 'email', 'phone'].forEach(key => {
       if (filter && filter[key]) {
         queryFilter[key] = {
           [Op.like]: `%${filter[key]}%`
         };
       }
     });
+
+    if (!isEmpty(filter?.isSuperAdmin)) {
+      roleQueryFilter['role'] = {
+        [Op.eq]: filter.isSuperAdmin === 'false' ? 'Common' : 'SuperAdmin'
+      };
+    }
     const { count, rows } = await models.user.findAndCountAll({
       include: [
         {
           attributes: ['role'],
-          model: models.adminRole
+          model: models.adminRole,
+          where: roleQueryFilter
         },
         {
           model: models.tenant
