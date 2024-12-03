@@ -83,6 +83,11 @@ module.exports = fp(async (fastify, options) => {
         [fastify.sequelize.Sequelize.Op.like]: `%${filter.name}%`
       };
     }
+    if (filter?.status) {
+      queryFilter.status = {
+        [fastify.sequelize.Sequelize.Op.like]: filter.status
+      };
+    }
 
     if (filter?.serviceStartTime) {
       queryFilter.serviceStartTime = {
