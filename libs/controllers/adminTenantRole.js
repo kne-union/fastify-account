@@ -25,7 +25,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      const { filter, tenantId, perPage, currentPage } = Object.assign(
+      const { filter, tenantId, withoutDefaultRole, perPage, currentPage } = Object.assign(
         {
           perPage: 20,
           currentPage: 1,
@@ -33,7 +33,7 @@ module.exports = fp(async (fastify, options) => {
         },
         request.query
       );
-      return await services.tenantRole.getTenantRoleList({ tenantId, perPage, currentPage, filter });
+      return await services.tenantRole.getTenantRoleList({ tenantId, withoutDefaultRole, perPage, currentPage, filter });
     }
   );
 
