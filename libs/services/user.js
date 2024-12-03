@@ -108,8 +108,10 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const saveUser = async ({ id, ...otherInfo }) => {
+    if (!otherInfo.email && !otherInfo.phone) {
+      throw new Error('请输入邮箱或手机号');
+    }
     const user = await getUserInstance({ id });
-
     if ((await accountIsExists({ phone: otherInfo.phone, email: otherInfo.email }, user)) > 0) {
       throw new Error('手机号或者邮箱都不能重复');
     }
@@ -153,7 +155,11 @@ module.exports = fp(async (fastify, options) => {
         };
       }
     });
-
+    if (filter && !isEmpty(filter.status)) {
+      queryFilter['status'] = {
+        [Op.eq]: filter.status
+      };
+    }
     if (!isEmpty(filter?.isSuperAdmin)) {
       roleQueryFilter['role'] = {
         [Op.eq]: filter.isSuperAdmin === 'false' ? 'Common' : 'SuperAdmin'
@@ -164,7 +170,8 @@ module.exports = fp(async (fastify, options) => {
         {
           attributes: ['role'],
           model: models.adminRole,
-          where: roleQueryFilter
+          where: roleQueryFilter,
+          required: !!roleQueryFilter.role
         },
         {
           model: models.tenant
