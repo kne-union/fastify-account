@@ -3379,6 +3379,7 @@ This operation does not require authentication
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |name|query|string|false|租户名|
+|status|query|number|false|状态|
 |serviceStartTime|query|string(date-time)|false|服务开始时间|
 |serviceEndTime|query|string(date-time)|false|服务结束时间|
 |perPage|query|number|false|每页条数|

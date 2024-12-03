@@ -1,13 +1,20 @@
 const fp = require('fastify-plugin');
 const isNil = require('lodash/isNil');
+const isEmpty = require('lodash/isEmpty');
+
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
   const { Op } = fastify.sequelize.Sequelize;
 
-  const getTenantRoleList = async ({ tenantId, currentPage, perPage, filter }) => {
+  const getTenantRoleList = async ({ tenantId, withoutDefaultRole, currentPage, perPage, filter }) => {
     const queryFilter = {};
     if (!isNil(filter?.type)) {
       queryFilter.type = filter.type;
+    }
+    if (!isEmpty(withoutDefaultRole) && withoutDefaultRole === 'true') {
+      queryFilter.type = {
+        [Op.not]: 1
+      };
     }
     const { count, rows } = await models.tenantRole.findAndCountAll({
       where: Object.assign({}, queryFilter, { tenantId }),
