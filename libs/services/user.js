@@ -148,7 +148,7 @@ module.exports = fp(async (fastify, options) => {
     const queryFilter = {},
       roleQueryFilter = {};
 
-    ['nickname', 'status', 'email', 'phone'].forEach(key => {
+    ['nickname', 'email', 'phone'].forEach(key => {
       if (filter && filter[key]) {
         queryFilter[key] = {
           [Op.like]: `%${filter[key]}%`
