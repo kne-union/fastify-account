@@ -15,7 +15,8 @@ module.exports = fp(async (fastify, options) => {
             filter: {
               type: 'object',
               properties: {
-                name: { type: 'string' }
+                name: { type: 'string' },
+                roleIds: { type: 'array', items: { type: 'number' }, default: [] }
               }
             },
             currentPage: { type: 'number' },
