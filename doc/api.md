@@ -811,6 +811,20 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+## get__api_v1_account_tenant_getTenantInfo
+
+`GET /api/v1/account/tenant/getTenantInfo`
+
+<h3 id="get__api_v1_account_tenant_gettenantinfo-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Default Response|None|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 ## post__api_v1_account_tenant_addOrg
 
 `POST /api/v1/account/tenant/addOrg`
