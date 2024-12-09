@@ -4,6 +4,7 @@ const groupBy = require('lodash/groupBy');
 const { Unauthorized } = require('http-errors');
 const pick = require('lodash/pick');
 const isNil = require('lodash/isNil');
+const isEmpty = require('lodash/isEmpty');
 module.exports = fp(async (fastify, options) => {
   const { models, services } = fastify.account;
   const { Op } = fastify.sequelize.Sequelize;
@@ -483,6 +484,24 @@ module.exports = fp(async (fastify, options) => {
         };
       }
     });
+    if (filter && !isEmpty(filter.status)) {
+      queryFilter['status'] = {
+        [Op.eq]: filter.status
+      };
+    }
+    if (!isEmpty(filter.roleIds)) {
+      const defaultTenant = await models.tenantUserRole.findAll({
+        where: {
+          tenantRoleId: {
+            [Op.in]: !isEmpty(filter.roleIds) ? filter.roleIds : []
+          },
+          tenantId: tenantId
+        }
+      });
+      queryFilter['uuid'] = {
+        [Op.in]: (defaultTenant || []).map(item => item.tenantUserId)
+      };
+    }
 
     const { count, rows } = await models.tenantUser.findAndCountAll({
       include: [models.tenantRole, models.tenantOrg, models.user],

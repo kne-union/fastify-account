@@ -3,6 +3,7 @@ const { Unauthorized } = require('http-errors');
 const get = require('lodash/get');
 const pick = require('lodash/pick');
 const isNil = require('lodash/isNil');
+const isEmpty = require('lodash/isEmpty');
 
 function userNameIsEmail(username) {
   return /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(username);
@@ -107,8 +108,10 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const saveUser = async ({ id, ...otherInfo }) => {
+    if (!otherInfo.email && !otherInfo.phone) {
+      throw new Error('请输入邮箱或手机号');
+    }
     const user = await getUserInstance({ id });
-
     if ((await accountIsExists({ phone: otherInfo.phone, email: otherInfo.email }, user)) > 0) {
       throw new Error('手机号或者邮箱都不能重复');
     }
@@ -142,20 +145,33 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const getAllUserList = async ({ filter, perPage, currentPage }) => {
-    const queryFilter = {};
+    const queryFilter = {},
+      roleQueryFilter = {};
 
-    ['nickname'].forEach(key => {
+    ['nickname', 'email', 'phone'].forEach(key => {
       if (filter && filter[key]) {
         queryFilter[key] = {
           [Op.like]: `%${filter[key]}%`
         };
       }
     });
+    if (filter && !isEmpty(filter.status)) {
+      queryFilter['status'] = {
+        [Op.eq]: filter.status
+      };
+    }
+    if (!isEmpty(filter?.isSuperAdmin)) {
+      roleQueryFilter['role'] = {
+        [Op.eq]: filter.isSuperAdmin === 'false' ? 'Common' : 'SuperAdmin'
+      };
+    }
     const { count, rows } = await models.user.findAndCountAll({
       include: [
         {
           attributes: ['role'],
-          model: models.adminRole
+          model: models.adminRole,
+          where: roleQueryFilter,
+          required: !!roleQueryFilter.role
         },
         {
           model: models.tenant

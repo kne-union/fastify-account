@@ -29,6 +29,9 @@ module.exports = fp(async (fastify, options) => {
   };
 
   const addUser = async ({ avatar, nickname, phone, email, password, description }) => {
+    if (!email && !phone) {
+      throw new Error('请输入邮箱或手机号');
+    }
     return await services.user.addUser({
       avatar,
       nickname,

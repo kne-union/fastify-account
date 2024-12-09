@@ -16,6 +16,10 @@ module.exports = fp(async (fastify, options) => {
               type: 'string',
               description: '租户名'
             },
+            status: {
+              type: 'number',
+              description: '状态'
+            },
             serviceStartTime: {
               type: 'string',
               format: 'date-time',
@@ -70,7 +74,7 @@ module.exports = fp(async (fastify, options) => {
       }
     },
     async request => {
-      const { name, perPage, currentPage } = Object.assign(
+      const { name, status, perPage, currentPage } = Object.assign(
         {
           perPage: 20,
           currentPage: 1
@@ -78,7 +82,7 @@ module.exports = fp(async (fastify, options) => {
         request.query
       );
       return await services.tenant.getAllTenantList({
-        filter: { name },
+        filter: { name, status },
         perPage,
         currentPage
       });
