@@ -24,6 +24,11 @@ module.exports = fp(async (fastify, options) => {
 
     return Object.assign({}, tenant.get({ plain: true }), { id: tenant.uuid });
   };
+  const getTenantInfo = async ({ id }) => {
+    const tenantInfo = await services.tenant.getTenant({ id: id });
+    // console.log('getTenantInfo=======>\n', tenantInfo);
+    return tenantInfo;
+  };
 
   const closeTenant = async ({ tenantId }) => {
     const tenant = await getTenantInstance({ id: tenantId });
@@ -128,6 +133,7 @@ module.exports = fp(async (fastify, options) => {
   services.tenant = {
     getTenantInstance,
     getTenant,
+    getTenantInfo,
     closeTenant,
     openTenant,
     saveTenant,
