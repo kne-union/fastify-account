@@ -42,6 +42,7 @@ module.exports = ({ DataTypes }) => {
     options: {
       indexes: [
         {
+          name:'code_key',
           unique: true,
           fields: ['code', 'application_id', 'pid', 'deleted_at']
         }
