@@ -21,6 +21,7 @@ module.exports = ({ DataTypes }) => {
     options: {
       indexes: [
         {
+          name:'tenant_key',
           unique: true,
           fields: ['tenant_id', 'token', 'type', 'deleted_at']
         }
